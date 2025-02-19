@@ -47,6 +47,7 @@ class Application(web.Application):
         s = handler.get_status()
         if s != 404 and not(s < 400 and re.search(r'/static', summary)):
             user = handler.current_user
+            summary = re.sub(r'\(.+\)', '(' + handler.get_ip() + ')', summary)
             request_time = int(1000 * handler.request.request_time())
             cls = re.split("[.']", str(handler.__class__))[-2]
             log_method = log.info if s < 400 else log.warning if s < 500 else log.error

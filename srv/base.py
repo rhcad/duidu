@@ -92,6 +92,10 @@ class BaseHandler(CorsMixin):
         except TypeError:
             pass
 
+    def get_ip(self):
+        ip = self.request.headers.get('x-forwarded-for') or self.request.remote_ip
+        return ip and re.sub(r'^::\d$', '', ip[:15]) or '127.0.0.1'
+
     def data(self):
         if self._data is None:
             if 'data' not in self.request.body_arguments:

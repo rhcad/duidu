@@ -10,7 +10,7 @@ if __name__ == '__main__':
     app = Application([(conv_placeholder(c.URL), c) for c in handlers],
                       default_handler_class=invalid.Page404Handler,
                       ui_modules=ui_module.modules,
-                      xsrf_cookies=True)
+                      xsrf_cookies=True, xheaders=True)
     if app.db is None:
         exit(1)
     app.listen(options.port)
