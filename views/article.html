@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{page['code']}} {{page['name']}}</title>
+  {% include _/base_head.html %}
+  <style>
+    .section.hidden10 > .hidden10 { display: none; }
+    .section > .more { cursor: pointer; color: gray; }
+    .section.hidden10 > .more::after { content: "更多(" attr(data-n) "段)..."; }
+    .section:not(.hidden10) > .more::after { content: "折叠..."; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav(page['code'], prev=dict(url='/proj/edit/' + str(page['proj_id']), title=page['proj_name'])) %}
+  <div id="content" class="container">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-title">经典基本信息
+          <div class="dropdown pull-right">
+            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              操作 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li><a data-toggle="modal" data-target="#editInfoModal">修改</a></li>
+              <li><a href="/proj/edit/{{page['proj_id']}}">回到项目</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a onclick="deleteAll()">全部删除</a></li>
+              {% if internal and [1 for s in page['sections'] if 'import_cb' in s['source']] %}
+              <li role="separator" class="divider"></li>
+              <li><a onclick="reimport()">重新导入</a></li>
+              {% end %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p>
+          <span class="info-span"><span class="gray">编码：</span>{{page['code']}}</span>
+          <span class="info-span"><span class="gray">类型：</span>{{page['type']}}</span>
+          <span class="info-span"><span class="gray">字数：</span>{{page['char_n']}}</span>
+          <span class="info-span"><span class="gray">对照简称：</span>{{page['short_name']}}</span>
+          <span class="info-span"><span class="gray">经典名称：</span>{{page['name']}}</span>
+        </p>
+        <p>{% module Users([page['created_by']]) %} {{'克隆' if page.get('cloned') else '创建'}}于 <small>{{page['created']}}</small></p>
+      </div>
+    </div>
+    {% for i, sec in enumerate(page['sections']) %}
+    <div class="panel panel-default" id="{{sec['_id']}}">
+      <div class="panel-heading">
+        <div class="panel-title">
+          <span class="gray m-r-10">{{i+1}}</span> <span>{{sec['name']}}</span>
+          <small class="m-l-10"><span class="gray">字数：</span>{{sec['char_n']}}</small>
+          <div class="dropdown pull-right">
+            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              操作 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+              <li><a onclick="deleteSection($(this.closest('.panel')))">删除</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body section hidden10">
+        {% for i, r in enumerate(sec['org_rows']) %}
+        <p class="text ellipsis{{' hidden10' if i >= 10 else ''}}{{''.join([' '+s for s in r.get('tag',[])])}}" data-line="{{r['line']}}">{{r['text']}}</p>{% end %}
+        {% if len(sec['org_rows']) > 10 %}<p class="more" data-n="{{ len(sec['org_rows']) - 10 }}"></p>{% end %}
+      </div>
+    </div>
+    {% end %}
+  </div>
+</div>
+{% include modal/edit_article_info.html %}
+{% include _/base_foot.html %}
+<script>
+  function onSubmitInfo($modal) {
+    const data = getModalData($modal, ['short_name', 'name', 'type', 'colspan'], 'a')
+    if (data) {
+      postApi('/article/info', Object.assign(data, {_id: '{{_id}}'}),
+        res => res['modified'] ? reloadPage() : $modal.modal('hide'))
+    }
+  }
+  function deleteAll() {
+    Swal2.fire({title: '确认删除', confirmButtonText: '删除',
+      text: `确实要删除 “{{page['name']}}” 的全部内容吗？`,
+      preConfirm: () => postApi(`/article/del/{{_id}}`, {},
+        res => window.location = res.redirect),
+    })
+  }
+  function deleteSection(sec) {
+    Swal2.fire({title: '确认删除', confirmButtonText: '删除',
+      text: `确实要删除 “${sec.find('.panel-title>span').text()}” 吗？`,
+      preConfirm: () => postApi(`/section/del/${sec.attr('id')}`, {}, reloadPage),
+    })
+  }
+  function reimport() {
+    $('.dropdown').addClass('wait')
+    postApi(`/article/reimport/{{_id}}`, {}, res => {
+      if (res.data.length) {
+        showSuccess('重新导入', `${res.data.length} 个经典已导入新的内容。`, reloadPage)
+      } else {
+        showSuccess('没有改变', '内容已经是最新的。')
+      }
+    })
+  }
+
+  $(document).on('click', '.section p', e => {
+    const $body = $(e.target).closest('.panel-body')
+    $body.find('p').toggleClass('ellipsis')
+    $body.toggleClass('hidden10')
+  })
+</script>
+</body>
+</html>

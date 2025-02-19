@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{site['name']}} - 注册</title>
+  {% include _/base_head.html %}
+  <style>
+    .input-group-addon { min-width: 6em; }
+    .actions > * + * { margin-left: 6px; }
+    .w400 { max-width: 450px; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav() %}
+  <div class="m-t-20 w400">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title center">注册</h3>
+      </div>
+      <div class="panel-body">
+        <form onsubmit="onSubmit();return false;">
+          <div class="input-group">
+            <span class="input-group-addon">用户名</span>
+            <input type="text" id="username" class="form-control"
+                   required minlength="3" maxlength="12"
+                   pattern="[A-Za-z][A-Za-z0-9]+" placeholder="3~12个字母或数字，字母开头，创建后不可改"
+                   oninvalid="setCustomValidity('请输入3~12个字母或数字，字母开头')">
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">姓　名</span>
+            <input type="text" id="nickname" class="form-control"
+                   required minlength="2" maxlength="8"
+                   pattern="[\u4e00-\u9fa5]{2,4}|[A-Za-z0-9]{3,8}"
+                   placeholder="姓名、昵称，2~4个汉字，或3~8个字母或数字"
+                   oninvalid="setCustomValidity('请输入2~4个汉字，或3~8个字母或数字')">
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">密　码</span>
+            <input type="password" id="password" class="form-control" required autocomplete="off" maxlength="20"
+                   pattern="[A-Za-z0-9~!@#$%_;,.]{6,}"
+                   placeholder="6~20个字母、数字或特殊符号，至少三种"
+                   oninvalid="setCustomValidity('6~20个大写字母、小写字母、数字或特殊符号\n至少三种，可含符号 ~!@#$%_;,.')">
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button" onclick="togglePassword()">显</button>
+            </span>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">确认密码</span>
+            <input type="password" id="password2" class="form-control"
+                   required placeholder="再次输入密码" autocomplete="off">
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">备　忘</span>
+            <input type="text" id="verification" class="form-control"
+                   required minlength="2" maxlength="11"
+                   pattern="[\u4e00-\u9fa5]+|\d{8,11}"
+                   oninvalid="setCustomValidity('2~8个汉字或8~11位手机号')"
+                   placeholder="忘记密码验证用，可为2~8个汉字或8~11位手机号">
+          </div>
+          <div class="actions m-t-10 center">
+            <input type="submit" class="btn btn-primary" value="注册"/>
+            <a href="/user/login?next={{next}}" class="btn btn-default">登录</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% include _/base_foot.html %}
+<script>
+  function onSubmit() {
+    const data = {
+      username: $('#username').val(),
+      password: $('#password').val(),
+      nickname: $('#nickname').val(),
+      verification: $('#verification').val(),
+    }
+    if ($('#password2').val() !== data.password) {
+      return showError('错误', '两次输入的密码不一致')
+    }
+    postApi('/user/register', {data: data}, function (res) {
+      window.location = res.redirect || '{{next}}'
+    })
+  }
+  function togglePassword(sel='#password') {
+    $(sel).attr('type', $(sel).attr('type') === 'text' ? 'password' : 'text')
+  }
+</script>
+</body>
+</html>

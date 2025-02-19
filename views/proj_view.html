@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{proj['code']}} 对照预览</title>
+  {% include _/base_head.html %}
+  <link href="{{static_url('css/proj-match.css')}}" rel="stylesheet"/>
+  {% if all_toc %}
+  <link rel="stylesheet" href="{{static_url('jstree/jstree.min.css')}}"/>
+  <script src="{{static_url('jstree/jstree.min.js')}}"></script>
+  {% end %}
+  <style>
+    .cell { width: 1%; }/*{{ col_w }}*/
+    .cell[colspan="2"] { width: 1%; }/*{{ 2*col_w }}*/
+    .cell[colspan="3"] { width: 1%; }/*{{ 3*col_w }}*/
+  </style>
+</head>
+
+<body class="{{'show-sidebar' if all_toc else ''}}">
+<ul class="nav-more">
+  <li class="dropdown m-l-5">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">显示 <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      {% if all_toc %}
+      <li class="toggle-sidebar active" onclick="$('body').toggleClass('show-sidebar');$(this).toggleClass('active')"><a>显示侧边栏</a></li>
+      <li onclick="$('.sidebar').toggleClass('wide')"><a>切换宽度</a></li>
+      {% if len(all_toc)>1 %}
+      <li class="toggle-sidebar active" onclick="$('.sidebar').toggleClass('toc-n');$(this).toggleClass('active')"><a>显示第二科判</a></li>
+      {% end %}
+      <li role="separator" class="divider"></li>
+      {% end %}
+      <li><a id="theme-default" title="切换为普通外观">普通外观</a></li>
+      <li><a id="theme-warm" title="切换为浅色外观、护眼色">护眼色</a></li>
+      <li><a id="theme-dark" title="切换为深色外观">深色外观</a></li>
+      {% if len(proj['columns']) > 1 %}
+      <li role="separator" class="divider"></li>
+      {% for i, c in enumerate(proj['columns']) %}
+      <li class="toggle-col active" data-i="{{i}}"><a title="切换栏的可见性，要作合并为一组操作前需要显示出相关栏">{{i+1}} {{c['code']}} {{c['name']}}</a></li>
+      {% end %}{% end %}
+    </ul>
+  </li>
+</ul>
+
+<div class="app">
+  {% module TopNav('对照预览', prev=dict(url='/proj/edit/' + _id, title=proj['short_name']), themes=False) %}
+  <div class="container-fluid m-t-n10">
+    <div class="app-body">
+      {% if all_toc %}
+      {% set toc_i = ([i for i, a in enumerate(all_toc) if a['cur']]+[0])[0] %}
+      <div class="sidebar bx-shadow toc-{{'n' if len(all_toc)>1 else '1'}}">
+        <div class="toc-tree-p" data-ext="1">
+          {% module TocDropdown(all_toc, toc_i) %}
+          <div id="toc-tree1" class="toc-tree"><div></div></div>
+        </div>
+        {% if len(all_toc)>1 %}
+        {% set toc_j = [i for i,a in enumerate(all_toc) if i!=toc_i][0] %}
+        <div class="toc-tree-p" data-ext="2">
+          {% module TocDropdown(all_toc, toc_j, '1') %}
+          <div id="toc-tree2" class="toc-tree"><div></div></div>
+        </div>
+        {% end %}
+      </div>
+      {% end %}
+      <div class="columns-p">
+        {% if max_page %}{% module Pager(pi, max_page, 'm-t-0 m-r-10 m-b-5') %}{% end %}
+        <table>
+        {% for r in proj.get('rows', []) %}
+        <tr class="merged columns" data-row-i="{{r['row_i']}}">
+          {% for i, c in enumerate(proj['columns']) %}
+          <td class="cell" colspan="{{ c.get('colspan', 1) }}" data-i="{{i}}" data-id="{{c['a_id']}}">
+            {% module SectionBlock(c, r['row_i']) %}
+          </td>{% end %}
+        </tr>{% end %}
+        <tr class="original columns{{' single-article' if len(proj['columns']) == 1 else ''}}" data-row-i="0">
+          {% for i, c in enumerate(proj['columns']) %}
+          <td class="cell" colspan="{{ c.get('colspan', 1) }}" data-i="{{i}}" data-id="{{c['a_id']}}" data-toc-i="{{c.get('toc_i','')}}">
+            {% module SectionBlock(c) %}
+          </td>{% end %}
+        </tr>
+        </table>
+        {% if max_page %}{% module Pager(pi, max_page, 'm-b-0 m-r-10') %}{% end %}
+      </div>
+    </div>
+  </div>
+</div>
+{% include _/base_foot.html %}
+<script src="{{static_url('js/toc.js')}}"></script>
+<script>
+  function getParaInfo($p, defVal=null) {
+    const $c = $p.closest('.cell')
+    return Object.assign({
+      line: $p.data('line'), s_id: $p.data('s-id'),
+      a_i: $c.data('i'), a_id: $c.data('id'),
+      row_i: $c.closest('tr').data('row-i'),
+      toc_i: $p.data('toc-i'), toc_id: $p.data('toc-id'),
+    }, $p.hasClass('toc_row') ? {} : {s_i: $p.data('s-i')}, defVal || {})
+  }
+
+  function activatePara($p, selectTocNode=false) {
+    if (!$p.hasClass('active')) {
+      $('p.active').removeClass('active')
+      $p.addClass('active')
+    }
+    $('.cell.has-active').removeClass('has-active')
+    $p.closest('.cell').addClass('has-active')
+    if (selectTocNode && window.tocEnsureVisible) {
+      tocEnsureVisible(getParaInfo($p, {element: $p[0]}))
+    }
+  }
+
+  const _status = {}
+  $(function () {
+    $('.col-name,.original .del,.sec,.p-head').remove()
+    $('.original:not(:has(.text))').hide()
+
+    $(document).on('click', 'p.text,.toc_row', e => {
+      const $p = $(e.target).closest('p')
+      activatePara($p, e.which === 1)
+      if (e.which === 1 && _status.p === $p[0]) {
+        if ($p.hasClass('text') && $p.height() > 50) {
+          $p.toggleClass('ellipsis-n')
+        } else if ($p.hasClass('toc_row') && ($p.height() > 40 || $p.hasClass('ellipsis'))) {
+          $p.toggleClass('ellipsis-n').toggleClass('ellipsis')
+        }
+      }
+      _status.p = $p[0]
+    }).on('click', '.toggle-col', e => {
+      const $li = $(e.target).closest('.toggle-col'), i = $li.data('i')
+      $('.columns-p').toggleClass(`hide-col-${i}`)
+      $li.toggleClass('active')
+    })
+  })
+  {% if all_toc %}tocLoad('1', `{{ all_toc[toc_i]['a_id'] }}`, `{{ all_toc[toc_i]['toc_i'] }}`){% end %}
+  {% if len(all_toc)>1 %}tocLoad('2', `{{ all_toc[toc_j]['a_id'] }}`, `{{ all_toc[toc_j]['toc_i'] }}`){% end %}
+</script>
+</body>
+</html>

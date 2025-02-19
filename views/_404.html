@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{site['name']}} - 404</title>
+  {% include _/base_head.html %}
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav() %}
+  <div class="app-main w600">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">页面不存在</h3>
+      </div>
+      <div class="panel-body">
+        <p>您要访问的页面不存在。<br><code>{{request.uri}}</code></p>
+        <div class="actions m-t-10">
+          <a href="javascript:history.back()" class="btn btn-default">返回前页</a>
+          <a href="/" class="btn btn-default">回到首页</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include _/base_foot.html %}
+</body>
+</html>

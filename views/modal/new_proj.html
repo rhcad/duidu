@@ -1,0 +1,36 @@
+<div id="newProjModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newProjModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form onsubmit="onSubmitNewProj($('#newProjModal'));event.preventDefault();return false;">
+        <div class="modal-header"><h4 class="modal-title">创建项目</h4></div>
+        <div class="modal-body">
+          <div class="row">
+            <h4 class="col-sm-2 control-label">编码</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="p-code" required maxlength="8"
+                     pattern="[A-Za-z][A-Za-z0-9_]+" placeholder="3~8个字母或数字，字母开头，可含_，创建后不可修改"
+                     oninvalid="setCustomValidity('请输入3~8个字母或数字，字母开头，可含_')">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">名称</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="p-name" required
+                     minlength="2" maxlength="20" placeholder="2~20字，可有汉字、字母、数字、标点">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">备注</h4>
+            <div class="col-sm-10">
+              <textarea class="form-control" name="p-comment" maxlength="60"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-primary modal-confirm">确定</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

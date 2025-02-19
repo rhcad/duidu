@@ -1,0 +1,47 @@
+<div id="editInfoModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editInfoModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form onsubmit="onSubmitInfo($('#editInfoModal'));event.preventDefault();return false;">
+        <div class="modal-header"><h4 class="modal-title">修改经典信息</h4></div>
+        <div class="modal-body">
+          <div class="row">
+            <h4 class="col-sm-2 control-label">经典编码</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" readonly name="a-code" value="{{page['code']}}">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">对读简称</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="short-name" value="{{page['short_name']}}"
+                     minlength="2" maxlength="10" placeholder="2~10个汉字，分栏对读区分用">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">经典名称</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="a-name" required value="{{page['name']}}"
+                     minlength="2" maxlength="30" placeholder="2~30字，可有汉字、字母、数字、标点">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">经典类别</h4>
+            <div class="col-sm-10">
+              {% module RadioGroup(Article.get_field('type'), page, True) %}
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">对读宽度</h4>
+            <div class="col-sm-10">
+              {% module RadioGroup(Article.get_field('colspan'), page) %}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-primary modal-confirm">确定</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

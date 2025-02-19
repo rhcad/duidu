@@ -1,0 +1,93 @@
+.columns { overflow-x: auto; }
+.cell { min-width: 160px; padding: 10px; vertical-align: top; overflow-x: hidden; }
+.cell .ellipsis { max-width: 180px; width: fit-content; }
+.single-article .cell .ellipsis { max-width: 500px; }
+
+.cell, .toc-tree-p { border: 1px solid var(--border-color); }
+.cell + .cell:not(.has-active) { border-left-color: transparent; }
+
+.show-sidebar .app-body { display: flex; }
+.show-sidebar .columns-p { flex: 1; }
+.sidebar { width: 200px; margin-right: 4px; }
+.sidebar.wide { width: 300px; }
+body:not(.show-sidebar) .sidebar { display: none; }
+
+html, body, .app, .columns-p, .sidebar, .toc-tree-p { height: 100%; }
+.app > .container-fluid { height: calc(100% - 72px); }
+.app-body { height: 100%; }
+.columns-p { overflow-y: auto; }
+.sidebar.toc-n > .toc-tree-p { height: 50%; }
+.toc-tree-p + .toc-tree-p { margin-top: 5px; }
+.sidebar .toc-tree  {
+    height: calc(100% - 28px); padding: 0 10px;
+    overflow: auto; scrollbar-width: thin; }
+
+@media (max-width:1023px) {
+  .show-sidebar .app-body { display: block; }
+  .sidebar { position: fixed; overflow-y: auto; margin-left: unset; }
+  .sidebar, .sidebar.wide { width: calc(100% - 30px); }
+
+  .navbar { z-index: 11; position: fixed; width: 100%; top: 0; }
+  .sidebar { z-index: 10; background-color: var(--body-background-color); }
+
+  .sidebar { top: 60px; height: 140px; }
+  .show-sidebar .columns-p { margin-top: 220px; }
+  .show-sidebar .app-body { height: calc(100% - 200px); }
+  .app > .container-fluid { height: 100%; }
+
+  .sidebar { display: flex; }
+  .sidebar > .toc-tree-p { flex: 1; }
+  .sidebar.toc-n > .toc-tree-p, .toc-tree-p { height: calc(100% - 5px); }
+  .sidebar.toc-n > .toc-tree-p { max-width: 50%; }
+  .toc-tree-p + .toc-tree-p { margin-top: 0; margin-left: 5px; width: calc(50% - 5px); }
+
+  body:not(.show-sidebar) .app-body { height: calc(100% - 75px); margin-top: 75px; }
+}
+
+.p-head::before, .cell .toc_row::before {
+    border: 1px solid var(--border-color); border-radius: 3px;
+    width: 16px; height: 16px; text-align: center;
+    z-index: 10; background-color: var(--body-background-color);
+}
+.cell .p-head::before {
+    float: left; margin-right: -15px; margin-top: 1px; opacity: .5; }
+.p-head::before, .cell .toc_row::before {
+    content: "≡"; font-size: 11px; padding: 0 2px; }
+.p-head[data-tag]::before { font-size: 10px; content: attr(data-tag); opacity: .7; }
+.p-head.split::before, .p-head.merge::before { font-size: 10px; opacity: 1; }
+.p-head.split::before { content: "拆"; }
+.p-head.merge::before { content: "合"; }
+
+.col-name { font-size: .9em; margin: 0 auto .5em; }
+.cell.has-active { border-color: var(--hover-color); }
+.columns-p > table { border-collapse: unset; }
+.columns-p tr:not(:first-child) > td:not(.has-active) { border-top-color: transparent; }
+
+.cell .toc_row {
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  margin: 0 -10px;
+}
+.cell .toc_row.active { font-weight: bold; font-style: italic; }
+.cell .toc_row:not(.active) { color: gray; }
+.cell .toc_row.ellipsis { min-width: calc(100% + 20px); }
+.cell .toc_row:first-child { margin-top: -10px; border-top: none; }
+.cell .toc_row + .toc_row { border-top: none; }
+.cell .toc_row::before {
+    content: attr(data-level); margin: 3px 3px 0 10px; opacity: .8; float: left;
+}
+
+.hide-col-0 .cell[data-i="0"], .hide-col-1 .cell[data-i="1"],
+.hide-col-2 .cell[data-i="2"], .hide-col-3 .cell[data-i="3"],
+.hide-col-4 .cell[data-i="4"], .hide-col-5 .cell[data-i="5"],
+.hide-col-6 .cell[data-i="6"], .hide-col-7 .cell[data-i="7"],
+.hide-col-8 .cell[data-i="8"], .hide-col-9 .cell[data-i="9"],
+.hide-col-10 .cell[data-i="10"], .hide-col-11 .cell[data-i="11"] { display: none; }
+
+.sidebar .dropdown { height: 23px; padding: 0 10px; margin-top: 5px; }
+.sidebar:not(.toc-n) > .toc-tree-p:not(:first-child) { display: none; }
+.toc-n .toc-tree-p.active-toc { border-color: var(--placeholder-color); }
+
+.toc-dropdown li a { display: flex; }
+.toc-dropdown li a > :first-child { flex: 1; }
+.toc-dropdown li a > small { margin: 2px -10px 0 10px; text-align: right; color: gray; }

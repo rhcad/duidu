@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{site['name']}}-克隆项目</title>
+  {% include _/base_head.html %}
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav('克隆项目') %}
+  <div class="container">
+    {% module Table(model, rows) %}
+  </div>
+</div>
+{% include modal/new_proj.html %}
+{% include _/base_foot.html %}
+</body>
+</html>

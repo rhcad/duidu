@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{site['name']}}</title>
+  {% include _/base_head.html %}
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav('首页') %}
+  <div class="container">
+    <div class="pull-right">
+      <a data-toggle="modal" data-target="#newProjModal" class="btn btn-default">创建项目</a>
+    </div>
+    {% module Table(model, rows) %}
+  </div>
+</div>
+{% include modal/new_proj.html %}
+{% include _/base_foot.html %}
+</body>
+<script>
+  function onSubmitNewProj($modal) {
+    const data = getModalData($modal, ['code', 'name', 'comment'], 'p')
+    postApi('/proj/add', data, res => {
+      window.location = res.redirect
+    })
+  }
+</script>
+</html>

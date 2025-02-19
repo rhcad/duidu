@@ -1,0 +1,50 @@
+<div id="importCBetaModal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="importCBetaModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form onsubmit="onSubmitImportCBeta($('#importCBetaModal'));event.preventDefault();return false;">
+        <div class="modal-header"><h4 class="modal-title">从CBETA导入原文</h4></div>
+        <div class="modal-body">
+          <div class="row">
+            <h4 class="col-sm-2 control-label">CB编码</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="a-code" required maxlength="10"
+                     pattern="[A-Za-z][A-Za-z0-9]+(:[a-z])?" placeholder="3~10个字母或数字，字母开头，例如 T1234"
+                     oninvalid="setCustomValidity('请输入3~10个字母或数字，字母开头')">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">卷号</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="a-vol"
+                     pattern="[0-9]{1,3}(([ ,~]|-)[0-9]{1,3})*" placeholder="001、2~11、001 003 多个卷号用空格或逗号分隔"
+                     oninvalid="setCustomValidity('卷号最多三位数字，多个卷号用空格或逗号分隔')">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">对读简称</h4>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" name="short-name"
+                     minlength="2" maxlength="10" placeholder="2~10个汉字，分栏对读区分用">
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">经典类别</h4>
+            <div class="col-sm-10">
+              {% module RadioGroup(Article.get_field('type'), required=True) %}
+            </div>
+          </div>
+          <div class="row">
+            <h4 class="col-sm-2 control-label">对读宽度</h4>
+            <div class="col-sm-10">
+              {% module RadioGroup(Article.get_field('colspan')) %}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-primary modal-confirm">导入</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

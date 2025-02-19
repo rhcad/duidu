@@ -1,0 +1,148 @@
+html, body { margin: 0; padding: 0; }
+
+body {
+  -moz-osx-font-smoothing: grayscale;
+   -webkit-font-smoothing: antialiased;
+}
+
+.w800, .w600, .w400, .w300 {
+  margin-left: auto;
+  margin-right: auto;
+}
+.w800 { max-width: 800px; }
+.w600 { max-width: 600px; }
+.w400 { max-width: 400px; }
+.w300 { max-width: 300px; }
+
+.bold { font-weight: bold; }
+.center { text-align: center; }
+.float-left { float: left; }
+.float-right { float: right; }
+
+.gray { color: gray; user-select: none; }
+.no-select, .btn, .dropdown, .alert { user-select: none; }
+.no-border { border: none; }
+.no-pointer, .disabled a { pointer-events: none; }
+
+a { text-decoration: none; }
+[onclick], li:not(.disabled)>a { cursor: pointer; }
+
+input, .btn, input:focus, .btn:focus { outline: none; }
+input[type="submit"] { border: none; }
+.input-group + .input-group { margin-top: 8px; }
+
+.bx-shadow {
+  -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+     -moz-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+.btn-key {
+    display: inline-block;
+    box-shadow: var(--key-shadow);
+    background: var(--key-gradient);
+    border: 0; border-radius: 3px;
+    margin-right: .4em;
+    position: relative; top: -1px;
+    min-width: 20px; padding: 1px 2px;
+    font-size: 12px; font-family: monospace;
+}
+
+@media print {
+  .no-print, nav, footer, .sidebar {
+    display: none;
+  }
+}
+
+.p-0 { padding: 0; }
+.p-10 { padding: 10px; }
+.p-20 { padding: 20px; }
+
+.m-0 { margin: 0; }
+.m-5 { margin: 5px; }
+.m-10 { margin: 10px; }
+.m-20 { margin: 20px; }
+
+.m-t-0 { margin-top: 0; }
+.m-t-5 { margin-top: 5px; }
+.m-t-10 { margin-top: 10px; }
+.m-t-15 { margin-top: 15px; }
+.m-t-20 { margin-top: 20px; }
+.m-t-n5 { margin-top: -5px; }
+.m-t-n10 { margin-top: -10px; }
+.m-t-n20 { margin-top: -20px; }
+
+.m-b-0 { margin-bottom: 0; }
+.m-b-5 { margin-bottom: 5px; }
+.m-b-10 { margin-bottom: 10px; }
+.m-b-15 { margin-bottom: 15px; }
+.m-b-20 { margin-bottom: 20px; }
+
+.m-l-0 { margin-left: 0; }
+.m-l-5 { margin-left: 5px; }
+.m-l-10 { margin-left: 10px; }
+.m-r-0 { margin-right: 0; }
+.m-r-5 { margin-right: 5px; }
+.m-r-10 { margin-right: 10px; }
+
+.modal-body h4 { font-size: 16px; font-weight: 400; white-space: nowrap; }
+.modal-body input + label { margin-right: 8px; }
+.modal-body .modal-radio { margin-top: 6px; margin-bottom: 6px; }
+.modal-body .modal-radio label { font-weight: normal; }
+.control-label.required::after {
+    content: "*"; color: gray;
+    margin-left: .5em;
+}
+.wait { cursor: wait; }
+.wait button { pointer-events: none; }
+.swal2-modal { font-size: 14px; }
+
+.panel-heading > div.panel-title { line-height: 1.1; }
+.panel-body p:last-child { margin-bottom: 0; }
+.info-span { margin-right: 15px; display: inline-block; white-space: nowrap; }
+.panel-title .dropdown.pull-right { margin-top: -6px; margin-right: -10px; }
+
+.app-main { margin-top: 10px; }
+
+.app .table > tbody > tr > td { max-width: 12em; }
+.app td.comment, .ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.app td p:last-child { margin-bottom: 0; }
+td.created, td.updated { font-size: .9em; }
+.table .name { min-width: 5em; }
+.table .actions .btn { padding: 2px 4px; }
+.users > span + span { margin-left: 5px; }
+
+.ellipsis-n {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+p.text { text-indent: 2em; }
+.text.xu { font-size: .9em; }
+.text.xu.head { text-align: center; text-indent: 0; }
+.text.xu_first {
+    border-top: 1px solid var(--border-color);
+    margin-top: .5em; padding-top: .5em;
+}
+.text.xu_end:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: .5em;
+}
+.text.xu_end:not(.ellipsis-n) { padding-bottom: .5em; }
+.xu_end + .text.xu_first,
+.num + .text.xu_first,
+.text.xu_first:first-child { border-top: none; padding-top: 0; }
+
+.text.start-quot, .text.start-quot { text-indent: 1em; }
+.text.juan_end { text-align: right; font-size: .7em; text-indent: 0; }
+.text.byline { text-align: right; text-indent: 0; font-size: .9em; }
+.text.juan { font-size: 1.05em; font-weight: bold; text-align: center; text-indent: 0; }
+.text.juan.xu { font-size: 1em; }
+.text.head, .text.pin { font-weight: 500; }
+.text.num { font-size: .8em; }
+.text.verse, .text.dharani { color: var(--verse-color); }
+@media (min-width:600px) {
+    .text.verse { margin-left: 2em; }
+}

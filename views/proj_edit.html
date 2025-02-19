@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{proj['code']}} {{proj['short_name']}}</title>
+  {% include _/base_head.html %}
+  <style>
+    .article-tabs { display: flex; flex-wrap: wrap; }
+    .article-tabs > .a-tab {
+        margin-right: 10px;
+        padding-right: 10px;
+        padding-left: 10px;
+        border-right: 1px solid var(--border-color);
+        width: 8em;
+        margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav(proj['short_name']) %}
+  <div class="container">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-title">项目基本信息
+          {% set op_cls = '' if is_owner else 'disabled' %}
+          <div class="dropdown pull-right">
+            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              操作 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li class="{{op_cls}}"><a data-toggle="modal" data-target="#editProjModal">修改</a></li>
+              <li class="{{op_cls}}"><a onclick="onChangeEditors()">设置协编</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a data-toggle="modal" data-target="#cloneProjModal">克隆</a></li>
+              <li role="separator" class="divider"></li>
+              <li class="{{op_cls}}"><a onclick="deleteProj()">删除</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p>
+          <span class="info-span"><span class="gray">编码：</span>{{proj['code']}}</span>
+          <span class="info-span"><span class="gray">名称：</span>{{proj['name']}}</span>
+          <span class="info-span"><span class="gray">字数：</span>{{proj['char_n']}}</span>
+          {% if proj['comment'] %}
+          <span class="info-span"><span class="gray">备注：</span>{{proj['comment']}}</span>
+          {% end %}
+        </p>
+        {% if is_owner %}
+        <span class="info-span"><span class="gray">协编：</span>
+            {% module Users(proj['editors'], '可邀请其他人共同编辑和检查内容') %}</span>
+        {% elif current_user and current_user['username'] in proj['editors'] %}
+        <span class="info-span gray">我 是本项目的协编</span>
+        {% end %}
+        <span class="info-span">{% module Users([proj['created_by']]) %}
+          {% if proj['_cloned'] %}<a href="/cloned/{{proj['_cloned']}}" title="查看项目克隆列表">
+            {{'克隆' if proj.get('cloned') else '创建'}}项目</a>
+          {% else %} {{'克隆' if proj.get('cloned') else '创建'}}项目 {% end %}于
+          <small>{{proj['created']}}</small> <span class="gray">{{ '已公开' if proj.get('public') else '未公开' }}</span></span>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="panel-title">第一步 获取原文
+          <div class="dropdown pull-right">
+            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              导入 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+              <li><a data-toggle="modal" data-target="#importTextModal">输入文本内容</a></li>
+              <li><a data-toggle="modal" data-target="#importCBetaModal">从 CBETA 导入</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a data-toggle="modal" data-target="#appendTextModal">追加文本内容</a></li>
+              {% if len(proj.get('columns',[])) > 1 and is_owner %}
+              <li role="separator" class="divider"></li>
+              <li><a onclick="reorderColumns()">调整栏序</a></li>
+              {% end %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <p>导入经典原文（或译本，可按章卷多次导入），可加多栏并列对读显示的原文。总字数不超过20万，太长可按章卷分拆项目。</p>
+        <div class="article-tabs">
+          {% for c in proj.get('columns', []) %}
+          <div class="a-tab" id="{{c['a_id']}}">
+            <p><a href="/article/{{c['a_id']}}">{{c['code']}}</a></p>
+            <p class="ellipsis">{{c['name']}}</p>
+          </div>
+          {% end %}
+          {% if not proj.get('columns') %}
+          <div class="a-tab gray">
+            <p>编码</p>
+            <p class="ellipsis">经典名称</p>
+          </div>
+          {% end %}
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">第二步 段落对照</h3>
+      </div>
+      <div class="panel-body">
+        将多个版本的经典内容进行段落拆分和分组，建立并列对照关系。
+        {% if proj.get('columns') %}
+        <a href="/proj/match/{{_id}}" class="btn btn-default">段落对照</a>
+        {% end %}
+        <br>单一经典也可在此设置科判。可基于某栏经典插入或导入科判目录，同时支持多种科判。
+        {% if proj['toc_n'] %}已有 {{proj['toc_n']}} 种科判。{% end %}
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">第三步 合并注解</h3>
+      </div>
+      <div class="panel-body">
+        将论典、注疏、讲解等注解按需合并到上面的经典内容中。
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">第四步 发布网页</h3>
+      </div>
+      <div class="panel-body">
+        将合并完成的页面发布分享，可下载为离线网页。
+      </div>
+    </div>
+  </div>
+</div>
+{% set codes = [(c['code'], c['code'] + ': ' + c['name']) for c in proj.get('columns', [])] %}
+{% include modal/clone_proj.html %}
+{% include modal/import_text.html %}
+{% include modal/import_cb.html %}
+{% include modal/edit_proj_info.html %}
+{% include _/base_foot.html %}
+</body>
+<script>
+  function onChangeEditors() {
+    Swal2.fire({title: '设置协编', input: 'text',
+      text: '输入要增加的协编人的用户名，减号开头则移除。',
+      preConfirm: (value) => value && postApi('/proj/editor',
+          {editor: value, proj_id: '{{_id}}'}, reloadPage),
+    })
+  }
+  function reorderColumns() {
+    Swal2.fire({ title: '调整栏序', input: 'textarea', inputAttributes: {rows: 6},
+      inputValue: `{{ '\n'.join([ c['code'] + ' ' + c['name'] for c in proj['columns']]) }}`,
+      preConfirm: (value) => value && postApi('/proj/reorder',
+          {rows: value, proj_id: '{{_id}}'}, reloadPage),
+    })
+  }
+  function deleteProj() {
+    Swal2.fire({title: '确认删除', confirmButtonText: '删除',
+      text: `确实要删除 “{{proj['name']}}” 项目及{{proj['cols']}}个原文吗？`,
+      preConfirm: () => postApi(`/proj/del/{{_id}}`, {},
+        res => window.location = res.redirect),
+    })
+  }
+  function onSubmitCloneProj($modal) {
+    const data = getModalData($modal, ['code', 'name', 'comment'], 'p')
+    postApi('/proj/clone', Object.assign(data, {proj_id: '{{_id}}'}), res => {
+      window.location = res.redirect
+    })
+  }
+
+  function onSubmitProj($modal) {
+    const data = getModalData($modal, ['code', 'name', 'comment', 'public'], 'p')
+    if (data) {
+      postApi('/proj/info', Object.assign(data, {proj_id: '{{_id}}'}),
+        res => res['modified'] ? reloadPage() : $modal.modal('hide'))
+    }
+  }
+
+  function onSubmitImportText($modal) {
+    const fields = ['code', 'name', 'type', 'content', 'short_name', 'colspan'],
+      d = getModalData($modal, fields, 'a')
+    if (d) {
+      postApi('/proj/import/text', Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
+    }
+  }
+  function onSubmitAppendText($modal) {
+    const d = getModalData($modal, ['code', 'name', 'content'], 's')
+    if (d) {
+      postApi('/proj/import/text', Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
+    }
+  }
+  function onSubmitImportCBeta($modal) {
+    const d = getModalData($modal, ['code', 'vol', 'type', 'short_name', 'colspan'], 'a')
+    if (d) {
+      postApi('/proj/import/cb', Object.assign(d, {proj_id: '{{_id}}'}), res => {
+        if (!res.data.ignore) showSuccess('', '导入成功', reloadPage)
+        else {showError('部分导入', res.data.ignore, reloadPage)}
+      })
+    }
+  }
+</script>
+</html>

@@ -1,0 +1,16 @@
+{% raw xsrf_form_html() %}
+<script src="{{static_url('bootstrap/js/bootstrap.min.js')}}"></script>
+<script src="{{static_url('sweetalert/sweetalert2.js')}}"></script>
+<script src="{{static_url('js/alert_modal.js')}}"></script>
+<script>
+  $('[oninvalid]').attr('oninput', 'setCustomValidity("")')
+  $('.modal-body .required,.modal-body [required]').each((i, el) => {
+    $(el).closest('.row').find('.control-label').addClass('required')
+  })
+  $(document).on('click', '.swal2-popup', function() {
+    if ($('#swal2-validation-message').is(':visible')) {
+      Swal.resetValidationMessage()
+      Swal.enableButtons()
+    }
+  })
+</script>

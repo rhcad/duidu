@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{site['name']}} - 登录</title>
+  {% include _/base_head.html %}
+  <style>
+    .input-group-addon { min-width: 5em; }
+    .actions > * + * { margin-left: 6px; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav() %}
+  <div class="m-t-20 w400">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title center">登录</h3>
+      </div>
+      <div class="panel-body">
+        <form onsubmit="onSubmit();return false;">
+          <div class="input-group">
+            <span class="input-group-addon">用户名</span>
+            <input type="text" id="username" autofocus class="form-control" required>
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">密　码</span>
+            <input type="password" id="password" class="form-control" required autocomplete="on">
+          </div>
+          <div class="actions m-t-10 center">
+            <a href="/user/forgot" id="forgot" class="float-left hidden">忘记密码</a>
+            <input type="submit" class="btn btn-primary" value="登录"/>
+            <a href="/user/register?next={{next}}" class="btn btn-default">注册</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% include _/base_foot.html %}
+<script>
+  function onSubmit() {
+    const data = {username: $('#username').val(), password: $('#password').val()}
+    postApi('/user/login', {data: data}, function (res) {
+      window.location = res.redirect || '{{next}}'
+    }, function (res) {
+      showError('操作失败', res.message)
+      $('#forgot').removeClass('hidden')
+    })
+  }
+</script>
+</body>
+</html>

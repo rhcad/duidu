@@ -1,0 +1,38 @@
+<table class="table">
+  <thead>
+    <tr>
+      {% for k, f in fields.items() %}
+      <th class="{{k}}{{' text-'+f['align'] if f.get('align') else ''}}">{{f['caption']}}</th>
+      {% end %}
+      {% if model.actions %}
+      <th class="actions">操作</th>
+      {% end %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr id="{{r['_id']}}">
+      {% for k, f in fields.items() %}
+      <td class="{{k}}{{' text-'+f['align'] if f.get('align') else ''}}">
+        {% if f.get('type') == 'user' %}
+        {% module Users([r[k]]) %}
+        {% else %}
+        {{r.get(k, '')}}
+        {% end %}
+      </td>
+      {% end %}
+      {% if model.actions %}
+      <td class="actions">
+        {% for c in model.actions %}
+        <a href="{{util.sub_prop(c['url'], r) if 'url' in c else '#'}}"
+           class="btn btn-default btn-sm">{{c['caption']}}</a>
+        {% end %}
+      </td>
+      {% end %}
+    </tr>
+    {% end %}
+  </tbody>
+</table>
+{% if not rows %}
+<p class="center gray m-t-n10">表格没有内容</p>
+{% end %}
