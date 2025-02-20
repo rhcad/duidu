@@ -33,7 +33,7 @@ class Application(web.Application):
             if options.test_db:
                 self.db.user.count_documents({})
         except PyMongoError as e:
-            logging.error(re.sub(r'\..+$', '', str(e)))
+            logging.error('database ' + re.sub(r'.?(, |[({]).+$', '', str(e)))
             self.stop()
 
     def stop(self):

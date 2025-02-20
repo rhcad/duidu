@@ -20,14 +20,14 @@ def on_exception(self, e):
         tb_info = traceback.extract_tb(tb)
         filename, line, f, text = tb_info[-1]
         if isinstance(e, PyMongoError):
-            msg = '数据库错误 ' + re.sub(r'[.:].+$', '', str(e))
+            msg = '数据库错误 ' + re.sub('.?(, |[({]).+$', '', str(e))
         else:
             msg = e.__class__.__name__ + ' ' + str(e)
         logging.error('{0} {1}, in {2}: {3}'.format(path.basename(filename), line, f, msg))
         BaseHandler.send_error(self, 500, reason=msg)
 
 
-def auto_try(func,):
+def auto_try(func):
     """Decorator for get or post function"""
 
     def wrapper(self, *args, **kwargs):
@@ -74,7 +74,7 @@ class BaseHandler(CorsMixin):
                     self.current_user = None
                     logging.info(f'{self.username} need login')
                     need_login = 're'
-                
+
         if need_login:
             if self.is_api:
                 self.send_error(403, reason='请重新登录' if need_login == 're' else '请登录')
@@ -149,7 +149,8 @@ class BaseHandler(CorsMixin):
         self.send_error(code, **kwargs)
 
     def send_error(self, code=500, **kwargs):
-        traceback.print_exc()
+        if code >= 500:
+            traceback.print_exc()
         msg = kwargs.get('message') or kwargs.get('reason') or self._reason
         exc = kwargs.get('exc_info')
         exc = exc and len(exc) == 3 and exc[1]
