@@ -51,7 +51,7 @@ class Model(object):
 
     @classmethod
     def pack_data(cls, data, fields):
-        return dict((k, cls.convert_value(k, data[k])) for k in fields if k in data)
+        return dict((k, cls.convert_value(k, data[k])) for k in fields if data.get(k))
 
     @classmethod
     def unpack_data(cls, data, fields):

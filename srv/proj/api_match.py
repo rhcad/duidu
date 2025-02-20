@@ -1,5 +1,5 @@
 from bson import json_util
-from srv.proj.api import ProjBaseApi, auto_try, logging, re, re_long_word
+from srv.proj.api import ProjBaseApi, auto_try, re, re_long_word
 from srv.proj.model import Section, Toc
 
 
@@ -47,7 +47,7 @@ class SplitApi(ProjBaseApi):
                 new_rs.append(dict(line=new_line, text=text, **attr))
                 new_line += 1
 
-        logging.info(f"match split {sec['_id']} {row_i}: {len(new_rs)} rows")
+        self.log(f"match split {sec['_id']} {row_i}: {len(new_rs)} rows")
         rows[row_i:row_i + 1] = new_rs
         self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
             updated=self.now(), rows=rows)})
@@ -84,7 +84,7 @@ class MergeUpApi(ProjBaseApi):
         prev_r['text'] += now_r['text']
         del rows[ri + 1]
 
-        logging.info(f"match merge {sec['_id']} {ri}")
+        self.log(f"match merge {sec['_id']} {ri}")
         if from_i >= 0:
             del from_cell[from_i]
             self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
@@ -170,7 +170,7 @@ class MergeRowApi(ProjBaseApi):
         if from_r and len([k for k, v in from_r.items() if v]) == 1:
             proj['rows'].remove(from_r)
 
-        logging.info(f"match merge row: {json_util.dumps(new_row)}")
+        self.log(f"match merge row: {json_util.dumps(new_row)}")
         for sec in sections.values():
             if sec.get('_changed'):
                 self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
@@ -427,7 +427,7 @@ class TocDelApi(TocBaseApi):
                         n += 1
                 self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(rows=sec['rows'])})
             sec = None
-            logging.info(f"toc_del n={n} name={toc['name']}")
+            self.log(f"toc_del n={n} name={toc['name']}")
         else:
             assert t_r, '科判条目不存在'
             if row and t_r['id'] in row.get('toc_ids', []):
@@ -440,7 +440,7 @@ class TocDelApi(TocBaseApi):
                 i, t_rows = toc['rows'].index(t_r), toc['rows']
                 t_rows.remove(t_r)
                 d['next_id'] = t_rows[i if i < len(t_rows) else i - 1]['id'] if t_rows else 0
-                logging.info(f"toc_del id={d['toc_id']} next_id={d['next_id']}")
+                self.log(f"toc_del id={d['toc_id']} next_id={d['next_id']}")
 
         if sec:
             self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(updated=self.now(), rows=rows)})

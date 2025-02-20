@@ -1,4 +1,3 @@
-import logging
 import re
 from srv.util import md5
 from srv.base import auto_try, BaseHandler
@@ -23,7 +22,7 @@ class LoginApi(BaseHandler):
         if u['password'] != md5(d['password']):
             self.send_raise_failed('密码不对，请重新输入')
 
-        logging.info(f"{d['username']} login")
+        self.log(f"{d['username']} login")
         LoginApi.send_user(self, u)
 
     @staticmethod
@@ -59,7 +58,7 @@ class RegisterApi(BaseHandler):
         r = self.db.user.insert_one(u)
         u['_id'] = r.inserted_id
 
-        logging.info(f"{u['username']} registered")
+        self.log(f"{u['username']} registered")
         LoginApi.send_user(self, u)
 
     @staticmethod
@@ -81,7 +80,7 @@ class LogoutApi(BaseHandler):
         if self.current_user:
             self.clear_cookie('user')
             self.current_user = None
-            logging.info(f'{self.username} logout')
+            self.log(f'{self.username} logout')
         if self.get_query_argument('redirect', ''):
             return self.redirect('/')
         self.send_success()
@@ -107,7 +106,7 @@ class ProfileApi(BaseHandler):
         upd['updated'] = self.now()
 
         self.db.user.update_one(dict(username=self.username), {'$set': upd})
-        logging.info(f"{self.username} profile changed: {','.join(list(upd.keys()))}")
+        self.log(f"{self.username} profile changed: {','.join(list(upd.keys()))}")
         LoginApi.send_user(self, self.db.user.find_one(dict(username=self.username)))
 
 
@@ -124,7 +123,7 @@ class PasswordApi(BaseHandler):
 
         upd = dict(updated=self.now(), password=md5(u['password']))
         self.db.user.update_one(dict(username=self.username), {'$set': upd})
-        logging.info(f"{self.username} password changed")
+        self.log(f"{self.username} password changed")
         LoginApi.send_user(self, self.db.user.find_one(dict(username=self.username)))
 
 
@@ -146,5 +145,5 @@ class ForgotApi(BaseHandler):
 
         upd = dict(updated=self.now(), password=md5(u['password']))
         self.db.user.update_one(dict(username=u['username']), {'$set': upd})
-        logging.info(f"{u['username']} password reset")
+        self.log(f"{u['username']} password reset")
         self.send_success()

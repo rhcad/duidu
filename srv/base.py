@@ -1,6 +1,5 @@
 import re
 import sys
-import logging
 import traceback
 from os import path
 from bson import json_util
@@ -23,7 +22,7 @@ def on_exception(self, e):
             msg = '数据库错误 ' + re.sub('.?(, |[({]).+$', '', str(e))
         else:
             msg = e.__class__.__name__ + ' ' + str(e)
-        logging.error('{0} {1}, in {2}: {3}'.format(path.basename(filename), line, f, msg))
+        self.log('{0} {1}, in {2}: {3}'.format(path.basename(filename), line, f, msg), 'E')
         BaseHandler.send_error(self, 500, reason=msg)
 
 
@@ -72,7 +71,7 @@ class BaseHandler(CorsMixin):
                 else:
                     self.clear_cookie('user')
                     self.current_user = None
-                    logging.info(f'{self.username} need login')
+                    self.log(f'{self.username} need login')
                     need_login = 're'
 
         if need_login:
@@ -95,6 +94,9 @@ class BaseHandler(CorsMixin):
     def get_ip(self):
         ip = self.request.headers.get('x-forwarded-for') or self.request.remote_ip
         return ip and re.sub(r'^::\d$', '', ip[:15]) or '127.0.0.1'
+
+    def log(self, text, method='I'):  # I|W|E
+        self.app.log(self, text + ' (ip)', 0, 'IWE'.index(method))
 
     def data(self):
         if self._data is None:
@@ -137,7 +139,7 @@ class BaseHandler(CorsMixin):
         raise Finish()
 
     def send_raise_failed(self, message, code=0):
-        logging.warning(message + (f' [{self.username}]' if self.username else ''))
+        self.log(message + (f' [{self.username}]' if self.username else ''), 'W')
         if self.is_api:
             self.write(dict(status='failed', message=str(message)))
         else:

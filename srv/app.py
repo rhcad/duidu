@@ -46,13 +46,18 @@ class Application(web.Application):
         summary = handler._request_summary()
         s = handler.get_status()
         if s != 404 and not(s < 400 and re.search(r'/static', summary)):
-            user = handler.current_user
-            summary = re.sub(r'\(.+\)', '(' + handler.get_ip() + ')', summary)
-            request_time = int(1000 * handler.request.request_time())
-            cls = re.split("[.']", str(handler.__class__))[-2]
-            log_method = log.info if s < 400 else log.warning if s < 500 else log.error
-            log_method("%d %s %s %d ms%s", s, summary, cls, request_time,
-                       user and ' [%s]' % user.get('username') or '')
+            Application.log(handler, summary, s, 0 if s < 400 else 'W' if 1 < 500 else 2)
+
+    @staticmethod
+    def log(handler, summary='', code=0, method=0):
+        user = handler.current_user
+        summary = re.sub(r'\(.+\)', '(' + handler.get_ip() + ')', summary)
+        request_time = int(1000 * handler.request.request_time())
+        cls = re.split("[.']", str(handler.__class__))[-2]
+        log_method = [log.info, log.warning, log.error][method]
+        log_method("%s%s %s %d ms%s", '%03d ' % code if code else '',
+                   summary, cls, request_time,
+                   user and ' [%s]' % user.get('username') or '')
 
     @staticmethod
     def _connect_db(d):

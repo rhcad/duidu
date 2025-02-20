@@ -1,8 +1,8 @@
 from tornado import gen
 from tornado.escape import to_basestring
 from tornado.httpclient import AsyncHTTPClient, HTTPError
-from srv.base import on_exception, json_util
-from srv.proj.api import ImportTextApi, logging, re
+from srv.base import on_exception
+from srv.proj.api import ImportTextApi, re
 from bs4 import BeautifulSoup as Soup
 
 
@@ -36,7 +36,7 @@ class ImportCBApi(ImportTextApi):
                 xu_rows[-1]['tag'].append('xu_end')
             xu_rows.clear()
 
-        logging.info(f'parse_html {code} {title}')
+        self.log(f'parse_html {code} {title}')
         html = re.sub('<(a|title)( [^>]+)?>[^<]+</(a|title)>', '', html, re.I)  # 去掉脚注
         html = re.sub(r"<div id='[a-z]+-copyright'>(.|\n)+</div>", '', html, re.M)
         soup = Soup(html, 'html.parser')
@@ -169,5 +169,5 @@ class ArticleImportCBApi(ImportCBApi):
 
             if n or not s.get('rows'):
                 self.db.section.update_one({'_id': s['_id']}, {'$set': s_upd})
-                logging.info(f"section {code} {s['_id']} updated: {n} rows")
+                self.log(f"section {code} {s['_id']} updated: {n} rows")
                 changes.append(dict(code=code, s_id=str(s['_id'])))

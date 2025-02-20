@@ -1,4 +1,4 @@
-from srv.base import auto_try, BaseHandler, json_util, logging, re
+from srv.base import auto_try, BaseHandler, json_util, re
 from bson.objectid import ObjectId
 from srv.proj.model import Proj, Article, Section
 
@@ -105,7 +105,7 @@ class ProjBaseApi(BaseHandler):
         self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
             updated=self.now(), columns=proj['columns'], cols=len(proj['columns']))})
 
-        logging.info(f"article {code} {a['name']} of project {proj['code']} created")
+        self.log(f"article {code} {a['name']} of project {proj['code']} created")
         return proj, a, is_append
 
     @staticmethod
@@ -138,7 +138,7 @@ class ProjAddApi(BaseHandler):
         r = self.db.proj.insert_one(p)
         _id = str(r.inserted_id)
 
-        logging.info(f"project {p['code']} {p['name']} created")
+        self.log(f"project {p['code']} {p['name']} created")
         self.send_success(dict(redirect=f"/proj/edit/{_id}"))
 
 
@@ -191,7 +191,7 @@ class ProjCloneApi(ProjBaseApi):
         self.db.section.update_many(dict(proj_id=p_id), {'$unset': {'tmp': 1}})
         self.db.article.update_many(dict(proj_id=p_id), {'$unset': {'tmp': 1}})
 
-        logging.info(f"project {p['code']} {p['name']} created from {p0['_id']}")
+        self.log(f"project {p['code']} {p['name']} created from {p0['_id']}")
         self.send_success(dict(redirect=f"/proj/edit/{p_id}"))
 
 
@@ -209,7 +209,7 @@ class ProjEditApi(ProjBaseApi):
                 self.send_raise_failed(f"项目编码重复 {upd['code']}")
         r = self.db.proj.update_one({'_id': proj['_id']}, {'$set': upd})
         if r.modified_count:
-            logging.info(f"proj {proj['code']} changed")
+            self.log(f"proj {proj['code']} changed")
         return self.send_success({'modified': r.modified_count})
 
 
@@ -238,7 +238,7 @@ class SetEditorApi(ProjBaseApi):
             self.send_raise_failed('协编没有改变')
 
         self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(editors=editors)})
-        logging.info('editors changed: ' + ','.join(editors))
+        self.log('editors changed: ' + ','.join(editors))
         return self.send_success(editors)
 
 
@@ -289,7 +289,7 @@ class ArticleEditApi(ProjBaseApi):
             changed += r.modified_count
 
         if changed:
-            logging.info(f"article {a['code']} changed")
+            self.log(f"article {a['code']} changed")
         return self.send_success({'modified': changed})
 
 
@@ -303,7 +303,7 @@ class ProjDelApi(ProjBaseApi):
         self.db.section.delete_many({'proj_id': proj['_id']})
         self.db.article.delete_many({'proj_id': proj['_id']})
         self.db.proj.delete_one({'_id': proj['_id']})
-        logging.info(f"project {_id} removed: {proj['name']}")
+        self.log(f"project {_id} removed: {proj['name']}")
         self.send_success({'redirect': '/'})
 
 
@@ -324,7 +324,7 @@ class SectionDelApi(ProjBaseApi):
             'sections': [r for r in a['sections'] if r['_id'] != s['_id']]}})
         assert r.modified_count
         self.db.section.delete_one({'_id': s['_id']})
-        logging.info(f"section {s['_id']} removed: {s['name']}")
+        self.log(f"section {s['_id']} removed: {s['name']}")
 
         rows = self.update_ids(dict(char_n=p['char_n'] - s['char_n'],
                                     rows=p.get('rows', [])), {str(s['_id']): ''})
@@ -357,7 +357,7 @@ class ArticleDelApi(ProjBaseApi):
 
         self.db.article.delete_one({'_id': a['_id']})
         self.db.section.delete_many({'a_id': a['_id']})
-        logging.info(f"article {a['_id']} removed: {a['name']}")
+        self.log(f"article {a['_id']} removed: {a['name']}")
 
         self.send_success({'redirect': f"/proj/edit/{a['proj_id']}" if p else '/'})
 
@@ -387,7 +387,7 @@ class ImportTextApi(ProjBaseApi):
             large = self.save_section(proj, a, a['name'], a['content'])
         large = large and f'已导入{n}部分，项目总字数{large[0]}，如再导入{large[1]}字的内容就超过20万，多余内容可分拆项目'
         if n:
-            logging.warning(large or f'已导入{n}部分')
+            self.log(large or f'已导入{n}部分', 'W')
             self.send_success({'ignore': large, 'n': n})
         else:
             self.send_raise_failed(large)

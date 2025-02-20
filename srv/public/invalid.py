@@ -1,4 +1,4 @@
-from srv.base import BaseHandler, logging
+from srv.base import BaseHandler
 
 
 class Page404Handler(BaseHandler):
@@ -8,7 +8,7 @@ class Page404Handler(BaseHandler):
         pass
 
     def get(self):
-        logging.error(f'{self.request.path} not found')
+        self.log(f'{self.request.path} not found', 'W')
         self.set_status(404, reason='Not found')
         if self.is_api:
             return self.finish()

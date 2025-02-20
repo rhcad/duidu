@@ -1,5 +1,3 @@
-import logging
-
 from tornado.web import UIModule
 from tornado.template import Template
 from srv import util
