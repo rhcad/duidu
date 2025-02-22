@@ -121,9 +121,8 @@ body, .form-control, textarea,
         background-color: #1b1b1d;
         color: #aaa;
     }
-    [data-theme="dark"] a {
-        color: #aaf;
-    }
+    [data-theme="dark"] a { color: #aaa; }
+    [data-theme="dark"] table a { color: #aae; }
 
     [data-theme="dark"] code {
         color: rgb(201, 209, 217);;
