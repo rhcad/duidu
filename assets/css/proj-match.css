@@ -40,7 +40,8 @@ html, body, .app, .columns-p, .sidebar, .toc-tree-p { height: 100%; }
   .sidebar > .toc-tree-p { flex: 1; }
   .sidebar.toc-n > .toc-tree-p, .toc-tree-p { height: calc(100% - 5px); }
   .sidebar.toc-n > .toc-tree-p { max-width: 50%; }
-  .sidebar:not(.toc-n) > .toc-tree-p { overflow-x: hidden; }
+  .sidebar:not(.toc-n) > .toc-tree-p { overflow-x: hidden; padding: 4px; }
+  .sidebar:not(.toc-n) .toc-tree { overflow-x: hidden; }
   .toc-tree-p + .toc-tree-p { margin-top: 0; margin-left: 5px; width: calc(50% - 5px); }
 
   body:not(.show-sidebar) .app-body { height: calc(100% - 70px); margin-top: 70px; }
