@@ -14,6 +14,7 @@
         width: 8em;
         margin-bottom: 5px;
     }
+    .panel-body > .btn { padding: 2px 12px; font-size: 14px; margin-bottom: 4px; }
   </style>
 </head>
 
@@ -130,8 +131,9 @@
         <h3 class="panel-title">第四步 发布网页</h3>
       </div>
       <div class="panel-body">
-        合并完成后，确认 <a href="/proj/view/{{_id}}">预览</a> 无误，就可
-        <a onclick="publish()">发布</a> 分享，或 <a onclick="downloadHtml()">下载</a> 为离线网页。
+        合并完成后，确认 <a href="/proj/view/{{_id}}" class="btn btn-default btn-sm">预览</a> 无误，就可
+        <a onclick="publish()" class="btn btn-default btn-sm">发布</a> 分享，
+        或 <a onclick="downloadHtml()" class="btn btn-default btn-sm">下载</a> 为离线网页。
       </div>
     </div>
   </div>
