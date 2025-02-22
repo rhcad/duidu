@@ -3,7 +3,10 @@
     {% if download %}
     <ul class="nav navbar-nav nav-fixed m-t-0 m-b-0" style="display: flex">
       <li class="navbar-header"><a class="navbar-brand" href="/">经典</a></li>
-      <li class="active name"><a href="#" class="no-pointer">{{prev['title'] if prev else title}}</a></li>
+      {% if prev and download == 'preview' %}
+      <li class="name"><a href="{{prev['url']}}">{{prev['title']}}</a></li>
+      {% end %}
+      <li class="active name"><a href="#" class="no-pointer">{{title}}</a></li>
     </ul>
     {% else %}
     <!-- Brand and toggle get grouped for better mobile display -->

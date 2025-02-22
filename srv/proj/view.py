@@ -59,7 +59,7 @@ class MatchHandler(ProjHandler):
                                new=1 if u and u['a_id'] == str(a['_id']) and u['toc_i'] == ti else 0)
                           for ti, t in enumerate(a['toc']) if t['rows']]
 
-        self.render(f"proj_{mode if mode == 'match' else 'view'}.html",
+        self.render(f"proj_{mode if mode == 'match' else 'view'}.html", mode=mode,
                     TAGS=Section.TAGS, proj=p, _id=str(p['_id']), pi=pi, max_page=max_page,
                     col_w=100 * 1000 // max(1, col_n) / 1000, all_toc=all_t, cur_toc=cur_toc,
                     is_owner=p['created_by'] == self.username, editable=editable)

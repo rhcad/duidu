@@ -15,11 +15,16 @@
     .cell[colspan="3"] { width: 1%; }/*{{ 3*col_w }}*/
     @media (max-width:768px) {
         .navbar, .navbar-brand { min-height: 40px; height: 40px; }
+        .navbar li>a { white-space: nowrap; }
         .sidebar { top: 50px; height: 150px; }
+        li.name>a { max-width: 8em; }
         body:not(.show-sidebar) .app-body {
           height: calc(100% - 60px);
           margin-top: 60px;
         }
+    }
+    @media (max-width:500px) {
+        .open>.dropdown-menu { position: fixed; top: 40px; right: 4px; left: auto; }
     }
   </style>
 </head>
@@ -50,7 +55,11 @@
   </li>
 </ul>
 <div class="app">
+  {% if mode == 'download' %}
   {% module TopNav(proj['short_name'], themes=False, download=True) %}
+  {% else %}
+  {% module TopNav('预览', prev=dict(url='/proj/edit/' + _id, title=proj['short_name']), themes=False, download='preview') %}
+  {% end %}
   <div class="container-fluid m-t-n10">
     <div class="app-body">
       {% if all_toc %}
