@@ -293,7 +293,7 @@ $(function () {
 
 function importToc() {
   const $a = $('.cell p.active').first()
-  const a_id = $a[0] ? $a.closest('.cell').data('id') : _$tree && _$tree.attr('data-a-id')
+  const a_id = $a[0] ? $a.closest('.cell').data('id') : ''
   const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
   const $p = $a[0] ? $a : $(`.cell[data-id="${a_id}"] p`).first()
 
