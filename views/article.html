@@ -14,7 +14,7 @@
 
 <body>
 <div class="app">
-  {% module TopNav(page['code'], prev=dict(url='/proj/edit/' + str(page['proj_id']), title=page['proj_name'])) %}
+  {% module TopNav(page['code'], prev=dict(cls='name', url='/proj/edit/' + str(page['proj_id']), title=page['proj_name'])) %}
   <div id="content" class="container">
     <div class="panel panel-default">
       <div class="panel-heading">

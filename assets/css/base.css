@@ -28,7 +28,7 @@ body {
 .no-border { border: none; }
 .no-pointer, .disabled a { pointer-events: none; }
 
-a { text-decoration: none; }
+a { text-decoration: none !important; }
 [onclick], li:not(.disabled)>a { cursor: pointer; }
 
 input, .btn, input:focus, .btn:focus { outline: none; }
@@ -57,36 +57,36 @@ input[type="submit"] { border: none; }
   }
 }
 
-.p-0 { padding: 0; }
-.p-10 { padding: 10px; }
-.p-20 { padding: 20px; }
+.p-0 { padding: 0 !important; }
+.p-10 { padding: 10px !important; }
+.p-20 { padding: 20px !important; }
 
-.m-0 { margin: 0; }
-.m-5 { margin: 5px; }
-.m-10 { margin: 10px; }
-.m-20 { margin: 20px; }
+.m-0 { margin: 0 !important; }
+.m-5 { margin: 5px !important; }
+.m-10 { margin: 10px !important; }
+.m-20 { margin: 20px !important; }
 
-.m-t-0 { margin-top: 0; }
-.m-t-5 { margin-top: 5px; }
-.m-t-10 { margin-top: 10px; }
-.m-t-15 { margin-top: 15px; }
-.m-t-20 { margin-top: 20px; }
-.m-t-n5 { margin-top: -5px; }
-.m-t-n10 { margin-top: -10px; }
-.m-t-n20 { margin-top: -20px; }
+.m-t-0 { margin-top: 0 !important; }
+.m-t-5 { margin-top: 5px !important; }
+.m-t-10 { margin-top: 10px !important; }
+.m-t-15 { margin-top: 15px !important; }
+.m-t-20 { margin-top: 20px !important; }
+.m-t-n5 { margin-top: -5px !important; }
+.m-t-n10 { margin-top: -10px !important; }
+.m-t-n20 { margin-top: -20px !important; }
 
-.m-b-0 { margin-bottom: 0; }
-.m-b-5 { margin-bottom: 5px; }
-.m-b-10 { margin-bottom: 10px; }
-.m-b-15 { margin-bottom: 15px; }
-.m-b-20 { margin-bottom: 20px; }
+.m-b-0 { margin-bottom: 0 !important; }
+.m-b-5 { margin-bottom: 5px !important; }
+.m-b-10 { margin-bottom: 10px !important; }
+.m-b-15 { margin-bottom: 15px !important; }
+.m-b-20 { margin-bottom: 20px !important; }
 
-.m-l-0 { margin-left: 0; }
-.m-l-5 { margin-left: 5px; }
-.m-l-10 { margin-left: 10px; }
-.m-r-0 { margin-right: 0; }
-.m-r-5 { margin-right: 5px; }
-.m-r-10 { margin-right: 10px; }
+.m-l-0 { margin-left: 0 !important; }
+.m-l-5 { margin-left: 5px !important; }
+.m-l-10 { margin-left: 10px !important; }
+.m-r-0 { margin-right: 0 !important; }
+.m-r-5 { margin-right: 5px !important; }
+.m-r-10 { margin-right: 10px !important; }
 
 .modal-body h4 { font-size: 16px; font-weight: 400; white-space: nowrap; }
 .modal-body input + label { margin-right: 8px; }
@@ -112,7 +112,8 @@ th.created_by { min-width: 4em; }
 .app .table > tbody > tr > td { max-width: 9em; }
 .app .table > tbody > tr > td.code,
 .app .table > tbody > tr > td.created_by { max-width: 5.5em; }
-.ellipsis, td.code, td.created_by {
+li.name>a { max-width: 10em; }
+.ellipsis, td.code, td.created_by, li.name>a {
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .app td p:last-child { margin-bottom: 0; }
 td.created, td.updated { font-size: .9em; min-width: 5em; }

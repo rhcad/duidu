@@ -233,11 +233,12 @@ body, .form-control, textarea,
         border: 1px solid #515151;
     }
 
-    [data-theme="dark"] .btn-default.active {
+    [data-theme="dark"] .btn.btn-default.active {
         color: #e1e1e1;
         background-color: #375a7f;
-        border-color: #375a7f;
+        border-color: #376a7f;
     }
+    .btn-group .btn { outline: none !important; }
 
     @media (pointer: fine) {
         [data-theme="dark"] .btn-default:hover,

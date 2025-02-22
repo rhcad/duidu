@@ -21,7 +21,7 @@ class Proj(Model):
     hidden_fields = ['editors', 'public', 'published', 'columns', 'created', 'char_n']
     actions = [
         dict(id='edit', caption='修改', url='/proj/edit/@_id'),
-        dict(id='view', caption='预览', url='/proj/view/@_id')
+        dict(id='view', caption='预览', url='/proj/view/@_id', default=True)
     ]
 
 

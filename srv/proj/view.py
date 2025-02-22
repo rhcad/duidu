@@ -47,6 +47,8 @@ class MatchHandler(ProjHandler):
         for c in p['columns']:
             a = self.db.article.find_one({'_id': c['a_id']})
             max_page = len(a['sections']) if pi and len(a['sections']) > 3 else 0
+            if max_page and mode == 'download':
+                self.send_raise_failed('多页内容目前不能下载')
             pi = min(pi, max_page) if max_page else 0
             c.update(dict(rows=Article.get_column_rows(self, a, pi),
                           toc=a.get('toc', [])))
@@ -57,7 +59,7 @@ class MatchHandler(ProjHandler):
                                new=1 if u and u['a_id'] == str(a['_id']) and u['toc_i'] == ti else 0)
                           for ti, t in enumerate(a['toc']) if t['rows']]
 
-        self.render(f"proj_{'view' if mode == 'view' else 'match'}.html",
+        self.render(f"proj_{mode if mode == 'match' else 'view'}.html",
                     TAGS=Section.TAGS, proj=p, _id=str(p['_id']), pi=pi, max_page=max_page,
                     col_w=100 * 1000 // max(1, col_n) / 1000, all_toc=all_t, cur_toc=cur_toc,
                     is_owner=p['created_by'] == self.username, editable=editable)
@@ -79,6 +81,18 @@ class MatchRenderApi(MatchHandler):
         html = re.search(b'<table>((.|\n)+)</table>', html).group(1)
         self.set_header('Content-Type', 'text/html; charset=UTF-8')
         self.write(to_basestring(html).strip())
+
+
+class DownloadHtmlApi(MatchHandler):
+    """下载对读网页"""
+    URL = '/api/proj/download/@oid'
+
+    @auto_try
+    def post(self, _id):
+        p = self.db.proj.find_one({'_id': ObjectId(_id)})
+        if not p or (p['cols'] < 2 and p['toc_n'] < 1):
+            self.send_raise_failed('多栏对读或有科判的才需要下载')
+        return MatchHandler.get(self, 'download', _id)
 
 
 class ArticleHandler(BaseHandler):

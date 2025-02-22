@@ -13,6 +13,14 @@
     .cell { width: 1%; }/*{{ col_w }}*/
     .cell[colspan="2"] { width: 1%; }/*{{ 2*col_w }}*/
     .cell[colspan="3"] { width: 1%; }/*{{ 3*col_w }}*/
+    @media (max-width:768px) {
+        .navbar, .navbar-brand { min-height: 40px; height: 40px; }
+        .sidebar { top: 50px; height: 150px; }
+        body:not(.show-sidebar) .app-body {
+          height: calc(100% - 60px);
+          margin-top: 60px;
+        }
+    }
   </style>
 </head>
 
@@ -23,8 +31,8 @@
        aria-haspopup="true" aria-expanded="false">显示 <span class="caret"></span></a>
     <ul class="dropdown-menu">
       {% if all_toc %}
-      <li class="toggle-sidebar active" onclick="$('body').toggleClass('show-sidebar');$(this).toggleClass('active')"><a>显示侧边栏</a></li>
-      <li onclick="$('.sidebar').toggleClass('wide')"><a>切换宽度</a></li>
+      <li class="toggle-sidebar active" onclick="$('body').toggleClass('show-sidebar');$(this).toggleClass('active')"><a>显示科判栏</a></li>
+      <li class="toggle-sidebar-width" onclick="$('.sidebar').toggleClass('wide')"><a>切换宽度</a></li>
       {% if len(all_toc)>1 %}
       <li class="toggle-sidebar active" onclick="$('.sidebar').toggleClass('toc-n');$(this).toggleClass('active')"><a>显示第二科判</a></li>
       {% end %}
@@ -41,14 +49,13 @@
     </ul>
   </li>
 </ul>
-
 <div class="app">
-  {% module TopNav('对照预览', prev=dict(url='/proj/edit/' + _id, title=proj['short_name']), themes=False) %}
+  {% module TopNav(proj['short_name'], themes=False, download=True) %}
   <div class="container-fluid m-t-n10">
     <div class="app-body">
       {% if all_toc %}
       {% set toc_i = ([i for i, a in enumerate(all_toc) if a['cur']]+[0])[0] %}
-      <div class="sidebar bx-shadow toc-{{'n' if len(all_toc)>1 else '1'}}">
+      <div class="sidebar toc-{{'n' if len(all_toc)>1 else '1'}}">
         <div class="toc-tree-p" data-ext="1">
           {% module TocDropdown(all_toc, toc_i) %}
           <div id="toc-tree1" class="toc-tree"><div></div></div>
@@ -63,7 +70,7 @@
       </div>
       {% end %}
       <div class="columns-p">
-        {% if max_page %}{% module Pager(pi, max_page, 'm-t-0 m-r-10 m-b-5') %}{% end %}
+        {% if max_page %}{% module Pager(pi, max_page, 'm-t-0 m-r-10 m-b-0') %}{% end %}
         <div class="table-p"><table>
         {% for r in proj.get('rows', []) %}
         <tr class="merged columns" data-row-i="{{r['row_i']}}">
@@ -79,7 +86,7 @@
           </td>{% end %}
         </tr>
         </table></div>
-        {% if max_page %}{% module Pager(pi, max_page, 'm-b-0 m-r-10') %}{% end %}
+        {% if max_page %}{% module Pager(pi, max_page, 'm-t-5 m-b-0 m-r-10') %}{% end %}
       </div>
     </div>
   </div>
@@ -128,7 +135,7 @@
     }).on('click', '.toggle-col', e => {
       const $li = $(e.target).closest('.toggle-col'), i = $li.data('i')
       $('.columns-p').toggleClass(`hide-col-${i}`)
-      $li.toggleClass('active')
+      $(`.toggle-col[data-i="${i}"]`).toggleClass('active')
     })
   })
   {% if all_toc %}tocLoad('1', `{{ all_toc[toc_i]['a_id'] }}`, `{{ all_toc[toc_i]['toc_i'] }}`){% end %}

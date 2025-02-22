@@ -30,7 +30,7 @@ class ClonedHandler(BaseHandler, Proj):
     ROLES = None
     hidden_fields = ['editors', 'public', 'published', 'columns', 'char_n', 'char_k']
     actions = [
-        dict(id='view', caption='预览', url='/proj/view/@_id')
+        dict(id='view', caption='预览', url='/proj/view/@_id', default=True)
     ]
 
     @auto_try

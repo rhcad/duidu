@@ -48,7 +48,7 @@ def sub_prop(text, obj):
 
 
 def trim_bracket(text):
-    return re.sub(r'[（）【】()\[－，。：；？-].*$', '', text).strip()
+    return re.sub(r'[（）【】()\[－，。：；？-].*$', '', text or '').strip()
 
 
 def get_users(db, usernames):

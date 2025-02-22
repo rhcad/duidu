@@ -67,9 +67,12 @@ function ajaxApi(url, type, data, success_callback, error_callback) {
       $modal.removeClass('wait')
       if (code >= 200 && code <= 299) {
         try {
-          const data = JSON.parse(xhr.responseText)
-          if (data && typeof data.status === 'string') {
-            success_callback(data)
+          if (/html/.test(data.contentType || '')) {
+            return success_callback(xhr.responseText)
+          }
+          const d = JSON.parse(xhr.responseText)
+          if (d && typeof d.status === 'string') {
+            success_callback(d)
             return
           }
         } catch (e) {}

@@ -13,7 +13,7 @@ $doc.on('click', '.p-head', e => {
 $doc.on('click', '.toggle-col', e => {
   const $li = $(e.target).closest('.toggle-col'), i = $li.data('i')
   $('.columns-p').toggleClass(`hide-col-${i}`)
-  $li.toggleClass('active')
+  $(`.toggle-col[data-i="${i}"]`).toggleClass('active')
   if (!$li.hasClass('active')) {
     options[`hide-col-${i}`] = !$li.hasClass('active')
   }

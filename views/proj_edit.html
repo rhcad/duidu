@@ -113,7 +113,7 @@
         {% if proj.get('columns') %}
         <a href="/proj/match/{{_id}}" class="btn btn-default">段落对照</a>
         {% end %}
-        <br>单一经典也可在此设置科判。可基于某栏经典插入或导入科判目录，同时支持多种科判。
+        <br>可基于某栏经典插入或导入科判目录，同时支持多种科判。
         {% if proj['toc_n'] %}已有 {{proj['toc_n']}} 种科判。{% end %}
       </div>
     </div>
@@ -130,7 +130,7 @@
         <h3 class="panel-title">第四步 发布网页</h3>
       </div>
       <div class="panel-body">
-        将合并完成的页面发布分享，可下载为离线网页。
+        将合并完成的页面 <a onclick="publish()">发布</a> 分享，或 <a onclick="downloadHtml()">下载</a> 为离线网页。
       </div>
     </div>
   </div>
@@ -141,7 +141,7 @@
 {% include modal/import_cb.html %}
 {% include modal/edit_proj_info.html %}
 {% include _/base_foot.html %}
-</body>
+<script src="{{static_url('js/download.js')}}"></script>
 <script>
   function onChangeEditors() {
     Swal2.fire({title: '设置协编', input: 'text',
@@ -202,4 +202,15 @@
     }
   }
 </script>
+<script>
+  function publish() {
+    showError('TODO')
+  }
+  function downloadHtml() {
+    postApi(`/proj/download/{{_id}}`, {contentType: 'text/html; charset=utf-8'}, r => {
+      download(r, `{{proj['code']}}.html`)
+    })
+  }
+</script>
+</body>
 </html>

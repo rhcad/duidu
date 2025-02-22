@@ -11,11 +11,14 @@
   </thead>
   <tbody>
     {% for r in rows %}
+    {% set url0 = [util.sub_prop(c.get('url'), r) for c in model.actions if c.get('default')] %}
     <tr id="{{r['_id']}}">
       {% for k, f in fields.items() %}
       <td class="{{k}}{{' text-'+f['align'] if f.get('align') else ''}}">
         {% if f.get('type') == 'user' %}
         {% module Users([r[k]]) %}
+        {% elif k == 'name' and url0 and url0[0] %}
+        <div><a href="{{url0[0]}}">{{r.get(k, '')}}</a></div>
         {% else %}
         <div>{{r.get(k, '')}}</div>
         {% end %}

@@ -1,6 +1,6 @@
 from . import view as v, api as a, api_match as m, api_cb as b
 
-handlers = [v.ProjHandler, v.MatchHandler, v.MatchRenderApi, v.ArticleHandler,
+handlers = [v.ProjHandler, v.MatchHandler, v.MatchRenderApi, v.DownloadHtmlApi, v.ArticleHandler,
             a.ProjAddApi, a.ProjCloneApi, a.ProjEditApi, a.SetEditorApi, a.ImportTextApi,
             a.ArticleEditApi, a.ArticleDelApi, a.SectionDelApi, a.ProjDelApi, a.ReorderColApi,
             b.ImportCBApi, b.ArticleImportCBApi,
