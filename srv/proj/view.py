@@ -20,14 +20,14 @@ class ProjHandler(BaseHandler):
         view = not editable and not p.get('public')
         if view and not editable and not p.get('published'):
             self.send_raise_failed(f"项目 {p['code']} 还未发布，不能查看", 404)
-        return p
+        return p, editable
 
     @auto_try
     def get(self, oid):
-        p = self.check_proj(oid)
+        p, editable = self.check_proj(oid)
         p.update(Proj.unpack_data(p, ['created', 'updated']))
         self.render('proj_edit.html', proj=p, Article=Article, _id=str(p['_id']),
-                    is_owner=p['created_by'] == self.username)
+                    is_owner=p['created_by'] == self.username, editable=editable)
 
 
 class MatchHandler(ProjHandler):
@@ -37,7 +37,7 @@ class MatchHandler(ProjHandler):
 
     @auto_try
     def get(self, mode, p_id):
-        p = self.check_proj(p_id)
+        p, editable = self.check_proj(p_id)
         col_n, max_page, all_t = 0, 0, []
         pi = max(1, int(self.get_argument('page', '1'))) if p['cols'] == 1 else 0
 
@@ -60,8 +60,7 @@ class MatchHandler(ProjHandler):
         self.render(f"proj_{'view' if mode == 'view' else 'match'}.html",
                     TAGS=Section.TAGS, proj=p, _id=str(p['_id']), pi=pi, max_page=max_page,
                     col_w=100 * 1000 // max(1, col_n) / 1000, all_toc=all_t, cur_toc=cur_toc,
-                    is_owner=p['created_by'] == self.username,
-                    editable=self.username == p['created_by'] or self.username in p['editors'])
+                    is_owner=p['created_by'] == self.username, editable=editable)
 
     def finish(self, html=None):
         if html and b'width: 1%' in html:

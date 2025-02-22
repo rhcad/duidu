@@ -19,8 +19,12 @@ body {
 .float-left { float: left; }
 .float-right { float: right; }
 
-.gray { color: gray; user-select: none; }
-.no-select, .btn, .dropdown, .alert { user-select: none; }
+.gray { color: gray; }
+.no-select, .gray, .btn, .dropdown, .alert {
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
 .no-border { border: none; }
 .no-pointer, .disabled a { pointer-events: none; }
 

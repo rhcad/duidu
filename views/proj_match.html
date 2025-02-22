@@ -31,10 +31,11 @@
     .original { border-top: 2px solid red; }
     .sel-tip {
         position: fixed; margin-top: -25px; padding: 5px; min-width: 100px;
-        user-select: none; font-size: .8em; text-align: center; display: none;
+        font-size: .8em; text-align: center; display: none;
         background-color: var(--body-background-color); color: var(--hover-color);
     }
     .sel-tip b { font-size: 1.1em; }
+    .single-article .sel-tip { display: none!important; }
   </style>
 </head>
 
@@ -112,7 +113,7 @@
         <tr class="original columns{{' single-article' if len(proj['columns']) == 1 else ''}}" data-row-i="0">
           {% for i, c in enumerate(proj['columns']) %}
           <td class="cell" colspan="{{ c.get('colspan', 1) }}" data-i="{{i}}" data-id="{{c['a_id']}}" data-toc-i="{{c.get('toc_i','')}}">
-            <div class="sel-tip" data-i="{{i}}">选中</div>
+            <div class="sel-tip no-select" data-i="{{i}}">选中</div>
             {% module SectionBlock(c) %}
           </td>{% end %}
         </tr>

@@ -26,6 +26,7 @@
         <div class="panel-title">项目基本信息
           {% set op_cls = '' if is_owner else 'disabled' %}
           <div class="dropdown pull-right">
+            {% if editable %}
             <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               操作 <span class="caret"></span>
             </button>
@@ -37,6 +38,9 @@
               <li role="separator" class="divider"></li>
               <li class="{{op_cls}}"><a onclick="deleteProj()">删除</a></li>
             </ul>
+            {% else %}
+            <button class="btn btn-default btn-sm" data-toggle="modal" data-target="#cloneProjModal">克隆</button>
+            {% end %}
           </div>
         </div>
       </div>
