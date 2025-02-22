@@ -9,7 +9,8 @@ class Table(UIModule):
         assert isinstance(rows, list)
         for r in rows:
             assert isinstance(r, dict)
-        fields = dict((k, v) for k, v in model.fields.items() if k not in model.hidden_fields)
+        fields = dict((k, v) for k, v in model.fields.items()
+                      if k not in model.hidden_fields and [1 for r in rows if r.get(k)])
         return self.render_string('_/table.html', model=model, fields=fields, rows=rows, util=util)
 
 

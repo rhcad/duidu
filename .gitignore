@@ -16,5 +16,6 @@ log/
 
 coverage/
 test.db
+app.yml
 
 !.keep

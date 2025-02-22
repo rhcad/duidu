@@ -1,15 +1,16 @@
 from bson.objectid import ObjectId
 from srv.base import auto_try, BaseHandler
 from srv.proj.model import Proj
+from srv.user.model import User
 
 
 class HomeHandler(BaseHandler):
     """首页"""
-    URL = '/'
+    URL = r'/(:\d+)?'
     ROLES = None
 
     @auto_try
-    def get(self):
+    def get(self, _=0):
         cond = [{'published': {'$ne': None}}, {'public': True},
                 {'created_by': {'$ne': None} if self.username == 'admin' else self.username or '-'},
                 {'editors': {'$elemMatch': {'$eq': self.username or '-'}}}]
@@ -41,3 +42,20 @@ class ClonedHandler(BaseHandler, Proj):
                                       projection=p, sort=[('created', 1)]))
         rows = [r for r in rows if r['cols'] or self.username in (r['editors'] + [r['created_by']])]
         self.render('home_cloned.html', model=self, rows=Proj.format_rows(rows))
+
+
+class UsersHandler(BaseHandler):
+    """用户管理"""
+    URL = '/users'
+
+    @auto_try
+    def get(self):
+        if self.username != 'admin' and len(self.username) > 2:
+            return self.send_error(403, reason='Forbidden')
+        rows = list(self.db.user.find({}, projection=dict(
+            username=1, nickname=1, created=1, updated=1, ip=1)))
+        blocked = [r['ip'] for r in self.db.blocklist.find(
+            {}, projection=dict(ip=1, _id=0), sort=[('created', -1)])]
+
+        self.render('users.html', blocked=blocked, model=User,
+                    rows=User.format_rows(rows, time_format='%Y-%m-%d'))

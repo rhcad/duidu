@@ -1,4 +1,4 @@
-<table class="table">
+<div class="table-p"><table class="table">
   <thead>
     <tr>
       {% for k, f in fields.items() %}
@@ -17,7 +17,7 @@
         {% if f.get('type') == 'user' %}
         {% module Users([r[k]]) %}
         {% else %}
-        {{r.get(k, '')}}
+        <div>{{r.get(k, '')}}</div>
         {% end %}
       </td>
       {% end %}
@@ -25,14 +25,14 @@
       <td class="actions">
         {% for c in model.actions %}
         <a href="{{util.sub_prop(c['url'], r) if 'url' in c else '#'}}"
-           class="btn btn-default btn-sm">{{c['caption']}}</a>
+           class="btn btn-default">{{c['caption']}}</a>
         {% end %}
       </td>
       {% end %}
     </tr>
     {% end %}
   </tbody>
-</table>
+</table></div>
 {% if not rows %}
 <p class="center gray m-t-n10">表格没有内容</p>
 {% end %}

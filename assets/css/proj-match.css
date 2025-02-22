@@ -12,7 +12,7 @@
 .sidebar.wide { width: 300px; }
 body:not(.show-sidebar) .sidebar { display: none; }
 
-html, body, .app, .columns-p, .sidebar, .toc-tree-p { height: 100%; }
+html, body, .app, .columns-p, .sidebar, .toc-tree-p, .table-p { height: 100%; }
 .app > .container-fluid { height: calc(100% - 72px); }
 .app-body { height: 100%; }
 .columns-p { overflow-y: auto; }
@@ -60,7 +60,7 @@ html, body, .app, .columns-p, .sidebar, .toc-tree-p { height: 100%; }
 
 .col-name { font-size: .9em; margin: 0 auto .5em; }
 .cell.has-active { border-color: var(--hover-color); }
-.columns-p > table { border-collapse: unset; }
+.columns-p table { border-collapse: unset; }
 .columns-p tr:not(:first-child) > td:not(.has-active) { border-top-color: transparent; }
 
 .cell .toc_row {

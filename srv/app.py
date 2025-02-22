@@ -3,7 +3,7 @@ import logging
 import pymongo
 from tornado import web
 from tornado.log import access_log as log
-from srv.base import BASE_DIR, path, PyMongoError
+from srv.base import BASE_DIR, path, PyMongoError, json_util
 from tornado.options import define, options
 from yaml import load as load_yml, SafeLoader
 
@@ -14,7 +14,8 @@ define('test_db', default=True, help='check database connection', type=bool)
 
 class Application(web.Application):
     def __init__(self, handlers, **p):
-        with open(path.join(BASE_DIR, 'app.yml'), encoding='utf-8') as f:
+        fn, fn0 = path.join(BASE_DIR, 'app.yml'), path.join(BASE_DIR, 'app_.yml')
+        with open(fn if path.exists(fn) else fn0, encoding='utf-8') as f:
             self.config = load_yml(f, Loader=SafeLoader)
         self.site = self.config['site']
 
@@ -33,8 +34,19 @@ class Application(web.Application):
             if options.test_db:
                 self.db.user.count_documents({})
         except PyMongoError as e:
-            logging.error('database ' + re.sub(r'.?(, |[({]).+$', '', str(e)))
+            mock = self.config['database'].get('mock')
+            logging.error('database ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e)) + (
+                    ', mocked data in %s used' % mock if mock else ''))
             self.stop()
+            if mock:
+                from glob import glob
+                self.conn, self.db = self._connect_db(self.config['database'], mock=True)
+                self.site['mock'] = True
+                for fn in glob(path.join(BASE_DIR, self.config['database']['mock'], '*.json')):
+                    coll = path.basename(fn).split('.')[0]
+                    with open(fn, encoding='utf-8') as f:
+                        rs = json_util.loads(f.read())
+                    [self.db[coll].insert_one(r) for r in rs]
 
     def stop(self):
         if self.conn:
@@ -60,7 +72,11 @@ class Application(web.Application):
                    user and ' [%s]' % user.get('username') or '')
 
     @staticmethod
-    def _connect_db(d):
+    def _connect_db(d, mock=False):
+        if mock:
+            from mongomock import MongoClient
+            conn = MongoClient()
+            return conn, conn[d['name']]
         usr = f"{d['user']}:{d['password']}@" if d.get('user') else ''
         uri = f"mongodb://{usr}{d['host']}:{d['port']}" + (f"/{d['name']}" if usr else '')
         conn = pymongo.MongoClient(

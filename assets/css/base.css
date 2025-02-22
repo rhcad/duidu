@@ -102,22 +102,28 @@ input[type="submit"] { border: none; }
 .panel-title .dropdown.pull-right { margin-top: -6px; margin-right: -10px; }
 
 .app-main { margin-top: 10px; }
-
-.app .table > tbody > tr > td { max-width: 12em; }
-.app td.comment, .ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.table-p { max-width: 100%; overflow-x: auto; }
+th { min-width: 3em; }
+th.created_by { min-width: 4em; }
+.app .table > tbody > tr > td { max-width: 9em; }
+.app .table > tbody > tr > td.code,
+.app .table > tbody > tr > td.created_by { max-width: 5.5em; }
+.ellipsis, td.code, td.created_by {
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .app td p:last-child { margin-bottom: 0; }
-td.created, td.updated { font-size: .9em; }
+td.created, td.updated { font-size: .9em; min-width: 5em; }
 .table .name { min-width: 5em; }
-.table .actions .btn { padding: 2px 4px; }
+.table .actions .btn { padding: 2px 5px; margin-bottom: 2px; }
 .users > span + span { margin-left: 5px; }
 
-.ellipsis-n {
+.ellipsis-n, td.name > div, td.comment > div {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
+.table td > div { -webkit-line-clamp: 2; }
 
 p.text { text-indent: 2em; }
 .text.xu { font-size: .9em; }

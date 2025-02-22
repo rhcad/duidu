@@ -19,7 +19,7 @@ def on_exception(self, e):
         tb_info = traceback.extract_tb(tb)
         filename, line, f, text = tb_info[-1]
         if isinstance(e, PyMongoError):
-            msg = '数据库错误 ' + re.sub('.?(, |[({]).+$', '', str(e))
+            msg = '数据库错误 ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e))
         else:
             msg = e.__class__.__name__ + ' ' + str(e)
         self.log('{0} {1}, in {2}: {3}'.format(path.basename(filename), line, f, msg), 'E')
@@ -73,6 +73,10 @@ class BaseHandler(CorsMixin):
                     self.current_user = None
                     self.log(f'{self.username} need login')
                     need_login = 're'
+        else:
+            sec = '.'.join(self.get_ip().split('.')[:2])
+            if sec != '127.0' and self.db.blocklist.find_one({'section': sec}):
+                return self.send_error(403, reason='Forbidden')
 
         if need_login:
             if self.is_api:

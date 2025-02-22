@@ -4,13 +4,21 @@
   <meta charset="UTF-8">
   <title>{{site['name']}}</title>
   {% include _/base_head.html %}
+  <style>
+    @media (max-width:680px) {
+        .cols, .toc_n, .char_k, .updated { display: none; }
+    }
+    @media (max-width:550px) {
+        .code { display: none; }
+    }
+  </style>
 </head>
 
 <body>
 <div class="app">
   {% module TopNav('首页') %}
   <div class="container">
-    <div class="pull-right">
+    <div class="text-right">
       <a data-toggle="modal" data-target="#newProjModal" class="btn btn-default">创建项目</a>
     </div>
     {% module Table(model, rows) %}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{site['name']}}-用户管理</title>
+  {% include _/base_head.html %}
+  <style>
+    @media (max-width:680px) {
+        .created { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  {% module TopNav('用户管理') %}
+  <div class="container">
+    {% module Table(model, rows) %}
+    {% if blocked %}
+    <p>禁止访问 {{len(blocked)}}段：<small>{{', '.join(blocked[:5])}}</small></p>
+    {% end %}
+  </div>
+</div>
+{% include _/base_foot.html %}
+</body>
+</html>

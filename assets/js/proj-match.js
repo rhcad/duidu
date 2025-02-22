@@ -192,7 +192,7 @@ $.contextMenu({
     },
     sep1: {name: '--'},
     moveUp: {
-      name: '合并为一组<span class="key">Enter</span>',
+      name: '合并为一组<span class="key" title="回车键">Enter</span>',
       isHtmlName: true,
       callback: function(){ mergeRow(false) },
       disabled: function(){ return !editable || !mergeRow(true) },
@@ -265,7 +265,7 @@ $.contextMenu({
       disabled: function(){ return !editable || !_moveP(this, false, true) },
     },
     extractRow: {
-      name: '另合为一组<span class="key">Enter</span>',
+      name: '另合为一组<span class="key" title="回车键">Enter</span>',
       isHtmlName: true,
       callback: function(){ mergeRow(false); },
       disabled: function(){ return !editable || !mergeRow(true)},

@@ -101,7 +101,7 @@
           除“合并为一组”外其余项仅对当前单元格中的选择有效，<span class="btn-key">Esc</span>或跨栏选择可清除选择。
         </div>
         {% if max_page %}{% module Pager(pi, max_page, 'm-t-0 m-r-10 m-b-5') %}{% end %}
-        <table>
+        <div class="table-p"><table>
         {% for r in proj.get('rows', []) %}
         <tr class="merged columns" data-row-i="{{r['row_i']}}">
           {% for i, c in enumerate(proj['columns']) %}
@@ -116,7 +116,7 @@
             {% module SectionBlock(c) %}
           </td>{% end %}
         </tr>
-        </table>
+        </table></div>
         {% if max_page %}{% module Pager(pi, max_page, 'm-b-0 m-r-10') %}{% end %}
       </div>
     </div>

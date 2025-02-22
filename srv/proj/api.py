@@ -11,13 +11,13 @@ class ProjBaseApi(BaseHandler):
         if proj is None:
             self.send_raise_failed('项目不存在', 404)
         if need_owner and self.username != proj['created_by']:
-            self.send_raise_failed('只有本项目的创建者才能修改')
+            self.send_raise_failed('创建者才能修改，或克隆后修改')
         return proj
 
     def editable(self, proj, verify=False):
         can = self.username == proj['created_by'] or self.username in proj['editors']
         if not can and verify:
-            self.send_raise_failed('只有本项目的创建者或协编才能修改内容')
+            self.send_raise_failed('本项目的创建者或协编才能修改内容，或克隆后修改')
         return can
 
     @staticmethod

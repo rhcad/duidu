@@ -9,7 +9,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">{{handler.app.site['name']}}</a>
+      <a class="navbar-brand" href="/">{{handler.app.site['name']}}{% if handler.app.site.get('mock') %}<small style="color:red">(演示)</small>{% end %}</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
@@ -33,6 +33,9 @@
             {% if current_user %}
             <li><a href="/user/profile">个人信息</a></li>
             <li><a href="/user/password">修改密码</a></li>
+            {% if title != '用户管理' and current_user['username'] == 'admin' or len(current_user['username']) < 3 %}
+            <li><a href="/users">用户管理</a></li>
+            {% end %}
             <li role="separator" class="divider"></li>
             <li><a href="/api/user/logout?redirect=1">注销</a></li>
             {% if themes %}<li role="separator" class="divider"></li>{% end %}
@@ -45,7 +48,7 @@
           </ul>
         </li>
         {% end %}
-        {% if not current_user %}
+        {% if not current_user and '/user/' not in request.path %}
         <li><a href="/user/login?next={{request.path}}">登录</a></li>
         {% end %}
       </ul>
