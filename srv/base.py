@@ -64,7 +64,7 @@ class BaseHandler(CorsMixin):
                 seconds = (self.now() - time).seconds
             except (TypeError, ValueError, AttributeError):
                 seconds = 1e5
-            if seconds > (30 if self.request.method[0] in 'PD' else 300):
+            if self.ROLES and seconds > (30 if self.request.method[0] in 'PD' else 300):
                 u = self.db.user.find_one(dict(username=self.username))
                 if u and u['updated'] == self.current_user['updated']:
                     self.set_secure_cookie('user_time', self.now().strftime('%Y-%m-%d %H:%M:%S'))

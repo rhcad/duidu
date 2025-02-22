@@ -22,6 +22,7 @@
       <a data-toggle="modal" data-target="#newProjModal" class="btn btn-default">创建项目</a>
     </div>
     {% module Table(model, rows) %}
+    <p class="gray text-right"><small>v{{handler.app.version}}</small></p>
   </div>
 </div>
 {% include modal/new_proj.html %}

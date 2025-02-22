@@ -14,7 +14,7 @@ if __name__ == '__main__':
     if app.db is None:
         exit(1)
     app.listen(options.port)
-    logging.info('Start the maker on http://localhost:%d' % (options.port,))
+    logging.info('Start the maker v%s on http://localhost:%d' % (app.version, options.port))
     try:
         ioloop.IOLoop.current().start()
     except KeyboardInterrupt:
