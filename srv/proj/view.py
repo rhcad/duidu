@@ -46,9 +46,7 @@ class MatchHandler(ProjHandler):
             self.db.proj.update_one({'_id': p['_id']}, {'$unset': {'cur_toc': 1}})
         for c in p['columns']:
             a = self.db.article.find_one({'_id': c['a_id']})
-            max_page = len(a['sections']) if pi and len(a['sections']) > 3 else 0
-            if max_page and mode == 'download':
-                self.send_raise_failed('多页内容目前不能下载')
+            max_page = self.get_max_page(p, a) and pi or max_page
             pi = min(pi, max_page) if max_page else 0
             c.update(dict(rows=Article.get_column_rows(self, a, pi),
                           toc=a.get('toc', [])))
@@ -63,6 +61,9 @@ class MatchHandler(ProjHandler):
                     TAGS=Section.TAGS, proj=p, _id=str(p['_id']), pi=pi, max_page=max_page,
                     col_w=100 * 1000 // max(1, col_n) / 1000, all_toc=all_t, cur_toc=cur_toc,
                     is_owner=p['created_by'] == self.username, editable=editable)
+
+    def get_max_page(self, p, a):
+        return len(a['sections']) if self and len(a['sections']) > 3 else 0
 
     def finish(self, html=None):
         if html and b'width: 1%' in html:
@@ -89,10 +90,21 @@ class DownloadHtmlApi(MatchHandler):
 
     @auto_try
     def post(self, _id):
-        p = self.db.proj.find_one({'_id': ObjectId(_id)})
+        p = self.db.proj.find_one({'_id': ObjectId(_id)}, projection=dict(cols=1, toc_n=1))
         if not p or (p['cols'] < 2 and p['toc_n'] < 1):
             self.send_raise_failed('多栏对读或有科判的才需要下载')
         return MatchHandler.get(self, 'download', _id)
+
+    def get_max_page(self, p, a):
+        if p['cols'] < 2 and p['toc_n'] < 1:
+            self.send_raise_failed('多栏对读或有科判的才需要下载')
+        if len(a['sections']) > 5:
+            self.send_raise_failed('多页内容目前不能下载')
+        if a.get('toc'):
+            p['all_toc'] = p.get('all_toc', []) + [
+                dict(a_id=str(a['_id']), toc_i=i, **Proj.unpack_data(t, True))
+                for i, t in enumerate(a['toc'])]
+        return 0
 
 
 class ArticleHandler(BaseHandler):

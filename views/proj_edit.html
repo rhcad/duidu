@@ -211,7 +211,7 @@
   }
   function downloadHtml() {
     postApi(`/proj/download/{{_id}}`, {contentType: 'text/html; charset=utf-8'}, r => {
-      download(r, `{{proj['code']}}.html`)
+      download(r.replace(/"\/static/g, '"assets'), `{{proj['code']}}.html`)
     })
   }
 </script>

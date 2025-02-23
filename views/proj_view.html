@@ -101,52 +101,16 @@
   </div>
 </div>
 {% include _/base_foot.html %}
+<script src="{{static_url('js/proj.js')}}"></script>
 <script src="{{static_url('js/toc.js')}}"></script>
 <script>
-  function getParaInfo($p, defVal=null) {
-    const $c = $p.closest('.cell')
-    return Object.assign({
-      line: $p.data('line'), s_id: $p.data('s-id'),
-      a_i: $c.data('i'), a_id: $c.data('id'),
-      row_i: $c.closest('tr').data('row-i'),
-      toc_i: $p.data('toc-i'), toc_id: $p.data('toc-id'),
-    }, $p.hasClass('toc_row') ? {} : {s_i: $p.data('s-i')}, defVal || {})
-  }
-
-  function activatePara($p, selectTocNode=false) {
-    if (!$p.hasClass('active')) {
-      $('p.active').removeClass('active')
-      $p.addClass('active')
-    }
-    $('.cell.has-active').removeClass('has-active')
-    $p.closest('.cell').addClass('has-active')
-    if (selectTocNode && window.tocEnsureVisible) {
-      tocEnsureVisible(getParaInfo($p, {element: $p[0]}))
-    }
-  }
-
-  const _status = {}
   $(function () {
     $('.col-name,.original .del,.sec,.p-head').remove()
     $('.original:not(:has(.text))').hide()
-
-    $(document).on('click', 'p.text,.toc_row', e => {
-      const $p = $(e.target).closest('p')
-      activatePara($p, e.which === 1)
-      if (e.which === 1 && _status.p === $p[0]) {
-        if ($p.hasClass('text') && $p.height() > 50) {
-          $p.toggleClass('ellipsis-n')
-        } else if ($p.hasClass('toc_row') && ($p.height() > 40 || $p.hasClass('ellipsis'))) {
-          $p.toggleClass('ellipsis-n').toggleClass('ellipsis')
-        }
-      }
-      _status.p = $p[0]
-    }).on('click', '.toggle-col', e => {
-      const $li = $(e.target).closest('.toggle-col'), i = $li.data('i')
-      $('.columns-p').toggleClass(`hide-col-${i}`)
-      $(`.toggle-col[data-i="${i}"]`).toggleClass('active')
-    })
   })
+  {% if mode == 'download' %}
+  window.all_toc = {% raw proj.get('all_toc', []) %}
+  {% end %}
   {% if all_toc %}tocLoad('1', `{{ all_toc[toc_i]['a_id'] }}`, `{{ all_toc[toc_i]['toc_i'] }}`){% end %}
   {% if len(all_toc)>1 %}tocLoad('2', `{{ all_toc[toc_j]['a_id'] }}`, `{{ all_toc[toc_j]['toc_i'] }}`){% end %}
 </script>
