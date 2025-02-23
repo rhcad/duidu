@@ -18,7 +18,7 @@
     --body-color: #aaa;
     --placeholder-color: #666;
     --hover-color: #69c;
-    --selected-color: #99f;
+    --selected-color: #9cf;
     --verse-color: #acc;
     --key-gradient: linear-gradient(-26.5deg, #565872, #31355b);
     --key-shadow: inset 0 -2px 0 0 #282d55, inset 0 0 1px 1px #51577d, 0 2px 2px 0 rgba(3, 4, 9, .3);
@@ -122,10 +122,11 @@ body, .form-control, textarea,
         color: #aaa;
     }
     [data-theme="dark"] a { color: #aaa; }
-    [data-theme="dark"] table a { color: #aae; }
+    [data-theme="dark"] table a,
+    [data-theme="dark"] .panel a { color: #aae; }
 
     [data-theme="dark"] code {
-        color: rgb(201, 209, 217);;
+        color: rgb(201, 209, 217);
         background-color: rgba(110, 118, 129, 0.4);
         border-color: transparent;
     }

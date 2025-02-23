@@ -30,8 +30,9 @@
     .text.del { text-decoration: line-through; }
     .original { border-top: 2px solid red; }
     .sel-tip {
-        position: fixed; margin-top: -25px; padding: 5px; min-width: 100px;
-        font-size: .8em; text-align: center; display: none;
+        position: fixed; margin-top: -25px; padding: 5px 10px; min-width: 100px;
+        font-size: .8em; text-align: center; display: none; top: 80px;
+        border: 1px solid var(--border-color);
         background-color: var(--body-background-color); color: var(--hover-color);
     }
     .sel-tip b { font-size: 1.1em; }
@@ -73,7 +74,7 @@
   </li>
 </ul>
 
-<div class="app">
+<div class="app proj-{{mode}}">
   {% module TopNav('段落对照', prev=dict(cls='name', url='/proj/edit/' + _id, title=proj['short_name']), themes=False) %}
   <div class="container-fluid m-t-n10">
     <div class="app-body">

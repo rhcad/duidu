@@ -102,7 +102,7 @@ class MergeRowApi(ProjBaseApi):
     def post(self):
         d = self.data()
         proj = self.get_project(d['proj_id'])
-        self.editable(proj, verify=True)
+        self.verify_editable(proj)
 
         from_ri = d.pop('from_row', 0)  # extract row
         from_r = from_ri and self.get_merged_row(proj, from_ri)
@@ -110,8 +110,8 @@ class MergeRowApi(ProjBaseApi):
         sections = self.get_sections(s['s_id'] for s in d['rows'])
         end_row = proj['rows'][-1] if proj['rows'] else {}
         end_status = dict(others=0, cur_col='')
-        new_row, n_rows = dict(row_i=1 + max([r['row_i'] for r in proj['rows']])), []
-        rest_row = from_r and dict(row_i=2 + max([r['row_i'] for r in proj['rows']]))
+        new_row, n_rows = dict(row_i=1 + max([r['row_i'] for r in proj['rows']] + [0])), []
+        rest_row = from_r and dict(row_i=2 + max([r['row_i'] for r in proj['rows']] + [0]))
 
         for key, c in d['columns'].items():
             if not c:  # 此栏没有新加的段落
@@ -189,12 +189,12 @@ class MoveApi(ProjBaseApi):
         d = self.data()
         sel = d['sel'] if d['up'] else list(reversed(d['sel']))
         proj = self.get_project(sel[0]['proj_id'])
-        self.editable(proj, verify=True)
+        self.verify_editable(proj)
 
         sections, is_extract = {}, d['to_row'] == 'new'
         from_r = self.get_merged_row(proj, d['from_row'])
         if d['to_row'] == 'new':
-            d['to_row'] = 1 + max([r['row_i'] for r in proj['rows']])
+            d['to_row'] = 1 + max([r['row_i'] for r in proj['rows']] + [0])
             to_r = {'row_i': d['to_row'], str(d['col_i']): []}
             proj['rows'].insert(proj['rows'].index(from_r) + 1, to_r)
         else:
@@ -233,7 +233,7 @@ class MarkDelApi(ProjBaseApi):
     def post(self):
         sel = self.data()
         proj = self.get_project(sel[0]['proj_id'])
-        self.editable(proj, verify=True)
+        self.verify_editable(proj)
 
         sections = {}
         for r in sel:
@@ -286,7 +286,7 @@ class FixRowsApi(ProjBaseApi):
     @auto_try
     def post(self, p_id):
         proj = self.get_project(p_id)
-        self.editable(proj, verify=True)
+        self.verify_editable(proj)
 
 
 class TocBaseApi(ProjBaseApi):
@@ -390,7 +390,7 @@ class TocImportApi(TocAddApi):
     def post(self):
         d = self.data()
         p = self.get_project(d.pop('proj_id'))
-        self.editable(p, verify=True)
+        self.verify_editable(p)
         a = self.get_article(d['a_id'])
 
         content = re.split(r'\s*\n+\s*', d['text'].strip())
@@ -456,7 +456,7 @@ class TocEditApi(TocBaseApi):
     def post(self):
         d = self.data()
         p = self.get_project(d.pop('proj_id'))
-        self.editable(p, verify=True)
+        self.verify_editable(p)
         a = self.get_article(d['a_id'])
         toc, t_r = Toc.get_toc(a, d['toc_i'], int(d.get('toc_id') or 0))
 

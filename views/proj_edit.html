@@ -120,7 +120,19 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">第三步 合并注解</h3>
+        <div class="panel-title">第三步 合并注解
+          <div class="dropdown pull-right">
+            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              导入 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+              <li><a data-toggle="modal" data-target="#importTextModal2">输入文本内容</a></li>
+              <li><a data-toggle="modal" data-target="#importCBetaModal2">从 CBETA 导入</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a data-toggle="modal" data-target="#appendTextModal2">追加文本内容</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="panel-body">
         将论典、注疏、讲解等注解按需合并到上面的经典内容中。
@@ -138,7 +150,7 @@
     </div>
   </div>
 </div>
-{% set codes = [(c['code'], c['code'] + ': ' + c['name']) for c in proj.get('columns', [])] %}
+{% set codes = [(c['code'], c['code'] + ': ' + c['name'], c.get('notes',[])) for c in proj.get('columns', [])] %}
 {% include modal/clone_proj.html %}
 {% include modal/import_text.html %}
 {% include modal/import_cb.html %}
@@ -189,14 +201,36 @@
       postApi('/proj/import/text', Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
     }
   }
+  function onSubmitImportNotesText($modal) {
+    const fields = ['base', 'code', 'name', 'type', 'content', 'tag'],
+      d = getModalData($modal, fields, 'a')
+    if (d) {
+      postApi('/proj/import/text', Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
+    }
+  }
   function onSubmitAppendText($modal) {
     const d = getModalData($modal, ['code', 'name', 'content'], 's')
     if (d) {
       postApi('/proj/import/text', Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
     }
   }
+  function onSubmitAppendNotesText($modal) {
+    const d = getModalData($modal, ['code2', 'name', 'content'], 's')
+    if (d) {
+      postApi('/proj/import/text', Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
+    }
+  }
   function onSubmitImportCBeta($modal) {
     const d = getModalData($modal, ['code', 'vol', 'type', 'short_name', 'colspan'], 'a')
+    if (d) {
+      postApi('/proj/import/cb', Object.assign(d, {proj_id: '{{_id}}'}), res => {
+        if (!res.data.ignore) showSuccess('', '导入成功', reloadPage)
+        else {showError('部分导入', res.data.ignore, reloadPage)}
+      })
+    }
+  }
+  function onSubmitImportNotesCBeta($modal) {
+    const d = getModalData($modal, ['base', 'code', 'vol', 'type', 'tag'], 'a')
     if (d) {
       postApi('/proj/import/cb', Object.assign(d, {proj_id: '{{_id}}'}), res => {
         if (!res.data.ignore) showSuccess('', '导入成功', reloadPage)

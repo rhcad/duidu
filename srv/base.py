@@ -17,12 +17,14 @@ def on_exception(self, e):
     if not isinstance(e, Finish):
         _, _, tb = sys.exc_info()
         tb_info = traceback.extract_tb(tb)
-        filename, line, f, text = tb_info[-1]
-        if isinstance(e, PyMongoError):
+        fn, line, f, text = tb_info[-1]
+        if isinstance(e, AssertionError):
+            msg = '内部错误 ' + (str(e) if e.args else f"{path.basename(fn).split('.')[0]} L{line}")
+        elif isinstance(e, PyMongoError):
             msg = '数据库错误 ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e))
         else:
             msg = e.__class__.__name__ + ' ' + str(e)
-        self.log('{0} {1}, in {2}: {3}'.format(path.basename(filename), line, f, msg), 'E')
+        self.log('{0} {1}, in {2}: {3}'.format(path.basename(fn), line, f, msg), 'E')
         BaseHandler.send_error(self, 500, reason=msg)
 
 
