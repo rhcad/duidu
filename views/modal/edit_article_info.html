@@ -10,6 +10,7 @@
               <input type="text" class="form-control" readonly name="a-code" value="{{page['code']}}">
             </div>
           </div>
+          {% if page['short_name'] %}
           <div class="row">
             <h4 class="col-sm-2 control-label">对读简称</h4>
             <div class="col-sm-10">
@@ -17,6 +18,7 @@
                      minlength="2" maxlength="10" placeholder="2~10个汉字，分栏对读区分用">
             </div>
           </div>
+          {% end %}
           <div class="row">
             <h4 class="col-sm-2 control-label">经典名称</h4>
             <div class="col-sm-10">
@@ -30,12 +32,14 @@
               {% module RadioGroup(Article.get_field('type'), page, True) %}
             </div>
           </div>
+          {% if page['short_name'] %}
           <div class="row">
             <h4 class="col-sm-2 control-label">对读宽度</h4>
             <div class="col-sm-10">
               {% module RadioGroup(Article.get_field('colspan'), page) %}
             </div>
           </div>
+          {% end %}
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>

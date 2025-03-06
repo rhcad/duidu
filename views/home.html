@@ -6,10 +6,7 @@
   {% include _/base_head.html %}
   <style>
     @media (max-width:680px) {
-        .cols, .toc_n, .char_k, .updated { display: none; }
-    }
-    @media (max-width:550px) {
-        .code { display: none; }
+        .code, .cols, .toc_n, .note_n, .char_k, .updated { display: none; }
     }
   </style>
 </head>
@@ -22,6 +19,7 @@
       <a data-toggle="modal" data-target="#newProjModal" class="btn btn-default">创建项目</a>
     </div>
     {% module Table(model, rows) %}
+    <p class="gray text-right" style="opacity: .3"><small>v{{handler.app.version}}</small></p>
   </div>
 </div>
 {% include modal/new_proj.html %}

@@ -19,13 +19,17 @@ body {
 .float-left { float: left; }
 .float-right { float: right; }
 
-.gray { color: gray; user-select: none; }
-.no-select, .btn, .dropdown, .alert { user-select: none; }
+.gray { color: gray; }
+.no-select, .gray, .btn, .dropdown, .alert {
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none; }
 .no-border { border: none; }
 .no-pointer, .disabled a { pointer-events: none; }
 
-a { text-decoration: none; }
-[onclick], li:not(.disabled)>a { cursor: pointer; }
+a { text-decoration: none !important; }
+[onclick], li:not(.disabled)>a, .note-row-head, .note-row-end { cursor: pointer; }
 
 input, .btn, input:focus, .btn:focus { outline: none; }
 input[type="submit"] { border: none; }
@@ -53,36 +57,36 @@ input[type="submit"] { border: none; }
   }
 }
 
-.p-0 { padding: 0; }
-.p-10 { padding: 10px; }
-.p-20 { padding: 20px; }
+.p-0 { padding: 0 !important; }
+.p-10 { padding: 10px !important; }
+.p-20 { padding: 20px !important; }
 
-.m-0 { margin: 0; }
-.m-5 { margin: 5px; }
-.m-10 { margin: 10px; }
-.m-20 { margin: 20px; }
+.m-0 { margin: 0 !important; }
+.m-5 { margin: 5px !important; }
+.m-10 { margin: 10px !important; }
+.m-20 { margin: 20px !important; }
 
-.m-t-0 { margin-top: 0; }
-.m-t-5 { margin-top: 5px; }
-.m-t-10 { margin-top: 10px; }
-.m-t-15 { margin-top: 15px; }
-.m-t-20 { margin-top: 20px; }
-.m-t-n5 { margin-top: -5px; }
-.m-t-n10 { margin-top: -10px; }
-.m-t-n20 { margin-top: -20px; }
+.m-t-0 { margin-top: 0 !important; }
+.m-t-5 { margin-top: 5px !important; }
+.m-t-10 { margin-top: 10px !important; }
+.m-t-15 { margin-top: 15px !important; }
+.m-t-20 { margin-top: 20px !important; }
+.m-t-n5 { margin-top: -5px !important; }
+.m-t-n10 { margin-top: -10px !important; }
+.m-t-n20 { margin-top: -20px !important; }
 
-.m-b-0 { margin-bottom: 0; }
-.m-b-5 { margin-bottom: 5px; }
-.m-b-10 { margin-bottom: 10px; }
-.m-b-15 { margin-bottom: 15px; }
-.m-b-20 { margin-bottom: 20px; }
+.m-b-0 { margin-bottom: 0 !important; }
+.m-b-5 { margin-bottom: 5px !important; }
+.m-b-10 { margin-bottom: 10px !important; }
+.m-b-15 { margin-bottom: 15px !important; }
+.m-b-20 { margin-bottom: 20px !important; }
 
-.m-l-0 { margin-left: 0; }
-.m-l-5 { margin-left: 5px; }
-.m-l-10 { margin-left: 10px; }
-.m-r-0 { margin-right: 0; }
-.m-r-5 { margin-right: 5px; }
-.m-r-10 { margin-right: 10px; }
+.m-l-0 { margin-left: 0 !important; }
+.m-l-5 { margin-left: 5px !important; }
+.m-l-10 { margin-left: 10px !important; }
+.m-r-0 { margin-right: 0 !important; }
+.m-r-5 { margin-right: 5px !important; }
+.m-r-10 { margin-right: 10px !important; }
 
 .modal-body h4 { font-size: 16px; font-weight: 400; white-space: nowrap; }
 .modal-body input + label { margin-right: 8px; }
@@ -100,23 +104,27 @@ input[type="submit"] { border: none; }
 .panel-body p:last-child { margin-bottom: 0; }
 .info-span { margin-right: 15px; display: inline-block; white-space: nowrap; }
 .panel-title .dropdown.pull-right { margin-top: -6px; margin-right: -10px; }
+.panel-title .btn { border: none; }
 
 .app-main { margin-top: 10px; }
 .table-p { max-width: 100%; overflow-x: auto; }
 th { min-width: 3em; }
 th.created_by { min-width: 4em; }
+.table-p > table { border-collapse: separate; }
 .app .table > tbody > tr > td { max-width: 9em; }
 .app .table > tbody > tr > td.code,
 .app .table > tbody > tr > td.created_by { max-width: 5.5em; }
-.ellipsis, td.code, td.created_by {
+li.name>a { max-width: 10em; }
+.ellipsis, td.code, td.created_by, li.name>a {
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .app td p:last-child { margin-bottom: 0; }
 td.created, td.updated { font-size: .9em; min-width: 5em; }
-.table .name { min-width: 5em; }
+.table .name, .table .base { min-width: 5em; }
+.table .actions { text-align: center; }
 .table .actions .btn { padding: 2px 5px; margin-bottom: 2px; }
 .users > span + span { margin-left: 5px; }
 
-.ellipsis-n, td.name > div, td.comment > div {
+.ellipsis-n, td.name > div, td.base > div, td.comment > div {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -152,3 +160,45 @@ p.text { text-indent: 2em; }
 @media (min-width:600px) {
     .text.verse { margin-left: 2em; }
 }
+
+.note-tag::before { content: "〔" attr(data-tag) "〕"; font-weight: bold; color: var(--hover-color); }
+.note-tag[data-pn]::before { content: "〔" attr(data-pn) "〕"; }
+.note-tag.expanded.active-note::before { color: var(--selected-color); }
+.note-tag.inline.expanded { padding: .4em .2em; margin-left: .2em; top: unset; font-size: 90%; font-weight: 400; }
+.note-tag.inline.expanded::before { display: none; }
+.note-tag.inline.expanded::after { content: "〔" attr(data-text) "〕" attr(data-source); }
+
+.note-text, .note-tag.inline.expanded::after {
+    color: var(--note-text-color);
+    font-family: STKaiti, "Kaiti SC", 楷体, 楷体_GB2312, KaiTi, KaiTi_GB2312, DFKai-SB;
+}
+.text .hi { color: var(--note-text-color); padding: .3em 0; }
+.cell-l .text span.hi { text-decoration: underline; text-decoration-color: var(--placeholder-color); }
+
+.note-p {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: .5em;
+  margin-bottom: 6px;
+  text-indent: 0;
+  font-size: .9em;
+  -moz-box-shadow: 1px 1px 1px var(--border-color);
+       box-shadow: 1px 1px 1px var(--border-color);
+       transition: background-color 200ms ease-out,display 200ms ease-out;
+}
+.note-p:not(.expanded) { display: none; }
+@media print {
+  .note-p {padding: .2em;}
+}
+
+.note-row-head[data-pn]::before { content: "〔" attr(data-pn) "〕"; color: gray; }
+.note-row-end[data-tag]::after { content: "〔" attr(data-tag) "〕"; color: gray; }
+.note-row-head[data-pn].active-note::before { color: var(--selected-color); font-weight: bold; }
+
+.note-pn + .note-pn { border-top: 1px solid var(--border-color); }
+.note-item + .note-item { border-top: 1px dotted var(--border-color); }
+.note-text.ellipsis-n { -webkit-line-clamp: 2; }
+.note-text.ellipsis-n:nth-child(n+5) { display: none; }
+
+.note-p > .close { float: right; margin-top: -24px; margin-right: -8px; font-size: 15px; }
+.note-p > .close::after { content: "✕"}

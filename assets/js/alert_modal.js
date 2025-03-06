@@ -45,11 +45,10 @@ function ajaxApi(url, type, data, success_callback, error_callback) {
 
   url = url.substr(0, 4) === '/api' ? url : '/api' + url;
   const $modal = $('.modal-open .modal-content,.swal2-popup,.wait').addClass('wait')
-  const on_error = obj => console.log(obj) || error_callback(obj)
   const on_success = data => {
     $modal.removeClass('wait')
     if (data.status === 'failed') {
-      on_error(data)
+      error_callback(data)
     } else {
       $.extend(data, data.data && typeof data.data === 'object' && !Array.isArray(data.data) ? data.data : {})
       success_callback(data)
@@ -67,29 +66,37 @@ function ajaxApi(url, type, data, success_callback, error_callback) {
       $modal.removeClass('wait')
       if (code >= 200 && code <= 299) {
         try {
-          const data = JSON.parse(xhr.responseText)
-          if (data && typeof data.status === 'string') {
-            success_callback(data)
+          if (contentType && !/json/.test(contentType)) {
+            return success_callback(xhr.responseText)
+          }
+          const d = JSON.parse(xhr.responseText)
+          if (d && typeof d.status === 'string') {
+            success_callback(d)
             return
           }
         } catch (e) {}
         success_callback({})
       } else {
-        on_error({code: code, message: `网络访问失败 (${code})`})
+        error_callback({code: code, message: `网络访问失败 (${code})`})
       }
     }
   }
 
-  const file = data.file, dataType = data.dataType
+  const file = data.file || data instanceof(FormData) && data.get('file')
+  const dataType = data.dataType, contentType = data.contentType
   delete data.file
   delete data.dataType
+  delete data.contentType
   if (file) {
-    params['data'] = data
-    params['processData'] = false
-    params['contentType'] = false
+    params.data = data
+    params.processData = false
+    params.contentType = false
   } else {
-    params['data'] = $.param(data)
-    params['dataType'] = dataType || 'json'
+    params.data = $.param(data)
+    params.dataType = dataType || 'json'
+    if (contentType) {
+      params.contentType = contentType
+    }
   }
 
   return $.ajax(params)

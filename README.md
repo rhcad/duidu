@@ -23,3 +23,10 @@ taskkill -F -PID 行末的PID号
 # MacOS
 kill -9 `sudo lsof -i:8000 | grep Python | awk -F" " {'print $2'}`
 ```
+
+## 参考资料
+- [jQuery contextMenu](https://swisnl.github.io/jQuery-contextMenu/docs.html)
+- [Bootstrap 3.x](https://v3.bootcss.com/components/)
+- [jsTree](https://www.bookstack.cn/read/jsTree-doc/)
+- [SweetAlert2](https://sweetalert2.github.io)
+- [Tornado](https://www.osgeo.cn/tornado/)

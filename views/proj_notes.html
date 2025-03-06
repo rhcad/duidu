@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>{{proj['code']}} 合并注解</title>
+  {% include _/base_head.html %}
+  <link href="{{static_url('css/proj-match.css')}}" rel="stylesheet"/>
+  <link href="{{static_url('menu/jquery.contextMenu.css')}}" rel="stylesheet"/>
+  {% if all_toc %}
+  <link rel="stylesheet" href="{{static_url('jstree/jstree.min.css')}}"/>
+  <script src="{{static_url('jstree/jstree.min.js')}}"></script>
+  {% end %}
+  <style>
+    .table-p { display: flex; }
+    .table-p > :first-child { flex: 2; font-size: 110%; }
+    .table-p > :last-child { flex: 3; }
+    @media (max-width:900px) {
+        .table-p > :last-child { flex: 2; }
+    }
+    @media (max-width:500px) {
+        .table-p > :first-child { flex: 9; }
+    }
+    .cell.has-active { border-color: var(--border-color); }
+    p.has-sel.ellipsis-n { -webkit-line-clamp: unset; }
+    p.active { color: var(--body-color) !important; }
+    p.active:not(.has-sel) { border: 1px dotted var(--border-color); }
+
+    .sec { margin: 0; padding: 5px; }
+    .sec.gray { font-style: italic; }
+    p .selected { padding: 4px 0; }
+    p .used { text-decoration: underline; text-decoration-color: var(--placeholder-color); }
+
+    @media (pointer: fine) {
+        .note-tag:hover,.used:hover { cursor: context-menu; }
+        .used:hover { color: var(--hover-color); }
+        .note-tag:hover::before { text-decoration: underline; }
+    }
+    .used.context-menu-active, .selected, .note-tag.active {
+        color: var(--selected-color); font-weight: bold; }
+    .swal2-shown .selected:not(.active),.active:not(.selected) { font-weight: normal; }
+    .error { color: red; font-weight: bold; }
+    .text.del { text-decoration: line-through; }
+  </style>
+</head>
+
+<body data-proj-id="{{_id}}" class="{{'show-sidebar' if all_toc else ''}}">
+<ul class="nav-more">
+  <li class="dropdown m-l-5">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+       aria-haspopup="true" aria-expanded="false">显示 <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      <li class="toggle-alert"><a>显示提示</a></li>
+      <li><a onclick="$('body').toggleClass('hide-navbar')" title="切换是否隐藏顶部导航条">隐藏导航条</a></li>
+      <li><a id="expand-all" onclick="$('.note-p,.note-tag').toggleClass('expanded', !$('.note-tag').hasClass('expanded'))">展开所有注解</a></li>
+      {% if all_toc %}
+      <li role="separator" class="divider"></li>
+      <li class="toggle-sidebar active" onclick="$('body').toggleClass('show-sidebar');$(this).toggleClass('active')"><a>显示科判栏</a></li>
+      <li class="toggle-sidebar-width" onclick="$('.sidebar').toggleClass('wide')"><a>切换宽度</a></li>
+      {% end %}
+      {% if len(all_toc)>1 %}
+      <li class="toggle-sidebar active" onclick="$('.sidebar').toggleClass('toc-n');$(this).toggleClass('active')"><a>显示第二科判</a></li>
+      {% end %}
+      <li role="separator" class="divider"></li>
+      <li><a id="theme-default" title="切换为普通外观">普通外观</a></li>
+      <li><a id="theme-warm" title="切换为浅色外观、护眼色">护眼色</a></li>
+      <li><a id="theme-dark" title="切换为深色外观">深色外观</a></li>
+    </ul>
+  </li>
+</ul>
+
+<div class="app proj-{{mode}}">
+  {% module TopNav('合并注解', prev=dict(cls='name', url='/proj/edit/' + _id, title=proj['short_name']), themes=False) %}
+  <div class="container-fluid m-t-n10">
+    <div class="app-body">
+      {% if all_toc %}
+      {% set toc_i = ([i for i,a in enumerate(all_toc) if a['new']] or [
+        i for i, a in enumerate(all_toc) if a['cur']] or [0])[0] %}
+      <div class="sidebar toc-{{'n' if len(all_toc)>1 else '1'}}">
+        <div class="toc-tree-p" data-ext="1">
+          {% module TocDropdown(all_toc, toc_i) %}
+          <div id="toc-tree1" class="toc-tree"><div></div></div>
+        </div>
+        {% if len(all_toc)>1 %}
+        {% set toc_j = [i for i,a in enumerate(all_toc) if i!=toc_i][0] %}
+        <div class="toc-tree-p" data-ext="2">
+          {% module TocDropdown(all_toc, toc_j, '1') %}
+          <div id="toc-tree2" class="toc-tree"><div></div></div>
+        </div>
+        {% end %}
+      </div>
+      {% end %}
+      <div class="columns-p swal-autoscroll">
+        <div class="alert alert-info alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <strong>提示：</strong> 在左栏中 点击段落 或 拉选文本，标记待注解；<br/>
+          然后在右栏中 点击段落 或 拉选文本（可选不连续的多段，点击清除，<span class="btn-key">Shift</span>点击则多选）；<br/>
+          然后 <span class="btn-key">回车</span> 添加注解。单行简短文本的注解默认为 行间注，多行或超过200字为 段尾注。<br/>
+          <span class="btn-key">Esc</span>或跨栏选择可清除标记。可点鼠标右键菜单或长按执行这些快捷键功能。
+        </div>
+        <div class="table-p">
+          <div class="cell cell-l no-ellipsis">
+            {% set c = proj['columns'][0] %}
+            {% for r in proj.get('rows', []) %}
+            {% module SectionBlock(c, r['row_i']) %}
+            {% end %}
+            {% module SectionBlock(c) %}
+          </div>
+          <div class="cell cell-r">
+            <div class="sel-tip no-select"></div>
+            {% module SectionBlock(proj['columns'][1]) %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  window.nA = {% raw note_a %}
+  window.notes = {% raw notes %}
+  window.editable = {{int(editable)}}
+</script>
+{% include _/base_foot.html %}
+<script src="{{static_url('menu/jquery.contextMenu.js')}}"></script>
+<script src="{{static_url('js/proj.js')}}"></script>
+<script src="{{static_url('js/toc.js')}}"></script>
+<script src="{{static_url('js/notes.js')}}"></script>
+<script src="{{static_url('js/merge-notes.js')}}"></script>
+<script>
+  {% if all_toc %}tocLoad('1', `{{ all_toc[toc_i]['a_id'] }}`, `{{ all_toc[toc_i]['toc_i'] }}`){% end %}
+  {% if len(all_toc)>1 %}tocLoad('2', `{{ all_toc[toc_j]['a_id'] }}`, `{{ all_toc[toc_j]['toc_i'] }}`){% end %}
+</script>
+</body>
+</html>

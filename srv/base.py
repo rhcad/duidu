@@ -17,13 +17,16 @@ def on_exception(self, e):
     if not isinstance(e, Finish):
         _, _, tb = sys.exc_info()
         tb_info = traceback.extract_tb(tb)
-        filename, line, f, text = tb_info[-1]
-        if isinstance(e, PyMongoError):
+        fn, line, f, text = tb_info[-1]
+        if isinstance(e, AssertionError):
+            msg = '内部错误 ' + (str(e) if e.args else f"{path.basename(fn).split('.')[0]} L{line}")
+        elif isinstance(e, PyMongoError):
             msg = '数据库错误 ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e))
         else:
             msg = e.__class__.__name__ + ' ' + str(e)
-        self.log('{0} {1}, in {2}: {3}'.format(path.basename(filename), line, f, msg), 'E')
-        BaseHandler.send_error(self, 500, reason=msg)
+        self.log('{0} {1}, in {2}: {3}'.format(path.basename(fn), line, f, msg), 'E')
+        BaseHandler.send_error(self, 500, reason=msg,
+                               print_exc=not (isinstance(e, AssertionError) and e.args))
 
 
 def auto_try(func):
@@ -31,6 +34,17 @@ def auto_try(func):
 
     def wrapper(self, *args, **kwargs):
         try:
+            if self.request.method == 'GET' and self.URL.endswith('/@oid'):
+                short = self.get_argument('use_short', 0) or self.get_argument('add_short', 0)
+                if self.get_argument('use_short', 0):
+                    self._short = short
+                elif self.get_argument('add_short', 0):
+                    assert self.current_user.get('internal') and re.match('^[a-z0-9]+$', short)
+                    r = self.db.short.find_one({'id': short})
+                    assert r is None or r['url'] == self.request.path, 'used by ' + r['url']
+                    self.db.short.update_one({'id': short}, {'$set': dict(
+                        url=self.request.path, created=self.now())}, upsert=True)
+                    self._short = short
             return func(self, *args, **kwargs)
         except Exception as e:
             on_exception(self, e)
@@ -47,7 +61,7 @@ class BaseHandler(CorsMixin):
         self.db, self.config, self.app = app.db, app.config, app
         self.is_api = '/api/' in req.path
         self.util = util
-        self.username, self._data = '', None
+        self.username, self._short, self._data = '', '', None
         RequestHandler.__init__(self, app, req, **p)
 
     def set_default_headers(self):
@@ -64,7 +78,7 @@ class BaseHandler(CorsMixin):
                 seconds = (self.now() - time).seconds
             except (TypeError, ValueError, AttributeError):
                 seconds = 1e5
-            if seconds > (30 if self.request.method[0] in 'PD' else 300):
+            if self.ROLES and seconds > (30 if self.request.method[0] in 'PD' else 300):
                 u = self.db.user.find_one(dict(username=self.username))
                 if u and u['updated'] == self.current_user['updated']:
                     self.set_secure_cookie('user_time', self.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -127,10 +141,14 @@ class BaseHandler(CorsMixin):
         return kwargs
 
     def render(self, template_name, **kwargs):
-        kwargs = self.kwargs_render(**kwargs)
+        kwargs, req = self.kwargs_render(**kwargs), self.request
         if self._finished:
             return
         try:
+            if req.method == 'GET' and self.URL.endswith('/@oid'):
+                r = not self._short and self.db.short.find_one({'url': req.path})
+                self._short = r['id'] if r else self._short
+            kwargs['short_url'] = f'/s/{self._short}' if self._short else ''
             super(BaseHandler, self).render(template_name, **kwargs)
         except Exception as error:
             kwargs['message'] = '页面出错(%s): %s' % (template_name, str(error) or error.__class__.__name__)
@@ -155,7 +173,7 @@ class BaseHandler(CorsMixin):
         self.send_error(code, **kwargs)
 
     def send_error(self, code=500, **kwargs):
-        if code >= 500:
+        if code >= 500 and kwargs.get('print_exc', True):
             traceback.print_exc()
         msg = kwargs.get('message') or kwargs.get('reason') or self._reason
         exc = kwargs.get('exc_info')

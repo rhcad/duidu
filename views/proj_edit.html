@@ -14,6 +14,10 @@
         width: 8em;
         margin-bottom: 5px;
     }
+    .panel-body > .btn { padding: 2px 12px; font-size: 14px; margin-bottom: 4px; }
+    @media (max-width:600px) {
+        table .code { display: none; }
+    }
   </style>
 </head>
 
@@ -26,17 +30,24 @@
         <div class="panel-title">项目基本信息
           {% set op_cls = '' if is_owner else 'disabled' %}
           <div class="dropdown pull-right">
-            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            {% if editable or internal %}
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               操作 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
               <li class="{{op_cls}}"><a data-toggle="modal" data-target="#editProjModal">修改</a></li>
               <li class="{{op_cls}}"><a onclick="onChangeEditors()">设置协编</a></li>
               <li role="separator" class="divider"></li>
+              <li class="{{op_cls}}"><a data-toggle="modal" data-target="#importProjModal">导入</a></li>
+              <li class="{{'' if internal else op_cls}}"><a href="/api/proj/export/{{_id}}">导出</a></li>
+              <li role="separator" class="divider"></li>
               <li><a data-toggle="modal" data-target="#cloneProjModal">克隆</a></li>
               <li role="separator" class="divider"></li>
               <li class="{{op_cls}}"><a onclick="deleteProj()">删除</a></li>
             </ul>
+            {% else %}
+            <button class="btn btn-default" data-toggle="modal" data-target="#cloneProjModal">克隆</button>
+            {% end %}
           </div>
         </div>
       </div>
@@ -52,7 +63,9 @@
         {% if is_owner %}
         <span class="info-span"><span class="gray">协编：</span>
             {% module Users(proj['editors'], '可邀请其他人共同编辑和检查内容') %}</span>
-        {% elif current_user and current_user['username'] in proj['editors'] %}
+        {% elif current_user and '*' in proj['editors'] %}
+        <span class="info-span gray">所有人可修改</span>
+        {% elif current_user and current_user['username'] %}
         <span class="info-span gray">我 是本项目的协编</span>
         {% end %}
         <span class="info-span">{% module Users([proj['created_by']]) %}
@@ -66,7 +79,7 @@
       <div class="panel-heading">
         <div class="panel-title">第一步 获取原文
           <div class="dropdown pull-right">
-            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               导入 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
@@ -109,16 +122,34 @@
         {% if proj.get('columns') %}
         <a href="/proj/match/{{_id}}" class="btn btn-default">段落对照</a>
         {% end %}
-        <br>单一经典也可在此设置科判。可基于某栏经典插入或导入科判目录，同时支持多种科判。
+        <br>可基于某栏经典插入或导入科判目录，同时支持多种科判。
         {% if proj['toc_n'] %}已有 {{proj['toc_n']}} 种科判。{% end %}
       </div>
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">第三步 合并注解</h3>
+        <div class="panel-title">第三步 合并注解
+          <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              导入 <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu3">
+              <li><a data-toggle="modal" data-target="#importTextModal2">输入文本内容</a></li>
+              <li><a data-toggle="modal" data-target="#importCBetaModal2">从 CBETA 导入</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a data-toggle="modal" data-target="#appendTextModal2">追加文本内容</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="panel-body">
-        将论典、注疏、讲解等注解按需合并到上面的经典内容中。
+        <p>将论典、注疏、讲解等注解按需合并到上面的经典内容中。</p>
+        {% set notes = [] %}
+        {% for c in proj.get('columns', []) %}
+        {% for note in c.get('notes', []) %}
+        {% set _n = notes.append(dict(_id=str(note['a_id']),base=c['code']+' '+c['name'],**note)) %}
+        {% end %}{% end %}
+        {% if notes %}{% module Table(ProjNote, notes) %}{% end %}
       </div>
     </div>
     <div class="panel panel-default">
@@ -126,18 +157,20 @@
         <h3 class="panel-title">第四步 发布网页</h3>
       </div>
       <div class="panel-body">
-        将合并完成的页面发布分享，可下载为离线网页。
+        合并完成后，确认 <a href="/proj/view/{{_id}}" class="btn btn-default btn-sm">预览</a> 无误，就可
+        <a onclick="publish()" class="btn btn-default btn-sm">发布</a> 分享，
+        或 <a onclick="downloadHtml()" class="btn btn-default btn-sm">下载</a> 为离线网页。
       </div>
     </div>
   </div>
 </div>
-{% set codes = [(c['code'], c['code'] + ': ' + c['name']) for c in proj.get('columns', [])] %}
+{% set codes = [(c['code'], c['code'] + ': ' + c['name'], c.get('notes',[])) for c in proj.get('columns', [])] %}
 {% include modal/clone_proj.html %}
 {% include modal/import_text.html %}
 {% include modal/import_cb.html %}
 {% include modal/edit_proj_info.html %}
 {% include _/base_foot.html %}
-</body>
+<script src="{{static_url('js/download.js')}}"></script>
 <script>
   function onChangeEditors() {
     Swal2.fire({title: '设置协编', input: 'text',
@@ -158,6 +191,21 @@
       text: `确实要删除 “{{proj['name']}}” 项目及{{proj['cols']}}个原文吗？`,
       preConfirm: () => postApi(`/proj/del/{{_id}}`, {},
         res => window.location = res.redirect),
+    })
+  }
+  function importProj($modal) {
+    const zipFile = $modal.find('input')[0].files[0]
+    const formData = new FormData()
+
+    if (!zipFile || !/\.z(ip|db)$/.test(zipFile.name)) {
+      return
+    }
+    if (zipFile.size > (1024 * 1024 * 10)) {
+      return showError('文件大小不能超过10MB')
+    }
+    formData.append('file', zipFile)
+    postApi(`/proj/import/{{_id}}`, formData, res => {
+      showSuccess('导入成功', `已更新 ${res.data.length} 个项目和相关经典。`, reloadPage)
     })
   }
   function onSubmitCloneProj($modal) {
@@ -182,8 +230,21 @@
       postApi('/proj/import/text', Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
     }
   }
+  function onSubmitImportNotesText($modal) {
+    const fields = ['base', 'code', 'name', 'type', 'content', 'tag'],
+      d = getModalData($modal, fields, 'a')
+    if (d) {
+      postApi('/proj/import/text', Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
+    }
+  }
   function onSubmitAppendText($modal) {
     const d = getModalData($modal, ['code', 'name', 'content'], 's')
+    if (d) {
+      postApi('/proj/import/text', Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
+    }
+  }
+  function onSubmitAppendNotesText($modal) {
+    const d = getModalData($modal, ['code2', 'name', 'content'], 's')
     if (d) {
       postApi('/proj/import/text', Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
     }
@@ -197,5 +258,26 @@
       })
     }
   }
+  function onSubmitImportNotesCBeta($modal) {
+    const d = getModalData($modal, ['base', 'code', 'vol', 'type', 'tag'], 'a')
+    if (d) {
+      postApi('/proj/import/cb', Object.assign(d, {proj_id: '{{_id}}'}), res => {
+        if (!res.data.ignore) showSuccess('', '导入成功', reloadPage)
+        else {showError('部分导入', res.data.ignore, reloadPage)}
+      })
+    }
+  }
 </script>
+<script>
+  function publish() {
+    showError('TODO')
+  }
+  function downloadHtml() {
+    postApi(`/proj/download/{{_id}}`, {contentType: 'text/html; charset=utf-8'}, r => {
+      download(r.replace(/"\/static/g, '"assets')
+        .replace(/\n\s*\n/g, '\n').replace(/\?v=[^"]+/g, s => s.substring(0, 13)), `{{proj['code']}}.html`)
+    })
+  }
+</script>
+</body>
 </html>

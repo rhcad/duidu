@@ -3,6 +3,7 @@
 <script src="{{static_url('sweetalert/sweetalert2.js')}}"></script>
 <script src="{{static_url('js/alert_modal.js')}}"></script>
 <script>
+  {% if globals().get('short_url') %}history.replaceState(null, null, '{{short_url}}'){% end %}
   $('[oninvalid]').attr('oninput', 'setCustomValidity("")')
   $('.modal-body .required,.modal-body [required]').each((i, el) => {
     $(el).closest('.row').find('.control-label').addClass('required')

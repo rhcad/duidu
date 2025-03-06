@@ -48,10 +48,12 @@ def sub_prop(text, obj):
 
 
 def trim_bracket(text):
-    return re.sub(r'[（）【】()\[－，。：；？-].*$', '', text).strip()
+    return re.sub(r'[（）【】()\[－，。：；？-].*$', '', text or '').strip()
 
 
 def get_users(db, usernames):
+    if usernames == ['*']:
+        return [dict(username='*', nickname='所有人')]
     return usernames and list(db.user.find({'username': {'$in': usernames}},
                                            projection=dict(username=1, nickname=1)))
 

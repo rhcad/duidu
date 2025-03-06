@@ -9,18 +9,20 @@
     .section > .more { cursor: pointer; color: gray; }
     .section.hidden10 > .more::after { content: "更多(" attr(data-n) "段)..."; }
     .section:not(.hidden10) > .more::after { content: "折叠..."; }
+    .panel-heading .ellipsis { max-width: calc(100% - 150px); display: inline-block; }
+    .panel-heading .char-n { margin-top: -.4em; vertical-align: middle; display: inline-block; }
   </style>
 </head>
 
 <body>
 <div class="app">
-  {% module TopNav(page['code'], prev=dict(url='/proj/edit/' + str(page['proj_id']), title=page['proj_name'])) %}
+  {% module TopNav(page['code'], prev=dict(cls='name', url='/proj/edit/' + str(page['proj_id']), title=page['proj_name'])) %}
   <div id="content" class="container">
     <div class="panel panel-default">
       <div class="panel-heading">
         <div class="panel-title">经典基本信息
           <div class="dropdown pull-right">
-            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               操作 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
@@ -41,7 +43,7 @@
           <span class="info-span"><span class="gray">编码：</span>{{page['code']}}</span>
           <span class="info-span"><span class="gray">类型：</span>{{page['type']}}</span>
           <span class="info-span"><span class="gray">字数：</span>{{page['char_n']}}</span>
-          <span class="info-span"><span class="gray">对照简称：</span>{{page['short_name']}}</span>
+          {% if page['short_name'] %}<span class="info-span"><span class="gray">对照简称：</span>{{page['short_name']}}</span>{% end %}
           <span class="info-span"><span class="gray">经典名称：</span>{{page['name']}}</span>
         </p>
         <p>{% module Users([page['created_by']]) %} {{'克隆' if page.get('cloned') else '创建'}}于 <small>{{page['created']}}</small></p>
@@ -51,10 +53,10 @@
     <div class="panel panel-default" id="{{sec['_id']}}">
       <div class="panel-heading">
         <div class="panel-title">
-          <span class="gray m-r-10">{{i+1}}</span> <span>{{sec['name']}}</span>
-          <small class="m-l-10"><span class="gray">字数：</span>{{sec['char_n']}}</small>
+          <span class="ellipsis"><span class="gray m-r-10">{{i+1}}</span> <span>{{sec['name']}}</span></span>
+          <small class="m-l-10 char-n"><span class="gray">字数：</span>{{sec['char_n']}}</small>
           <div class="dropdown pull-right">
-            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               操作 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
@@ -76,7 +78,9 @@
 {% include _/base_foot.html %}
 <script>
   function onSubmitInfo($modal) {
-    const data = getModalData($modal, ['short_name', 'name', 'type', 'colspan'], 'a')
+    const data = getModalData($modal,
+      {% if page['short_name'] %}['short_name', 'name', 'type', 'colspan'], 'a')
+      {% else %}['name', 'type'], 'a'){% end %}
     if (data) {
       postApi('/article/info', Object.assign(data, {_id: '{{_id}}'}),
         res => res['modified'] ? reloadPage() : $modal.modal('hide'))

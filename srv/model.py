@@ -1,4 +1,5 @@
 import srv.util as _
+from bson.objectid import ObjectId
 
 
 class Model(object):
@@ -38,6 +39,11 @@ class Model(object):
             value = value in ['true', True, '1', 1, '是']
         elif ft == 'time' and isinstance(value, str):
             value = _.datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+        elif value and isinstance(value, list):
+            for i, v in enumerate(value):
+                value[i] = cls.pack_data(v, True)
+        elif value and isinstance(value, dict):
+            value = cls.pack_data(value, True)
         return value
 
     @classmethod
@@ -47,12 +53,21 @@ class Model(object):
             value = '是' if value in ['true', True, '1', 1, '是'] else '否'
         elif ft == 'time' and isinstance(value, _.datetime):
             value = value.strftime('%Y-%m-%d %H:%M')
+        elif isinstance(value, ObjectId):
+            value = str(value)
+        elif value and isinstance(value, list):
+            for i, v in enumerate(value):
+                value[i] = cls.unpack_data(v, True)
+        elif value and isinstance(value, dict):
+            value = cls.unpack_data(value, True)
         return value
 
     @classmethod
     def pack_data(cls, data, fields):
-        return dict((k, cls.convert_value(k, data[k])) for k in fields if data.get(k))
+        return dict((k, cls.convert_value(k, data[k])) for k in (
+            data.keys() if fields is True else fields) if data.get(k))
 
     @classmethod
     def unpack_data(cls, data, fields):
-        return dict((k, cls.render_value(k, data[k])) for k in fields if k in data)
+        return dict((k, cls.render_value(k, data[k])) for k in (
+            data.keys() if fields is True else fields) if k in data)

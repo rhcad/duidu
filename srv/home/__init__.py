@@ -1,3 +1,3 @@
-from . import view
+from . import view as v
 
-handlers = [view.HomeHandler, view.ClonedHandler, view.UsersHandler]
+handlers = [v.HomeHandler, v.ClonedHandler, v.UsersHandler, v.ShortHandler]

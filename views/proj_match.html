@@ -28,13 +28,7 @@
     .error { color: red; font-weight: bold; }
 
     .text.del { text-decoration: line-through; }
-    .original { border-top: 2px solid red; }
-    .sel-tip {
-        position: fixed; margin-top: -25px; padding: 5px; min-width: 100px;
-        user-select: none; font-size: .8em; text-align: center; display: none;
-        background-color: var(--body-background-color); color: var(--hover-color);
-    }
-    .sel-tip b { font-size: 1.1em; }
+    .original > td { border-top: 2px solid red !important; }
   </style>
 </head>
 
@@ -45,9 +39,11 @@
        aria-haspopup="true" aria-expanded="false">显示 <span class="caret"></span></a>
     <ul class="dropdown-menu">
       <li class="toggle-alert"><a>显示提示</a></li>
+      <li><a onclick="$('body').toggleClass('hide-navbar')" title="切换是否隐藏顶部导航条">隐藏导航条</a></li>
       {% if all_toc %}
-      <li class="toggle-sidebar active" onclick="$('body').toggleClass('show-sidebar');$(this).toggleClass('active')"><a>显示侧边栏</a></li>
-      <li onclick="$('.sidebar').toggleClass('wide')"><a>切换宽度</a></li>
+      <li role="separator" class="divider"></li>
+      <li class="toggle-sidebar active" onclick="$('body').toggleClass('show-sidebar');$(this).toggleClass('active')"><a>显示科判栏</a></li>
+      <li class="toggle-sidebar-width" onclick="$('.sidebar').toggleClass('wide')"><a>切换宽度</a></li>
       {% end %}
       {% if len(all_toc)>1 %}
       <li class="toggle-sidebar active" onclick="$('.sidebar').toggleClass('toc-n');$(this).toggleClass('active')"><a>显示第二科判</a></li>
@@ -72,14 +68,14 @@
   </li>
 </ul>
 
-<div class="app">
-  {% module TopNav('段落对照', prev=dict(url='/proj/edit/' + _id, title=proj['short_name']), themes=False) %}
+<div class="app proj-{{mode}}">
+  {% module TopNav('段落对照', prev=dict(cls='name', url='/proj/edit/' + _id, title=proj['short_name']), themes=False) %}
   <div class="container-fluid m-t-n10">
     <div class="app-body">
       {% if all_toc %}
       {% set toc_i = ([i for i,a in enumerate(all_toc) if a['new']] or [
         i for i, a in enumerate(all_toc) if a['cur']] or [0])[0] %}
-      <div class="sidebar bx-shadow toc-{{'n' if len(all_toc)>1 else '1'}}">
+      <div class="sidebar toc-{{'n' if len(all_toc)>1 else '1'}}">
         <div class="toc-tree-p" data-ext="1">
           {% module TocDropdown(all_toc, toc_i) %}
           <div id="toc-tree1" class="toc-tree"><div></div></div>
@@ -96,8 +92,8 @@
       <div class="columns-p swal-autoscroll">
         <div class="alert alert-info alert-dismissible" role="alert">
           <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <strong>提示：</strong> 在各栏中依次 点击、拉选 或 <span class="btn-key">Shift</span>+点击 要同组的段落，然后按 <span class="btn-key">Enter</span> 执行 合并为一组 操作。<br/>
-          如需 拆分段落 或 插入科判条目 可在段落上点鼠标右键菜单 或点击 <span class="p-head"></span> 段首标记。<br/>
+          <strong>提示：</strong> 在各栏中依次 点击、拉选 或 <span class="btn-key">Shift</span>+点击 要同组的段落，按 <span class="btn-key">回车</span> 合并为一组。<br/>
+          如需 拆分段落 或 插入科判条目 可在段落上点鼠标右键菜单或长按 或点击 <span class="p-head"></span> 段首标记。<br/>
           除“合并为一组”外其余项仅对当前单元格中的选择有效，<span class="btn-key">Esc</span>或跨栏选择可清除选择。
         </div>
         {% if max_page %}{% module Pager(pi, max_page, 'm-t-0 m-r-10 m-b-5') %}{% end %}
@@ -112,7 +108,7 @@
         <tr class="original columns{{' single-article' if len(proj['columns']) == 1 else ''}}" data-row-i="0">
           {% for i, c in enumerate(proj['columns']) %}
           <td class="cell" colspan="{{ c.get('colspan', 1) }}" data-i="{{i}}" data-id="{{c['a_id']}}" data-toc-i="{{c.get('toc_i','')}}">
-            <div class="sel-tip" data-i="{{i}}">选中</div>
+            <div class="sel-tip no-select" data-i="{{i}}">选中</div>
             {% module SectionBlock(c) %}
           </td>{% end %}
         </tr>
@@ -122,9 +118,10 @@
     </div>
   </div>
 </div>
-<script>window.tags = {% raw TAGS %}; window.editable = {{int(editable)}};</script>
+<script>window.p_tags = {% raw P_TAGS %}; window.editable = {{int(editable)}};</script>
 {% include _/base_foot.html %}
 <script src="{{static_url('menu/jquery.contextMenu.js')}}"></script>
+<script src="{{static_url('js/proj.js')}}"></script>
 <script src="{{static_url('js/toc.js')}}"></script>
 <script src="{{static_url('js/proj-match.js')}}"></script>
 <script src="{{static_url('js/download.js')}}"></script>

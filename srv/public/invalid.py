@@ -1,12 +1,13 @@
 import re
 from srv.base import BaseHandler, PyMongoError
 
-re_err = re.compile(r'\.(yml|yaml|env|git|json|secret)|'
+re_err = re.compile(r'\.(yml|yaml|env|git|json|secret|git)|setup\.php|webdb|dbadmin|'
                     r'(config|settings|credential|secrets)\.js', re.I)
 
 
 class Page404Handler(BaseHandler):
     """404页面"""
+    URL = '/~'
 
     def prepare(self):
         pass

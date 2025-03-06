@@ -19,6 +19,7 @@ class SplitApi(ProjBaseApi):
         proj, sec, rows, row = self.get_one_row(d)
         if d['old_text'] != row['text']:
             self.send_raise_failed('行内容不匹配，请刷新页面')
+        self.verify_no_note(self, proj, d)
         assert not re_cr.search(row['text'])
         from_r = self.get_merged_row(proj, row.get('row_i'))
         from_cell = from_r and from_r[str(d['a_i'])]
@@ -56,6 +57,15 @@ class SplitApi(ProjBaseApi):
                 rows=proj['rows'], updated=self.now())})
         self.send_success()
 
+    @staticmethod
+    def verify_no_note(self, p, d):
+        line = int(d['line'])
+        for nr in p.get('notes', []):
+            for key in ['left', 'right']:
+                for r in nr[key]:
+                    if r['s_id'] == d['s_id'] and r['line'] == line:
+                        self.send_raise_failed('此段已关联注解')
+
 
 class MergeUpApi(ProjBaseApi):
     """合并段落到上一段"""
@@ -70,6 +80,7 @@ class MergeUpApi(ProjBaseApi):
         assert now_r and prev_r and ri + 1 == rows.index(now_r), '参数错误'
         if now_r.get('toc_ids'):
             self.send_raise_failed('需要解除科判条目才可合并此段')
+        SplitApi.verify_no_note(self, proj, d['info'])
 
         from_r = self.get_merged_row(proj, now_r.get('row_i'))
         from_cell = from_r and from_r[str(d['info']['a_i'])]
@@ -100,18 +111,15 @@ class MergeRowApi(ProjBaseApi):
 
     @auto_try
     def post(self):
-        d = self.data()
-        proj = self.get_project(d['proj_id'])
-        self.editable(proj, verify=True)
-
+        d, proj = self.get_project_edit()
         from_ri = d.pop('from_row', 0)  # extract row
         from_r = from_ri and self.get_merged_row(proj, from_ri)
 
         sections = self.get_sections(s['s_id'] for s in d['rows'])
         end_row = proj['rows'][-1] if proj['rows'] else {}
         end_status = dict(others=0, cur_col='')
-        new_row, n_rows = dict(row_i=1 + max([r['row_i'] for r in proj['rows']])), []
-        rest_row = from_r and dict(row_i=2 + max([r['row_i'] for r in proj['rows']]))
+        new_row, n_rows = dict(row_i=1 + max([r['row_i'] for r in proj['rows']] + [0])), []
+        rest_row = from_r and dict(row_i=2 + max([r['row_i'] for r in proj['rows']] + [0]))
 
         for key, c in d['columns'].items():
             if not c:  # 此栏没有新加的段落
@@ -189,12 +197,12 @@ class MoveApi(ProjBaseApi):
         d = self.data()
         sel = d['sel'] if d['up'] else list(reversed(d['sel']))
         proj = self.get_project(sel[0]['proj_id'])
-        self.editable(proj, verify=True)
+        self.verify_editable(proj)
 
         sections, is_extract = {}, d['to_row'] == 'new'
         from_r = self.get_merged_row(proj, d['from_row'])
         if d['to_row'] == 'new':
-            d['to_row'] = 1 + max([r['row_i'] for r in proj['rows']])
+            d['to_row'] = 1 + max([r['row_i'] for r in proj['rows']] + [0])
             to_r = {'row_i': d['to_row'], str(d['col_i']): []}
             proj['rows'].insert(proj['rows'].index(from_r) + 1, to_r)
         else:
@@ -233,7 +241,7 @@ class MarkDelApi(ProjBaseApi):
     def post(self):
         sel = self.data()
         proj = self.get_project(sel[0]['proj_id'])
-        self.editable(proj, verify=True)
+        self.verify_editable(proj)
 
         sections = {}
         for r in sel:
@@ -286,7 +294,7 @@ class FixRowsApi(ProjBaseApi):
     @auto_try
     def post(self, p_id):
         proj = self.get_project(p_id)
-        self.editable(proj, verify=True)
+        self.verify_editable(proj)
 
 
 class TocBaseApi(ProjBaseApi):
@@ -388,9 +396,7 @@ class TocImportApi(TocAddApi):
 
     @auto_try
     def post(self):
-        d = self.data()
-        p = self.get_project(d.pop('proj_id'))
-        self.editable(p, verify=True)
+        d, p = self.get_project_edit()
         a = self.get_article(d['a_id'])
 
         content = re.split(r'\s*\n+\s*', d['text'].strip())
@@ -454,9 +460,7 @@ class TocEditApi(TocBaseApi):
 
     @auto_try
     def post(self):
-        d = self.data()
-        p = self.get_project(d.pop('proj_id'))
-        self.editable(p, verify=True)
+        d, p = self.get_project_edit()
         a = self.get_article(d['a_id'])
         toc, t_r = Toc.get_toc(a, d['toc_i'], int(d.get('toc_id') or 0))
 

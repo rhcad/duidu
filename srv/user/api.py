@@ -54,7 +54,7 @@ class RegisterApi(BaseHandler):
 
         u = dict(username=u['username'], password=password,
                  nickname=u['nickname'], verification=u['verification'],
-                 ip=self.get_ip(), ip0=self.get_ip(),
+                 ip=self.get_ip(), ip0=self.get_ip(), internal=u['username'] == 'admin',
                  created=self.now(), updated=self.now())
         r = self.db.user.insert_one(u)
         u['_id'] = r.inserted_id
@@ -68,8 +68,8 @@ class RegisterApi(BaseHandler):
         for r in [re_lower, re_upper, re_digit, re_sign]:
             if r.search(password):
                 n += 1
-        if n < 3:
-            self.send_raise_failed('密码要有大写字母、小写字母、数字、特殊符号中至少三种')
+        if n < 2:
+            self.send_raise_failed('密码要有大写字母、小写字母、数字、特殊符号中至少两种')
 
 
 class LogoutApi(BaseHandler):

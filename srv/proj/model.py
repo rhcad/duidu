@@ -9,6 +9,7 @@ class Proj(Model):
         'comment': {'caption': '备注'},
         'cols': {'caption': '栏数'},
         'toc_n': {'caption': '科判'},
+        'note_n': {'caption': '注解'},
         'char_n': {'caption': '字数'},
         'char_k': {'caption': '千字', 'align': 'right'},
         'created_by': {'caption': '创建者', 'type': 'user'},
@@ -21,7 +22,7 @@ class Proj(Model):
     hidden_fields = ['editors', 'public', 'published', 'columns', 'created', 'char_n']
     actions = [
         dict(id='edit', caption='修改', url='/proj/edit/@_id'),
-        dict(id='view', caption='预览', url='/proj/view/@_id')
+        dict(id='view', caption='预览', url='/proj/view/@_id', default=True)
     ]
 
 
@@ -102,7 +103,7 @@ class Section(Model):
 
     @staticmethod
     def get_row(rows, line):
-        r = [r for r in rows if r['line'] == line]
+        r = [r for r in rows if int(r['line']) == line]
         return r[0] if r else None
 
 
@@ -118,3 +119,16 @@ class Toc(Model):
     def get_row(cls, rows, t_id):
         r = [r for r in rows if r['id'] == t_id]
         return r[0] if r else None
+
+
+class ProjNote(Model):
+    fields = {
+        'base': {'caption': '栏名'},
+        'tag': {'caption': '标签'},
+        'code': {'caption': '编码'},
+        'name': {'caption': '注解名称'},
+    }
+    actions = [
+        dict(id='edit', caption='合并注解', url='/proj/notes/@_id', default=True),
+        dict(id='view', caption='查看经典', url='/article/@_id')
+    ]

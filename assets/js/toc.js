@@ -37,27 +37,37 @@ function _scanTocRows(ext, rows) {
   return items
 }
 
+function _tocLoaded(d, ext, a_id, ti, ended) {
+  const items = _scanTocRows(ext, d.rows)
+  const tocSel = `#toc-tree${ext}`, tree = $.jstree.reference(tocSel + '>div')
+  if (tree) tree.destroy()
+  _curNode = null
+  const $w = _$tree[ext] = $(tocSel), $t = $(tocSel + '>div')
+  $w.attr('data-a-id', a_id).attr('data-toc-i', ti)
+  $t.jstree({core: {data: items, animation: 0}})
+  $(`.toc-tree-p[data-ext="${ext}"] .drop-toc-name`).text(d.name)
+
+  $t.on('loaded.jstree', () => _initTocTree(ended))
+    .on('changed.jstree', _tocNodeChanged)
+}
+
 function tocLoad(ext, a_id, ti, ended=null) {
-  getApi(`/proj/toc/${a_id}/${ti}`, res => {
-    const d = res.data, a_id = d.a_id, toc_i = d.toc_i
-    const items = _scanTocRows(ext, d.rows)
-
-    const tocSel = `#toc-tree${ext}`, tree = $.jstree.reference(tocSel + '>div')
-    if (tree) tree.destroy()
-    _curNode = null
-    const $w = _$tree[ext] = $(tocSel), $t = $(tocSel + '>div')
-    $w.attr('data-a-id', a_id).attr('data-toc-i', ti)
-    $t.jstree({core: {data: items, animation: 0}})
-    $(`.toc-tree-p[data-ext="${ext}"] .drop-toc-name`).text(d.name)
-
-    $t.on('loaded.jstree', () => _initTocTree(ended))
-      .on('changed.jstree', (e, data) => { _curNode=data.node; navigateToPara(data.node)})
-  }, $.noop)
+  if (window.all_toc) {
+    const r = all_toc.filter(a => a.a_id === a_id && parseInt(ti) === a.toc_i)[0]
+    return _tocLoaded(r, ext, a_id, ti, ended)
+  }
+  getApi(`/proj/toc/${a_id}/${ti}`,
+      r => _tocLoaded(r.data, ext, a_id, ti, ended), $.noop)
 }
 
 function _initTocTree(ended) {
   $('.jstree-anchor').each((i, a) => a.removeAttribute('href'))
   ended && ended()
+}
+
+function _tocNodeChanged(e, data) {
+  _curNode=data.node
+  navigateToPara(data.node)
 }
 
 function _findTocPara(texts, pElem) {
@@ -241,7 +251,7 @@ function navigateToPara(node) {
   if (node)
     _setActiveToc(node.data.ext)
   if (r && r[1]) {
-    window.activatePara && activatePara(r[1])
+    window.activatePara(r[1])
     scrollParaToVisible(r[1])
   }
 }
@@ -262,94 +272,4 @@ $(function () {
       }
     }
   })
-
-  $.contextMenu && $.contextMenu({
-    selector: '.drop-toc-name',
-    items: {
-      edit: {
-        name: '修改科判名称...',
-        callback: function(){ _editTocName(this) },
-        disabled: function(){ return !editable },
-      },
-      add: {
-        name: '导入新的科判...',
-        callback: function(){ importToc(this) },
-        disabled: function(){ return !editable },
-      },
-      sep1: {name: '--'},
-      export: {
-        name: '导出科判',
-        callback: function(){ _exportToc(this) },
-      },
-      sep2: {name: '--'},
-      del: {
-        name: '删除科判...',
-        callback: function(){ _delToc(this) },
-        disabled: function(){ return !editable },
-      },
-    }
-  })
 })
-
-function importToc() {
-  const $a = $('.cell p.active').first()
-  const a_id = $a[0] ? $a.closest('.cell').data('id') : _$tree && _$tree.attr('data-a-id')
-  const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
-  const $p = $a[0] ? $a : $(`.cell[data-id="${a_id}"] p`).first()
-
-  if (!a_id) {
-    return showError('不能导入', '请在对应栏中点击段落，然后再试。')
-  }
-  Swal2.fire({
-    title: '导入科判',
-    width: 600,
-    input: 'textarea',
-    inputAttributes: {rows: 10},
-    inputPlaceholder: `第一行输入科判名称
-其余每行一个科判条目，行首可指定级别，或+-相对缩进
-\u3000例如 “2 二级”、“  - 2 乙一抉择分”
-以“甲乙丙”等天干字开头可不指定级别数字，例如“丙二回答分”`,
-    inputLabel: `为经典“${ $c.text()}”增加科判`,
-    preConfirm: text => text && postApi('/proj/match/toc/import',
-      getParaInfo($p, {text: text}), reloadPage)
-  })
-}
-
-function _exportToc($s) {
-  const ext = $s.closest('[data-ext]').data('ext')
-  const $t = _$tree[ext], a_id = $t.attr('data-a-id'), ti = $t.attr('data-toc-i')
-  getApi(`/proj/toc/${a_id}/${ti}`, res => {
-    const d = res.data, rows = d.rows, content = [d.name]
-    _scanTocRows(ext, rows)
-    rows.forEach(r => content.push(`${'  '.repeat(r.level - 1)}- ${r.level} ${r.text}`))
-    download(content.join('\n'), d.code + '-md.txt')
-  })
-}
-
-function _delToc($s) {
-  const ext = $s.closest('[data-ext]').data('ext')
-  const $t = _$tree[ext], a_id = $t.attr('data-a-id'), ti = $t.attr('data-toc-i')
-  const $p = $(`.cell[data-id="${a_id}"] p[data-line]`).first()
-  Swal2.fire({
-    title: '删除确认',
-    text: `确实要删除“${ $s.text()}”的全部科判条目？`,
-    preConfirm: text => text && postApi('/proj/match/toc/del',
-      getParaInfo($p, {del_root: true, toc_i: ti}), reloadPage)
-  })
-}
-
-function _editTocName($s) {
-  const ext = $s.closest('[data-ext]').data('ext')
-  const $t = _$tree[ext], a_id = $t.attr('data-a-id'), ti = $t.attr('data-toc-i')
-  const $p = $(`.cell[data-id="${a_id}"] p[data-line]`).first()
-  const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
-
-  Swal2.fire({
-    title: '修改科判名称',
-    inputLabel: `修改经典“${ $c.text()}”的科判名称`,
-    input: 'text',
-    inputValue: $s.text(),
-    preConfirm: text => text && postApi('/proj/match/toc/edit',
-      getParaInfo($p, {edit_root: true, toc_i: ti, text: text}), reloadPage)
-  })
-}

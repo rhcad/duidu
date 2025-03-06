@@ -15,8 +15,9 @@ class Table(UIModule):
 
 
 class TopNav(UIModule):
-    def render(self, title='', prev=None, themes=True):
-        return self.render_string('_/nav.html', prev=prev, title=title, themes=themes)
+    def render(self, title='', prev=None, themes=True, download=False):
+        return self.render_string('_/nav.html', prev=prev, title=title,
+                                  themes=themes, download=download)
 
 
 class Users(UIModule):

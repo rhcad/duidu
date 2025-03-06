@@ -3,4 +3,5 @@ pymongo==4.10.1
 PyYAML==6.0.2
 beautifulsoup4
 mongomock
+zipfile37
 fire
