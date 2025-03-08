@@ -347,7 +347,10 @@ function addNote(note, $lf, $rt, $rp, ignoreErr=false) {
     $tag.attr('data-pn', $pn.attr('data-pn'))
   }
 
-  $tag.attr('title', title).insertAfter($next.closest('.note-tag.inline')[0] ? $next : $pos)
+  const $ins = $next.closest('.note-tag.inline')[0] ? $next : $pos
+  const insTag = $ins.closest('.note-tag')[0] || $ins[0] && $ins[0].previousSibling
+  $tag.attr('title', title).insertAfter($ins)
+    .toggleClass('after', insTag ? insTag.tagName === 'SUP' : false)
   if ($rt.addClass) {
     $rt.addClass('used').removeClass('selected').attr('data-nid', note.id).removeAttr('data-id')
   }

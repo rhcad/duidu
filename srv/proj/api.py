@@ -330,8 +330,10 @@ class ProjEditApi(ProjBaseApi):
     @auto_try
     def post(self):
         d = self.data()
-        upd = Proj.pack_data(d, ['code', 'name', 'comment', 'public'])
         proj = self.get_project(d.pop('proj_id'), True)
+        if d.get('published'):
+            d['published'] = proj.get('published') or self.now()
+        upd = Proj.pack_data(d, ['code', 'name', 'comment', 'public', 'published'])
         if upd.get('code') and upd['code'] != proj['code']:
             if self.db.proj.find_one({'code': upd['code'], 'created_by': proj['created_by']}):
                 self.send_raise_failed(f"项目编码重复 {upd['code']}")

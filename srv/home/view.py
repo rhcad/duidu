@@ -17,7 +17,7 @@ class HomeHandler(BaseHandler):
         p = dict(code=1, name=1, comment=1, published=1, updated=1, cols=1,
                  created_by=1, editors=1, public=1, char_n=1, toc_n=1, note_n=1)
         rows = list(self.db.proj.find({'$or': cond, 'tmp': None}, projection=p,
-                                      sort=[('code', 1), ('name', 1)]))
+                                      sort=[('published', -1), ('code', 1), ('name', 1)]))
         rows = [r for r in rows if r['cols'] or self.username in (r['editors'] + [r['created_by']])]
         for r in rows:
             r['char_k'] = round(r['char_n'] / 1000)
