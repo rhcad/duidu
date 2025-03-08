@@ -150,7 +150,8 @@ $doc.on('click', '.note-row', e => {
 })
 $doc.on('click', '.note-p .close', e => {
   const $p = $(e.target).closest('.note-p'),
-    nid = $p.find('.active-note[data-nid]').attr('data-nid')
+    nid = $p.find('.active-note[data-nid]').attr('data-nid') ||
+      $p.find('[data-nid]').attr('data-nid')
   _status.curNoteId = nid
   $(`.note-tag[data-nid="${nid}"]`).click()
 })

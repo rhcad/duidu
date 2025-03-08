@@ -192,7 +192,7 @@ function selNodesEnd(cell, n) {
   if (cell) {
     $('p.has-sel', cell).removeClass('has-sel all-sel')
     $('.cell .active').removeClass('active')
-    if ($(cell).hasClass('.cell-l')) { // 左栏仅保留当次选择
+    if ($(cell).hasClass('cell-l')) { // 左栏仅保留当次选择
       $('.selected', cell).each((i, s) => {
         if (parseInt(s.dataset.id) !== _status.selId) {
           _unwrapNode(s)
@@ -242,7 +242,7 @@ function selNodesEnd(cell, n) {
  * @param {Function|boolean} [replacer] 文本节点的内容替换函数，或true表示如果右侧是注解标签就扩大选择
  */
 function selectPText($cell, rows, replacer=null) {
-  const inEdit = $cell.hasClass('.cell-l') || $cell.hasClass('.cell-r')
+  const inEdit = $cell.hasClass('cell-l') || $cell.hasClass('cell-r')
   rows.forEach(r => {
     const $p = $(`p.text[data-line='${r.line}'][data-s-id='${r.s_id}']`, $cell), p = $p[0]
     if (!p) {
