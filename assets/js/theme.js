@@ -16,7 +16,7 @@ function updateThemeMenu() {
 }
 
 function saveOptions() {
-  localStorage.setItem('cbsOptions', JSON.stringify(options));
+  localStorage.setItem('cbsOptions', JSON.stringify(options))
 }
 
 $(function () {

@@ -17,7 +17,7 @@
 
     .col-name { cursor: not-allowed; }
     .sec { margin: 0; padding: 5px; }
-    .sec.gray { font-style: italic; }
+    .sec.gray { font-style: italic; font-size: .8em; }
 
     @media (pointer: fine) {
         .text:hover, .toc_row:hover { color: var(--hover-color); cursor: context-menu; }
@@ -28,7 +28,7 @@
     .error { color: red; font-weight: bold; }
 
     .text.del { text-decoration: line-through; }
-    .original > td { border-top: 2px solid red !important; }
+    .original:not(.single-article) > td { border-top: 2px solid red !important; }
   </style>
 </head>
 
@@ -51,6 +51,10 @@
       {% if editable %}
       <li><a onclick="importToc()">导入科判...</a></li>
       {% end %}
+      <li role="separator" class="divider"></li>
+      <li><a onclick="enlargeFont()">增加字号</a></li>
+      <li><a onclick="reduceFont()">减少字号</a></li>
+      <li><a onclick="resetFontSize()">默认字号</a></li>
       <li role="separator" class="divider"></li>
       <li><a id="theme-default" title="切换为普通外观">普通外观</a></li>
       <li><a id="theme-warm" title="切换为浅色外观、护眼色">护眼色</a></li>

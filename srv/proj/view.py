@@ -66,7 +66,7 @@ class MatchHandler(ProjHandler, ProjBaseApi):
 
         for c in p['columns']:
             a = self.db.article.find_one({'_id': c['a_id']})
-            max_page = self.get_max_page(p, a) and pi and mode != 'notes' or 0
+            max_page = pi and mode != 'notes' and self.get_max_page(p, a) or 0
             pi = min(pi, max_page) if max_page else 0
             c.update(dict(rows=Article.get_column_rows(self, a, pi),
                           toc=a.get('toc', [])))

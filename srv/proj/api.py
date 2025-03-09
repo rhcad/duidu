@@ -552,7 +552,7 @@ class ImportTextApi(ProjBaseApi):
         if not text:
             return
         if a.get('note_for'):
-            if p.get('note_char_n', 0) + len(text) > 1e5 or len(text) > 1e4:
+            if p.get('note_char_n', 0) + len(text) > 1e6 or len(text) > 1e5:
                 return p.get('note_char_n', 0), len(text), 10
         else:
             if p['char_n'] + len(text) > 2e5:
@@ -577,4 +577,7 @@ class ImportTextApi(ProjBaseApi):
             p['char_n'] = p.get('char_n', 0) + char_n
         self.db.article.update_one({'_id': a['_id']}, {'$set': dict(
             sections=a['sections'], char_n=a['char_n'])})
-        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(char_n=p['char_n'])})
+        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(
+            note_char_n=p.get('note_char_n', 0), char_n=p['char_n'],
+            note_n=p.get('note_n', 0), columns=p['columns'],
+        )})

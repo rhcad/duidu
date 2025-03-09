@@ -84,6 +84,7 @@ input[type="submit"] { border: none; }
 .m-l-0 { margin-left: 0 !important; }
 .m-l-5 { margin-left: 5px !important; }
 .m-l-10 { margin-left: 10px !important; }
+.m-l-15 { margin-left: 15px !important; }
 .m-r-0 { margin-right: 0 !important; }
 .m-r-5 { margin-right: 5px !important; }
 .m-r-10 { margin-right: 10px !important; }
@@ -151,9 +152,10 @@ p.text { text-indent: 2em; }
 
 .text.start-quot, .text.start-quot { text-indent: 1em; }
 .text.juan_end { text-align: right; font-size: .7em; text-indent: 0; }
-.text.byline { text-align: right; text-indent: 0; font-size: .9em; }
+.text.byline { text-align: right; text-indent: 0; font-size: .8em; }
 .text.juan { font-size: 1.05em; font-weight: bold; text-align: center; text-indent: 0; }
 .text.juan.xu { font-size: 1em; }
+.text.juan small { font-weight: normal; }
 .text.head, .text.pin { font-weight: 500; }
 .text.num { font-size: .8em; }
 .text.verse, .text.dharani { color: var(--verse-color); }

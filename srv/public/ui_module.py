@@ -1,7 +1,7 @@
 from tornado.web import UIModule
 from tornado.template import Template
 from srv import util
-from srv.proj.model import Article
+from srv.proj.model import Article, re
 
 
 class Table(UIModule):
@@ -70,6 +70,14 @@ class SectionBlock(UIModule):
         a, b = line // 100, line % 100
         return f"#{a}{'-%d' % b if b else ''}"
 
+    @staticmethod
+    def to_html(t):
+        tag = t.get('tag', [])
+        if 'juan' in tag and re.search('[(（]', t['text']):
+            return re.sub(r'[(（].+[)）]', lambda m: ('<br/>' if len(m.group()) > 12 else '') +
+                          f"<small>{m.group()}</small>", t['text'])
+        return t['text']
+
     def render(self, cell, row_i=None):
         t = Template('''<p class="col-name gray ellipsis">{{c['code']}} {{c['name']}}</p>
 {% for r in c['rows'] %}{% set tags = r.get('tag',[]) %}
@@ -95,12 +103,13 @@ class SectionBlock(UIModule):
     ''.join([' ' + s for s in tags])}}" data-line="{{
     r['line']}}"{% if tc %} data-toc-i="{{c['toc_i']}}" data-toc-id="{{tc[-1]['id']}}"{% end %} data-line-s="{{
     gen_line(r['line'])}}" data-s-i="{{
-    r['s_i']}}" data-s-id="{{r['s_id']}}">{{ r['text'] }}</p>
+    r['s_i']}}" data-s-id="{{r['s_id']}}">{% raw to_html(r) %}</p>
 {% end %}{% end %}''')
         tags_d = dict(juan='卷', juan_end='尾', verse='颂', dharani='咒',
                       pin='品', head='节', xu='序', byline='作').items()
         return t.generate(**self.handler.kwargs_render(
-            c=cell, row_i=row_i, gen_line=self.gen_line, get_toc=Article.get_toc_row, tags_d=tags_d))
+            c=cell, row_i=row_i, gen_line=self.gen_line, to_html=self.to_html,
+            get_toc=Article.get_toc_row, tags_d=tags_d))
 
 
 class TocDropdown(UIModule):

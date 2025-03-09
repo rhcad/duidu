@@ -192,3 +192,32 @@ function getSelectedTexts(shiftNode, allowSame=false) {
   }
   return [null, col]
 }
+
+// 正文增大字号
+function enlargeFont() {
+  let $t = $('.table-p'), fontSize = parseInt($t.css('font-size'))
+  if (fontSize < 36) {
+    fontSize++
+    $t.css('font-size', fontSize + 'px')
+    options.fontSize = fontSize
+    saveOptions()
+  }
+}
+function reduceFont() {
+  let $t = $('.table-p'), fontSize = parseInt($t.css('font-size'))
+  if (fontSize > 8) {
+    fontSize--
+    $t.css('font-size', fontSize + 'px')
+    options.fontSize = fontSize
+    saveOptions()
+  }
+}
+function resetFontSize() {
+  $('.table-p').css('font-size', '')
+  delete options.fontSize
+  saveOptions()
+}
+
+if (parseInt(options.fontSize)) {
+  $('.table-p').css('font-size', parseInt(options.fontSize) + 'px')
+}

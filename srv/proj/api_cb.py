@@ -19,6 +19,8 @@ class ImportCBApi(ImportTextApi):
                 html, title, code = yield self.fetch_cb(re.sub(':[a-z]$', '', a['code']), vol)
                 r, err = self.parse_html(html, title, code)
                 if not err:
+                    if not title or not r['rows']:
+                        break
                     a['content'].append(r)
                     a.update(dict(code=a['code'].replace(':', ''),
                                   name=a['name'] or self.util.trim_bracket(r['title'])))
