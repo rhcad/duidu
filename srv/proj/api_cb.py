@@ -4,7 +4,6 @@ from tornado.httpclient import AsyncHTTPClient, HTTPError
 from srv.base import on_exception
 from srv.proj.api import ImportTextApi, re
 from bs4 import BeautifulSoup as Soup
-from urllib import request
 
 
 class ImportCBApi(ImportTextApi):
@@ -92,7 +91,7 @@ class ImportCBApi(ImportTextApi):
             r['tag'] = ['verse']
         elif 'juan' in cls and len(s) > 2 and tags.get('juan', {}).get('text') and (
                 s in tags['juan']['text'] or '卷第' in s and re.search(
-                '卷第.+$', s).group() == re.search('卷第[^(（]+', tags['juan']['text']).group()):
+                '(卷第.+)终?$', s).group(1) == re.search('卷第[^(（]+', tags['juan']['text']).group()):
             r['tag'] = ['juan_end']
         elif cls:
             for tag in ['juan', 'byline', 'dharani', 'head']:
@@ -149,92 +148,47 @@ class ImportHtmlApi(ImportTextApi):
             a.update(dict(content=[], name='', source='import_html '), append='auto')
             for url in urls:
                 html, title = yield self.fetch_html(url)
-                continue
-                r, err = self.parse_html(html, title, code)
+                r, err = self.parse_html(html, title, a['code'], url)
                 if not err:
                     if not title or not r['rows']:
                         break
                     a['content'].append(r)
-                    a.update(dict(code=a['code'].replace(':', ''),
-                                  name=a['name'] or self.util.trim_bracket(r['title'])))
+                    a.update(dict(name=a['name'] or self.util.trim_bracket(r['title'])))
                 elif len(a['content']) < 2:
-                    self.send_raise_failed(f'{code} 导入失败: {err}')
+                    self.send_raise_failed(f'导入失败: {err}')
             ImportTextApi.post(self)
             self.finish()
         except Exception as e:
             on_exception(self, e)
 
-    def parse_html(self, html, title, code):
-        def flush_xu():
-            if len(xu_rows) > 1:
-                xu_rows[0]['tag'].append('xu_first')
-                xu_rows[-1]['tag'].append('xu_end')
-            xu_rows.clear()
-
-        self.log(f'parse_html {code} {title}')
+    def parse_html(self, html, title, code, url):
+        site = re.search(r'https?:\/\/(www.)?([^/]+?)(\.com)?/', url).group(2)
+        cfg = self.config.get('sites', {}).get(site, {})
+        self.log(f'parse_html {site} {code} {title}')
         html = re.sub('<(a|title)( [^>]+)?>[^<]+</(a|title)>', '', html, re.I)  # 去掉脚注
-        html = re.sub(r"<div id='[a-z]+-copyright'>(.|\n)+</div>", '', html, re.M)
         soup = Soup(html, 'html.parser')
         text, error, rows, tags = '', '', [], {}
-        mu, xu, xu_n, xu_rows = '', '', 0, []
 
-        for p in soup.select('#body,p,.lg-cell,.div-xu,mulu'):
+        root = cfg.get('body', '')
+        for p in soup.select('-p2,-p3,-p4,-p'.replace('-', root and root + ' ')):
             s = self.fix_text(p.get_text())
-            cls = p.get_attribute_list('class')
-
-            if p.name == 'mulu':
-                mu = mu or (cls[0] if cls else '')
-            elif 'div-xu' in cls:
-                xu, mu = xu or 'xu', ''  # 允许连续的 .div-xu 元素
-            elif s:
-                r = self._parse_html_p(text, rows, xu, xu_rows, tags, cls, s, p)
-                if not r:
-                    continue
-                r, text, xu = r
-                if mu:
-                    r['tag'] = r.get('tag', []) + [mu]
-                    mu = ''
-                if xu:
-                    if xu == 'xu':
-                        xu_n += 1
-                        flush_xu()
-                    xu = p.find_parent('div', class_='div-xu') is not None
-                    if xu:
-                        r['tag'] = r.get('tag', []) + ['xu', f'xu{xu_n}']
-                        xu_rows.append(r)
-                if not xu and xu_rows:
-                    flush_xu()
+            r = s and self._parse_html_p(cfg, text, rows, tags, s, p)
+            if r:
+                r, text = r
                 rows.append(r)
-        flush_xu()
-        if text.startswith('{"'):
-            m = re.search(r'"message":"(.+)"}}', text)
-            text, error = '', m.group(1) if m else 'error'
         return dict(rows=rows, text=text.strip(), title=title, code=code), error
 
     @staticmethod
-    def _parse_html_p(text, rows, xu, xu_rows, tags, cls, s, p):
+    def _parse_html_p(cfg, text, rows, tags, s, p):
         r = dict(text=s, line=(len(rows) + 1) * 100)
-        if p.get('id') == 'body':
-            text = r['text'] = s = p.contents[0].string.strip()
-            if re.match(r'^[A-Za-z0-9 \[\](),.-]+$', s):
-                rows.append(dict(tag=['num'], **r))
-            return
         text += s + '\n'
-        if 'lg-cell' in cls:
-            r['tag'] = ['verse']
-        elif 'juan' in cls and len(s) > 2 and tags.get('juan', {}).get('text') and (
-                s in tags['juan']['text'] or '卷第' in s and re.search(
-                '卷第.+$', s).group() == re.search('卷第[^(（]+', tags['juan']['text']).group()):
-            r['tag'] = ['juan_end']
-        elif cls:
-            for tag in ['juan', 'byline', 'dharani', 'head']:
-                if tag == 'head' and len(xu_rows) > 1 and 'head' in xu_rows[0].get('tag', []):
-                    xu = 'xu'  # 开启新的序
-                if tag in cls:
-                    r['tag'] = [tag]
-                    tags[tag] = r
-                    break
-        return r, text, xu
+        if re.search('(卷第.+)终$', s):
+            r['tag'] = 'juan_end'
+        elif p.name == 'h2':
+            r['tag'] = 'juan'
+        elif p.name in ['h3', 'h4']:
+            r['tag'] = 'head'
+        return r, text
 
     @gen.coroutine
     def fetch_html(self, url):
@@ -248,17 +202,15 @@ class ImportHtmlApi(ImportTextApi):
             r = yield client.fetch(url, connect_timeout=30, request_timeout=30)
             if r.error:
                 self.send_raise_failed(f'获取{url}失败: {r.error}')
-
-            req = request.Request(url=url)
-            res = request.urlopen(req, timeout=30).read()
             try:
-                html = res.decode('utf-8')
+                html = r.body.decode('utf-8')
             except UnicodeDecodeError:
-                html = res.decode('gb18030')
-            if html.startswith('{"'):
-                return '', ''
+                html = r.body.decode('gb18030')
+
             m = re.search('<title>(.+)</title>', html, re.I)
             title = m and re.sub(' - .+$', '', m.group(1).strip()) or ''
+            if not title or re.search('error|404|not found|错误|不存在', title):
+                return '', ''
             self.db.cb.update_one({'name': url}, {'$set': dict(
                 html=html, title=title, size=len(html),
                 created_by=self.username, created=self.now())}, upsert=True)

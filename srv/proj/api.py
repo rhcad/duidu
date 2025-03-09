@@ -80,6 +80,9 @@ class ProjBaseApi(BaseHandler):
         is_append = a.pop('append', 0)
         note_base, note_tag = a.pop('base', ''), a.pop('tag', '')
         assert a['code'] and a['name'] and (is_append or a['type'])
+
+        if ' 第' in a['name']:
+            a['name'] = re.sub(' 第.*$', '', a['name'])
         short_name = self.util.trim_bracket(a.pop('short_name', '') or a['name'])
         assert note_base or is_append or short_name, '请输入简称'
         code = re.sub(r'_\d{3}$|:', '', a['code'])
