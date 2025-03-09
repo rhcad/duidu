@@ -166,7 +166,7 @@ p.text { text-indent: 2em; }
 .note-tag.expanded.active-note::before { color: var(--selected-color); }
 .note-tag.inline.expanded { padding: .4em .2em; margin-left: .2em; top: unset; font-size: 90%; font-weight: 400; }
 .note-tag.inline.expanded::before { display: none; }
-.note-tag.inline.expanded::after { content: "〔" attr(data-text) "〕" attr(data-source); }
+.note-tag.inline.expanded::after { content: "〔" attr(data-text) "〕"; }
 .note-tag.after { margin-left: -1em; }
 
 .note-text, .note-tag.inline.expanded::after {

@@ -324,6 +324,7 @@ function addNote(note, $lf, $rt, $rp, ignoreErr=false) {
       } else {
         $notes.insertAfter($posP)
       }
+      $posP.addClass('has-note')
     }
     if (simple) {
       d.text.split('\n').forEach(s => {
@@ -345,7 +346,8 @@ function addNote(note, $lf, $rt, $rp, ignoreErr=false) {
       $(`<span class="note-row-head"/>`).prependTo($head)
         .attr('data-pn', $pn.attr('data-pn'))
     }
-    $(`<span class="note-row-end"/>`).appendTo($text).attr('data-tag', tag)
+    $(`<span class="note-row-end"/>`).appendTo($text)
+      .attr('data-tag', d && d.source || tag)
       .attr('title', (d && d.code || nA['code']) + ' ' + (d && d.name || nA['name']) + '\n点击隐藏')
     $tag.attr('data-pn', $pn.attr('data-pn'))
   }
