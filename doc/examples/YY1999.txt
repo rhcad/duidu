@@ -49,3 +49,9 @@ https://www.hrfjw.com/fjrw/hcrw/yyfs/69634.html
 https://www.hrfjw.com/fojing/lengyanjing/39558.html
 https://www.hrfjw.com/fojing/lengyanjing/39559.html
 https://www.hrfjw.com/fjrw/hcrw/yyfs/69635.html
+
+
+sites:
+  hrfjw:
+    name: 华人佛教网
+    body: .B1_text
