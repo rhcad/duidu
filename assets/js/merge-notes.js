@@ -89,7 +89,7 @@ function _selectionChanged(e) {
 
 // 在当前单元格拉选多个段落
 $doc.on('selectionchange', (e) => {
-  if (!$('.modal-open,.swal2-shown')[0] && !_status.busy && _status.down) {
+  if (!inModal() && !_status.busy && _status.down) {
     window.clearTimeout(_status.tmSel)
     _status.tmSel = setTimeout(() => _selectionChanged(e), 50)
   }
@@ -178,28 +178,56 @@ function _getLeftText(note) {
   return texts.join(' ')
 }
 
-function _mergeNote() {
+function _addNoteForSelected(note, data, $l, $r) {
+  const onSuccess = r => {
+    note.id = r && r.id || note.id
+    addNote(note, $l, $r, $('.cell-r p:has(.selected)'))
+    clearAllSelected()
+    window.notes.push(note)
+    setTimeout(() => {
+      $(`.note-tag[data-nid="${note.id}"]`).addClass('active')
+      reorderNoteTags()
+    }, 20)
+  };
+
+  if (!editable) onSuccess()
+  return postApi('/proj/note/add', {data: data}, onSuccess)
+}
+
+function _mergeNote(freeNode) {
   const pL = _selPos('.cell-l'), pR = _selPos('.cell-r'),
     $l = $('.cell-l .selected'), $r = $('.cell-r .selected')
 
-  if (pL.length && pR.length) {
+  if (nA.notes || freeNode) {
+    if (!pL.length) return showError('不能添加', '请选择要关联注解的文本。')
+    const leftText = ellipsisText(_getLeftText({left: pL}), 20)
+    Swal2.fire({
+      title: '添加注解',
+      html: `
+<label for="note-text" class="swal2-input-label">为“${leftText}”添加注解。</label>
+<textarea id="note-text" rows="8" class="swal2-textarea" maxlength="2000" style="width: 100%; margin: .5em 0 5px;"></textarea>
+<input id="note-source" class="swal2-input" maxlength="40" placeholder="来源" style="width: 100%; margin: 0;">`,
+      focusConfirm: false,
+      width: 500,
+      backdrop: false,
+      preConfirm: () => {
+        const text = $('#note-text').val().trim(),
+          source = $('#note-source').val().trim(),
+          inline = text.indexOf('\n') < 0 && pL[0].len <= 40 && text.length <= 200;
+        if (!text) { $('#note-text').focus(); return false }
+        if (!source) { $('#note-source').focus(); return false }
+        const note = {id: `${1 + window.notes.length}`, left: pL, right: [],
+          inline: pL.length === 1 && inline ? 1 : 0,
+          note: {text: text, source: source}}
+        const data = {proj_id: getProjId(), leftAid: nA['note_for'] || nA._id, noteAid: '', note: note}
+        return _addNoteForSelected(note, data, $l, note.note)
+      },
+    })
+  } else if (pL.length && pR.length) {
     const inline = pL.length === 1 && pR.length === 1 && pL[0].len <= 40 && pR[0].len <= 200
     const note = {id: `${1 + window.notes.length}`, left: pL, right: pR, inline: inline ? 1 : 0}
-
     const data = {proj_id: getProjId(), noteAid: nA._id, leftAid: nA['note_for'], note: note}
-    const onSuccess = r => {
-      note.id = r && r.id || note.id
-      addNote(note, $l, $r, $('.cell-r p:has(.selected)'))
-      clearAllSelected()
-      window.notes.push(note)
-      setTimeout(() => {
-        $(`.note-tag[data-nid="${note.id}"]`).addClass('active')
-        reorderNoteTags()
-      }, 20)
-    };
-
-    if (!editable) onSuccess()
-    postApi('/proj/note/add', {data: data}, onSuccess)
+    _addNoteForSelected(note, data, $l, $r)
   } else showError('不能添加', '请在左右栏分别选择要关联注解的文本。')
 }
 
@@ -218,7 +246,7 @@ function _removeNote($p, test) {
   const nid = $p.closest('[data-nid]').attr('data-nid'),
     note = getNote(nid), $tag = $(`.note-tag[data-nid="${nid}"]`)
 
-  if ($tag[0] && note) {
+  if ($tag[0] && note && !$tag.hasClass('disabled')) {
     if (test) return true
     const st = getComputedStyle($tag[0], '::before')
     const text = _getLeftText(note)
@@ -237,7 +265,7 @@ function _changeNote($p, test) {
   const nid = $p.closest('[data-nid]').attr('data-nid'),
     note = getNote(nid), $tag = $(`.note-tag[data-nid="${nid}"]`)
 
-  if ($tag[0] && note) {
+  if ($tag[0] && note && !$tag.hasClass('disabled')) {
     if (test) return true
     const st = getComputedStyle($tag[0], '::before')
     const text = _getLeftText(note)
@@ -314,7 +342,7 @@ $.contextMenu({
     removeAllNote: {
       name: '删除所有注解...',
       callback: function(){ _removeAllNote(); },
-      disabled: function(){ return !editable || !window.notes.length; },
+      disabled: function(){ return !editable || !window.notes.length || $('.note-tag.disabled')[0]; },
     },
   }
 })
@@ -332,9 +360,13 @@ $.contextMenu({
     },
     sep1: {name: '--'},
     mergeNote: {
-      name: '左右选择为注解<span class="key" title="回车键">Enter</span>',
+      name: (nA.notes ? '添加注解...' : '左右选择为注解') + '<span class="key" title="回车键">Enter</span>',
       isHtmlName: true,
-      callback: function(){ _mergeNote(); },
+      callback: function(){ _mergeNote() },
+    },
+    addNote: nA.notes ? {} : {
+      name: '添加注解...',
+      callback: function(){ _mergeNote(true) },
     },
   }
 })

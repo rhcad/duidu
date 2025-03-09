@@ -40,6 +40,10 @@ $doc.on('click', '.toggle-col', e => {
   }
 })
 
+function inModal() {
+  return $('.modal-open,.swal2-shown')[0]
+}
+
 function getProjId() {
   return $('[data-proj-id]').data('proj-id')
 }
@@ -79,7 +83,7 @@ window.activatePara = function($p, selectTocNode=false) {
 $doc.on('click', '.cell p.text', e => {
   const $t = $(e.target), $p = $t.closest('p');
 
-  if (!_status.clicked) {
+  if (!_status.clicked || inModal()) {
     return
   }
   $('.active-note').removeClass('active-note')
@@ -124,6 +128,9 @@ $doc.on('click', '.cell p.text', e => {
 // 在单元格内点击科判条目
 $doc.on('click', '.cell .toc_row', e => {
   const $p = $(e.target)
+  if (!_status.clicked || inModal()) {
+    return
+  }
   activatePara($p, e.which === 1)
   if (e.which === 1 && ($p.height() > 40 || $p.hasClass('ellipsis'))) {
     if (_status.lastClick === $p[0]) {
@@ -140,6 +147,9 @@ $doc.on('click', '.cell .toc_row', e => {
 
 // 点击注解元素
 $doc.on('click', '.note-row', e => {
+  if (!_status.clicked || inModal()) {
+    return
+  }
   const $t = $(e.target), $nid = $t.closest('[data-nid]'), nid = $nid.attr('data-nid')
   const toHide = $t.hasClass('note-row-end')
   if (!toHide && _status.curNoteId === nid) {

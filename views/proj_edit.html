@@ -99,7 +99,7 @@
         <p>导入经典原文（或译本，可按章卷多次导入），可加多栏并列对读显示的原文。总字数不超过20万，太长可按章卷分拆项目。</p>
         <div class="article-tabs">
           {% for c in proj.get('columns', []) %}
-          <div class="a-tab" id="{{c['a_id']}}">
+          <div class="a-tab" id="{{c['a_id']}}" data-code="{{c['code']}}">
             <p><a href="/article/{{c['a_id']}}">{{c['code']}}</a></p>
             <p class="ellipsis">{{c['name']}}</p>
           </div>
@@ -136,6 +136,7 @@
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu3">
               <li><a data-toggle="modal" data-target="#importTextModal2">输入文本内容</a></li>
               <li><a data-toggle="modal" data-target="#importCBetaModal2">从 CBETA 导入</a></li>
+              <li><a data-toggle="modal" data-target="#freeNoteModel">自由注解</a></li>
               <li role="separator" class="divider"></li>
               <li><a data-toggle="modal" data-target="#appendTextModal2">追加文本内容</a></li>
             </ul>
@@ -265,6 +266,13 @@
         if (!res.data.ignore) showSuccess('', '导入成功', reloadPage)
         else {showError('部分导入', res.data.ignore, reloadPage)}
       })
+    }
+  }
+  function onSubmitFreeNote($modal) {
+    const d = getModalData($modal, ['base'])
+    const id = d && $(`.a-tab[data-code="${d.base}"]`).attr('id')
+    if (id) {
+      window.location.href = `/proj/notes/${id}`
     }
   }
 </script>

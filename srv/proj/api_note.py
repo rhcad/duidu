@@ -61,5 +61,7 @@ class EditNoteApi(ProjBaseApi):
 
     @staticmethod
     def sub_notes(notes, n_a):
-        return [s for s in notes if s['left_aid'] == str(
-            n_a['note_for']) and (not s.get('note_aid') or s['note_aid'] == str(n_a['_id']))]
+        if n_a.get('note_for'):
+            return [s for s in notes if s['left_aid'] == str(
+                n_a['note_for']) and (not s.get('note_aid') or s['note_aid'] == str(n_a['_id']))]
+        return [s for s in notes if s['left_aid'] == str(n_a['_id'])]

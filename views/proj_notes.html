@@ -105,10 +105,12 @@
             {% end %}
             {% module SectionBlock(c) %}
           </div>
+          {% if len(proj['columns']) > 1 %}
           <div class="cell cell-r">
             <div class="sel-tip no-select"></div>
             {% module SectionBlock(proj['columns'][1]) %}
           </div>
+          {% end %}
         </div>
       </div>
     </div>

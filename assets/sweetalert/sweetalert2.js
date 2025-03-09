@@ -3008,12 +3008,14 @@
   function showValidationMessage(error) {
     const domCache = privateProps.domCache.get(this);
     const params = privateProps.innerParams.get(this);
-    setInnerHtml(domCache.validationMessage, error);
-    domCache.validationMessage.className = swalClasses['validation-message'];
-    if (params.customClass && params.customClass.validationMessage) {
-      addClass(domCache.validationMessage, params.customClass.validationMessage);
+    if (domCache) {
+      setInnerHtml(domCache.validationMessage, error);
+      domCache.validationMessage.className = swalClasses['validation-message'];
+      if (params.customClass && params.customClass.validationMessage) {
+        addClass(domCache.validationMessage, params.customClass.validationMessage);
+      }
+      show(domCache.validationMessage);
     }
-    show(domCache.validationMessage);
     const input = this.getInput();
     if (input) {
       input.setAttribute('aria-invalid', 'true');

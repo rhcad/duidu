@@ -246,7 +246,7 @@ function selectPText($cell, rows, replacer=null) {
   rows.forEach(r => {
     const $p = $(`p.text[data-line='${r.line}'][data-s-id='${r.s_id}']`, $cell), p = $p[0]
     if (!p) {
-      return !r.s_id || console.assert(p, r)
+      return !$cell[0] || !r.s_id || console.assert(p, r)
     }
     const nodes = []
     scanNodesToSel(p.firstChild, p.lastChild, inEdit ? $cell[0] : null, nodes)
@@ -288,8 +288,9 @@ function getNote(nid) {
  */
 function addNote(note, $lf, $rt, $rp, ignoreErr=false) {
   let $pos = $lf.last(), $next = $pos.next()
-  const simple = typeof $rt.text === 'string',
-    d = simple && $rt, tag = d ? d.tag || '注' : nA['note_tag']
+  const simple = typeof $rt.text === 'string', d = simple && $rt,
+    oneCol = (nA['notes'] || []).filter(t => t.a_id === note.note_aid)[0], // 单栏释文经典
+    tag = d ? d.tag || '注' : nA['note_tag'] || (oneCol && oneCol.tag)
   const $tag = $(`<sup class="note-tag" data-nid="${note.id}" data-tag="${tag}"></sup>`)
   let title = `〔${$tag.attr('data-tag')}〕`
 
@@ -316,7 +317,9 @@ function addNote(note, $lf, $rt, $rp, ignoreErr=false) {
     let $text = $('<div/>')
 
     if (!$notes[0].parentElement) {
-      if (note.type === 'front') {
+      if (!simple && !$rp[0]) {
+        $tag.addClass('disabled')
+      } else if (note.type === 'front') {
         $notes.insertBefore($posP)
       } else {
         $notes.insertAfter($posP)

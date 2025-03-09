@@ -119,6 +119,7 @@ body, .form-control, textarea,
     }
     [data-theme="warm"] .jstree-default .jstree-clicked,
     [data-theme="warm"] .jstree-default .jstree-hovered {background: #d1e0e7;}
+    .jstree-icon.linked { border: 1px dotted var(--body-color); border-radius: 2px; }
 
     [data-theme="dark"] footer {
         background-color: #1b1b1d;
@@ -177,9 +178,10 @@ body, .form-control, textarea,
     }
 
     [data-theme="dark"] .modal-content,
+    [data-theme="dark"] body.swal2-no-backdrop .swal2-modal,
     [data-theme="dark"] .swal2-modal {
-        -webkit-box-shadow: 0 5px 15px rgba(180, 180, 180, .5);
-                box-shadow: 0 5px 15px rgba(180, 180, 180, .5);
+        -webkit-box-shadow: 0 0 15px rgba(180, 180, 180, .5);
+                box-shadow: 0 0 15px rgba(180, 180, 180, .5);
     }
     [data-theme="dark"] .swal2-validation-message { background: unset; color: #eee; }
 

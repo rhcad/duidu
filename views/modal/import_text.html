@@ -195,3 +195,57 @@
     </div>
   </div>
 </div>
+
+<div id="freeNoteModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="freeNoteModel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form onsubmit="onSubmitFreeNote($('#freeNoteModel'));event.preventDefault();return false;">
+        <div class="modal-header"><h4 class="modal-title">自由注解</h4></div>
+        <div class="modal-body">
+          <div class="row">
+            <h4 class="col-sm-2 control-label">栏名</h4>
+            <div class="col-sm-10">
+              <select id="modal-base" class="form-control" required>
+                <option value="">请选择为哪个原文合入注解</option>
+                {% for code, text, _ in codes %}
+                <option value="{{code}}">{{text}}</option>
+                {% end %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-primary modal-confirm">前往</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="addNoteModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="addNoteModel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form onsubmit="onSubmitFreeNote($('#addNoteModel'));event.preventDefault();return false;">
+        <div class="modal-header"><h4 class="modal-title">添加注解</h4></div>
+        <div class="modal-body">
+          <div class="row">
+            <h4 class="col-sm-2 control-label">栏名</h4>
+            <div class="col-sm-10">
+              <select id="modal-base" class="form-control" required>
+                <option value="">请选择为哪个原文合入注解</option>
+                {% for code, text, _ in codes %}
+                <option value="{{code}}">{{text}}</option>
+                {% end %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-primary modal-confirm">前往</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -48,7 +48,7 @@ function _selectionChanged() {
 
 // 在当前单元格拉选多个段落
 $doc.on('selectionchange', () => {
-  if (!$('.modal-open,.swal2-shown')[0]) {
+  if (!inModal()) {
     window.clearTimeout(_status.tmSel)
     _status.tmSel = setTimeout(_selectionChanged, 50)
   }

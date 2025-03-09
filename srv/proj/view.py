@@ -37,7 +37,7 @@ class MatchHandler(ProjHandler, ProjBaseApi):
     ROLES = None
 
     @auto_try
-    def get(self, mode, p_id, **kwargs):
+    def get(self, mode, p_id, **kw):
         p, editable = self.check_proj(p_id)
         col_n, max_page, all_t = 0, 0, []
         pi = max(1, int(self.get_argument('page', '1'))) if p['cols'] == 1 else 0
@@ -46,17 +46,23 @@ class MatchHandler(ProjHandler, ProjBaseApi):
         if cur_toc and mode == 'match':
             self.db.proj.update_one({'_id': p['_id']}, {'$unset': {'cur_toc': 1}})
 
-        note_a = mode == 'notes' and kwargs['note_a']
-        if note_a:
-            kwargs['note_a'] = Article.unpack_data(note_a, True)
-            kwargs['notes'] = [s for s in p.get('notes', []) if s['left_aid'] == str(
-                note_a['note_for']) and (not s.get('note_aid') or s['note_aid'] == str(note_a['_id']))]
-            col0 = [c for c in p['columns'] if c['a_id'] == note_a['note_for']][0]
-            cn = [t for t in col0['notes'] if t['a_id'] == note_a['_id']][0]
-            p['columns'] = [col0, dict(a_id=note_a['_id'], code=note_a['code'],
-                                       name='[%s]%s' % (cn['tag'], note_a['name']))]
+        n_a = mode == 'notes' and kw['note_a']
+        if n_a:
+            kw['note_a'] = Article.unpack_data(n_a, True)
+            if n_a.get('note_for'):
+                kw['notes'] = [s for s in p.get('notes', []) if s['left_aid'] == str(
+                    n_a['note_for']) and (not s.get('note_aid') or s['note_aid'] == str(n_a['_id']))]
+                col0 = [c for c in p['columns'] if c['a_id'] == n_a['note_for']][0]  # 被注解的栏
+                cn = [t for t in col0.get('notes', []) if t['a_id'] == n_a['_id']]  # 对应注解标签
+                p['columns'] = [col0, dict(a_id=n_a['_id'], code=n_a['code'],  # 右栏为释文
+                                           name='[%s]%s' % (cn[0]['tag'], n_a['name']) if cn else n_a['name'])]
+            else:
+                kw['notes'] = [s for s in p.get('notes', []) if s['left_aid'] == str(n_a['_id'])]
+                cn = p['columns'] = [c for c in p['columns'] if c['a_id'] == n_a['_id']][:1]
+                n_a['notes'] = cn[0].get('notes', [])
+                kw['note_a'] = Article.unpack_data(n_a, True)
         else:
-            kwargs['notes'] = self.fill_notes(p) if p.get('notes') else []
+            kw['notes'] = self.fill_notes(p) if p.get('notes') else []
 
         for c in p['columns']:
             a = self.db.article.find_one({'_id': c['a_id']})
@@ -71,10 +77,10 @@ class MatchHandler(ProjHandler, ProjBaseApi):
                                new=1 if u and u['a_id'] == str(a['_id']) and u['toc_i'] == ti else 0)
                           for ti, t in enumerate(a['toc']) if t['rows']]
 
-        kwargs.update(mode=mode, proj=p, _id=str(p['_id']), pi=pi, max_page=max_page)
+        kw.update(mode=mode, proj=p, _id=str(p['_id']), pi=pi, max_page=max_page)
         self.render(f"proj_{mode if mode == 'match' else 'view'}.html", P_TAGS=Section.TAGS,
                     col_w=100 * 1000 // max(1, col_n) / 1000, all_toc=all_t, cur_toc=cur_toc,
-                    is_owner=p['created_by'] == self.username, editable=editable, **kwargs)
+                    is_owner=p['created_by'] == self.username, editable=editable, **kw)
 
     def get_max_page(self, p, a):
         return len(a['sections']) if self and len(a['sections']) > 3 else 0
@@ -127,8 +133,7 @@ class MergeNotesHandler(MatchHandler):
     @auto_try
     def get(self, a_id):
         a = self.db.article.find_one({'_id': ObjectId(a_id)})
-        if a is None or not a.get('note_for'):
-            self.send_raise_failed('经典不存在', 404)
+        assert a, '经典不存在'
         return MatchHandler.get(self, 'notes', a['proj_id'], note_a=a)
 
     def render(self, template_name, **kwargs):

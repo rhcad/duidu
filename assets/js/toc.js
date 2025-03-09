@@ -10,7 +10,7 @@ function _scanTocRows(ext, rows) {
           r.level = lv1
           linked += r.s_id ? 1 : 0
           items.push({
-            id: 'toc-' + r.id, text: r.text,
+            id: 'toc-' + r.id, text: r.text, icon: r.s_id ? 'linked' : '',
             data: {i: i, ext: ext, level: lv1, id: r.id, s_id: r.s_id, line: r.line}
           })
         }
@@ -62,6 +62,7 @@ function tocLoad(ext, a_id, ti, ended=null) {
 
 function _initTocTree(ended) {
   $('.jstree-anchor').each((i, a) => a.removeAttribute('href'))
+  $('.jstree-icon.jstree-themeicon-custom').removeClass('jstree-themeicon-custom')
   ended && ended()
 }
 
@@ -217,39 +218,53 @@ function getTocNode(toc_id, ext) {
   return toc_id && tree && tree.get_node(('toc-' + (toc_id + '').split('-').slice(-1)))
 }
 
+/**
+ * 根据树节点或节点ID得到节点信息、文中关联项
+ * @param {jQuery|string} $a 树节点对象或节点ID
+ * @param {string} ext 树序号，'1'、'2'
+ * @returns {Array} [NodeInfo, $toc_row, ext]
+ */
 function getTocRowByTreeNode($a, ext) {
   const id = !$a || typeof $a === 'string' ? $a : $a.closest('li').attr('id')
   const node = getTocNode(id, ext), ret = [_extendNode(node)]
 
   if (node) {
     const $t = _$tree[ext], a_id = $t.attr('data-a-id'), ti = $t.attr('data-toc-i')
-    const tid = id.replace('toc-', '')
+    const tid = id.replace('toc-', '') // tree id to toc id
     ret[1] = $(`.cell[data-id="${a_id}"] .toc_row[data-toc-i="${ti}"][data-toc-id="${tid}"]`)
     ret[2] = ext
   }
   return ret
 }
 
-function navigateToPara(node) {
+function _findTocRowByNode(node, traverse=true) {
   const ext = node && node.data.ext
-  let r = getTocRowByTreeNode(node && node.id || '', ext)
-  if (node && !r[1][0]) {
+  const r = getTocRowByTreeNode(node && node.id || '', ext)
+  const $toc_row = node && r[1]
+
+  if (node && !$toc_row[0] && traverse) {
     const scan = id => {
       const node = getTocNode(id, ext), r1 = getTocRowByTreeNode(node.id, ext)
       if (r1[1][0]) {
         return r1
       }
       for (let i = 0; i < node.children.length; i++) {
-        let r2 = scan(node.children[i])
+        const r2 = scan(node.children[i])
         if (r2) {
           return r2
         }
       }
     }
-    r = scan(node.id)
+    return scan(node.id)
   }
-  if (node)
+  return r
+}
+
+function navigateToPara(node) {
+  const r = _findTocRowByNode(node)
+  if (node) {
     _setActiveToc(node.data.ext)
+  }
   if (r && r[1]) {
     window.activatePara(r[1])
     scrollParaToVisible(r[1])
