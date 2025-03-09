@@ -168,7 +168,7 @@ class ProjAddApi(BaseHandler):
             self.send_raise_failed(f"项目编码重复 {p['code']}+{self.username}")
         p = dict(code=p['code'], name=p['name'], comment=p['comment'], columns=[],
                  created_by=self.username, editors=[], cols=0, char_n=0, toc_n=0, note_n=0,
-                 rows=[], created=self.now(), updated=self.now())
+                 rows=[], created=self.now(), updated=self.now(), note_char_n=0)
         r = self.db.proj.insert_one(p)
         _id = str(r.inserted_id)
 
@@ -196,7 +196,8 @@ class ProjCloneApi(ProjBaseApi):
         p = dict(code=d['code'], name=d['name'], comment=d['comment'], tmp=tmp,
                  created_by=self.username, editors=[], cols=p0['cols'], char_n=p0['char_n'],
                  columns=[], rows=[], created=self.now(), updated=self.now(), toc_n=p0['toc_n'],
-                 cloned=p0.get('cloned', p0['_id']), note_n=p0['note_n'])
+                 cloned=p0.get('cloned', p0['_id']),
+                 note_n=p0['note_n'], note_char_n=p0.get('note_char_n', 0))
         r = self.db.proj.insert_one(p)
         p_id = r.inserted_id
         id_map = {str(p0['_id']): str(p_id)}  # old_id: new_id
@@ -464,6 +465,7 @@ class SectionDelApi(ProjBaseApi):
         self.log(f"section {s['_id']} removed: {s['name']}")
 
         rows = self.update_ids(dict(char_n=p['char_n'] - (0 if is_note else s['char_n']),
+                                    note_char_n=p.get('note_char_n', 0) - (s['char_n'] if is_note else 0),
                                     rows=p.get('rows', [])), {str(s['_id']): ''})
         self.db.proj.update_one({'_id': p['_id']}, {'$set': rows})
         self.send_success({'a_id': str(a['_id'])})
@@ -508,6 +510,7 @@ class ArticleDelApi(ProjBaseApi):
         if columns is not None:
             self.db.proj.update_one({'_id': p['_id']}, {'$set': {
                 'char_n': p['char_n'] - (0 if is_note else a['char_n']),
+                'note_char_n': p.get('note_char_n', 0) - (a['char_n'] if is_note else 0),
                 'note_n': p['note_n'] - (1 if is_note else 0),
                 'columns': columns, 'cols': len(columns), 'rows': rows}})
         self.db.article.delete_one({'_id': a['_id']})

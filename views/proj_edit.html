@@ -144,7 +144,7 @@
         </div>
       </div>
       <div class="panel-body">
-        <p>将论典、注疏、讲解等注解按需合并到上面的经典内容中。</p>
+        <p data-note-char-n="{{proj.get('note_char_n',0)}}">将论典、注疏、讲解等注解按需合并到上面的经典内容中。</p>
         {% set notes = [] %}
         {% for c in proj.get('columns', []) %}
         {% for note in c.get('notes', []) %}
