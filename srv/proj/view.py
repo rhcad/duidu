@@ -40,7 +40,8 @@ class MatchHandler(ProjHandler, ProjBaseApi):
     def get(self, mode, p_id, **kw):
         p, editable = self.check_proj(p_id)
         col_n, max_page, all_t = 0, 0, []
-        pi = max(1, int(self.get_argument('page', '1'))) if p['cols'] == 1 else 0
+        pi_s = self.get_argument('page', '1').split('-')
+        pi = max(1, int(pi_s[0])) if p['cols'] == 1 else 0
 
         u = cur_toc = p.get('cur_toc') or {}
         if cur_toc and mode == 'match':
@@ -64,11 +65,14 @@ class MatchHandler(ProjHandler, ProjBaseApi):
         else:
             kw['notes'] = self.fill_notes(p) if p.get('notes') else []
 
-        for c in p['columns']:
+        for i, c in enumerate(p['columns']):
             a = self.db.article.find_one({'_id': c['a_id']})
-            max_page = pi and mode != 'notes' and self.get_max_page(p, a) or 0
-            pi = min(pi, max_page) if max_page else 0
-            c.update(dict(rows=Article.get_column_rows(self, a, pi),
+            if i == 0:
+                max_page = pi and self.get_max_page(p, a) or 0
+                pi_ = pi = min(pi, max_page) if max_page else 0
+            elif max_page:
+                pi_ = min(int(pi_s[i]) if i < len(pi_s) else pi, self.get_max_page(p, a))
+            c.update(dict(rows=Article.get_column_rows(self, a, pi_),
                           toc=a.get('toc', [])))
             col_n += int(c.get('colspan') or 1)
             if a.get('toc'):

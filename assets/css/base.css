@@ -148,7 +148,7 @@ p.text { text-indent: 2em; }
 .text.xu_end:not(.ellipsis-n) { padding-bottom: .5em; }
 .xu_end + .text.xu_first,
 .num + .text.xu_first,
-.text.xu_first:first-child { border-top: none; padding-top: 0; }
+.text.xu_first:first-child, .no-select + .text.xu_first { border-top: none; padding-top: 0; }
 
 .text.start-quot, .text.start-quot { text-indent: 1em; }
 .text.juan_end { text-align: right; font-size: .7em; text-indent: 0; }
