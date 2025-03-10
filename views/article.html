@@ -30,7 +30,7 @@
               <li><a href="/proj/edit/{{page['proj_id']}}">回到项目</a></li>
               <li role="separator" class="divider"></li>
               <li><a onclick="deleteAll()">全部删除</a></li>
-              {% if internal and [1 for s in page['sections'] if 'import_cb' in s['source']] %}
+              {% if internal and [1 for s in page['sections'] if 'import_cb' in s['source'] or 'import_html' in s['source']] %}
               <li role="separator" class="divider"></li>
               <li><a onclick="reimport()">重新导入</a></li>
               {% end %}
@@ -53,7 +53,7 @@
     <div class="panel panel-default" id="{{sec['_id']}}">
       <div class="panel-heading">
         <div class="panel-title">
-          <span class="ellipsis"><span class="gray m-r-10">{{i+1}}</span> <span>{{sec['name']}}</span></span>
+          <span class="ellipsis"><span class="gray m-r-10">{{i+1}}</span> <span>{{sec['name'].split('_')[-1]}}</span></span>
           <small class="m-l-10 char-n"><span class="gray">字数：</span>{{sec['char_n']}}</small>
           <div class="dropdown pull-right">
             <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">

@@ -80,6 +80,9 @@ class ProjBaseApi(BaseHandler):
         is_append = a.pop('append', 0)
         note_base, note_tag = a.pop('base', ''), a.pop('tag', '')
         assert a['code'] and a['name'] and (is_append or a['type'])
+
+        if ' 第' in a['name']:
+            a['name'] = re.sub(' 第.*$', '', a['name'])
         short_name = self.util.trim_bracket(a.pop('short_name', '') or a['name'])
         assert note_base or is_append or short_name, '请输入简称'
         code = re.sub(r'_\d{3}$|:', '', a['code'])
@@ -152,6 +155,7 @@ class ProjBaseApi(BaseHandler):
     def fix_text(content):
         content = re.sub(r'(\s*\n)+', '\n', content)
         content = re.sub(r'<[^<>]*>|\[[A-Z]?\d+[a-z]?]|[@|]', '', content)  # 去除xml标签、保留字符
+        content = re.sub(r'\\([“”’])', lambda m: m.group(1), content)
         return content.strip()
 
 
@@ -544,7 +548,7 @@ class ImportTextApi(ProjBaseApi):
                 self.send_raise_failed('内容有太长的词: ' + m.group())
             large = self.save_section(proj, a, a['name'], a['content'])
             n += 0 if large else 1
-        large = large and f'已导入{n}部分，项目总字数{large[0]}，如再导入{large[1]}字的内容就超过{large[2]}万，多余内容可分拆项目'
+        large = large and f'已导入{n}部分，项目总字数{large[0]}，不能再导入{large[1]}字的内容，多余内容可分拆项目'
         if n:
             self.log(large or f'已导入{n}部分', 'W')
             self.send_success({'ignore': large, 'n': n})
@@ -555,7 +559,7 @@ class ImportTextApi(ProjBaseApi):
         if not text:
             return
         if a.get('note_for'):
-            if p.get('note_char_n', 0) + len(text) > 1e6 or len(text) > 1e5:
+            if p.get('note_char_n', 0) + len(text) > 5e6 or len(text) > 1e5:
                 return p.get('note_char_n', 0), len(text), 10
         else:
             if p['char_n'] + len(text) > 2e5:

@@ -359,8 +359,8 @@ class TocAddApi(TocBaseApi):
             if not m:
                 break
             level, text = (m.group(1) or '').strip(), m.group(2).strip()
-            if not level and re.match('^[甲乙丙丁戊己庚辛壬癸]', text):
-                level = '甲乙丙丁戊己庚辛壬癸'.index(text[0]) + 1
+            if not level and Toc.re_toc.match(text):
+                level = Toc.TOC_CH.index(text[0]) + 1
             if not toc:
                 level = 1
             elif not level:

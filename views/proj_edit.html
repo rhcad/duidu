@@ -83,7 +83,7 @@
               导入 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-              <li><a data-toggle="modal" data-target="#importTextModal">输入文本内容</a></li>
+              <li><a data-toggle="modal" data-target="#importTextModal">导入文本或网页</a></li>
               <li><a data-toggle="modal" data-target="#importCBetaModal">从 CBETA 导入</a></li>
               <li role="separator" class="divider"></li>
               <li><a data-toggle="modal" data-target="#appendTextModal">追加文本内容</a></li>
@@ -134,7 +134,7 @@
               导入 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu3">
-              <li><a data-toggle="modal" data-target="#importTextModal2">输入文本内容</a></li>
+              <li><a data-toggle="modal" data-target="#importTextModal2">导入文本或网页</a></li>
               <li><a data-toggle="modal" data-target="#importCBetaModal2">从 CBETA 导入</a></li>
               <li><a data-toggle="modal" data-target="#freeNoteModel">自由注解</a></li>
               <li role="separator" class="divider"></li>
@@ -223,31 +223,37 @@
         res => res['modified'] ? reloadPage() : $modal.modal('hide'))
     }
   }
-
+  function _contentOrHtml(d) {
+    return /^https?:\/\//.test(d.content) ? 'html' : 'text'
+  }
   function onSubmitImportText($modal) {
     const fields = ['code', 'name', 'type', 'content', 'short_name', 'colspan'],
       d = getModalData($modal, fields, 'a')
     if (d) {
-      postApi('/proj/import/text', Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
+      postApi('/proj/import/' + _contentOrHtml(d),
+        Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
     }
   }
   function onSubmitImportNotesText($modal) {
     const fields = ['base', 'code', 'name', 'type', 'content', 'tag'],
       d = getModalData($modal, fields, 'a')
     if (d) {
-      postApi('/proj/import/text', Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
+      postApi('/proj/import/' + _contentOrHtml(d),
+        Object.assign(d, {proj_id: '{{_id}}'}), reloadPage)
     }
   }
   function onSubmitAppendText($modal) {
     const d = getModalData($modal, ['code', 'name', 'content'], 's')
     if (d) {
-      postApi('/proj/import/text', Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
+      postApi('/proj/import/' + _contentOrHtml(d),
+        Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
     }
   }
   function onSubmitAppendNotesText($modal) {
     const d = getModalData($modal, ['code2', 'name', 'content'], 's')
     if (d) {
-      postApi('/proj/import/text', Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
+      postApi('/proj/import/' + _contentOrHtml(d),
+        Object.assign(d, {append: 1, proj_id: '{{_id}}'}), reloadPage)
     }
   }
   function onSubmitImportCBeta($modal) {
