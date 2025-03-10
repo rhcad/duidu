@@ -313,6 +313,27 @@ function _mergeUp($p, test) {
   }
 }
 
+// 对当前单元格内选中的段落设置段落类型
+function _setTag($p) {
+  const $s = $p.closest('.cell').find('.selected')
+  const sel = $s.get().map(p => getParaInfo($(p)))
+  const tags = window.p_tags || {}, used = Object.keys(tags).filter(s => $p.hasClass(s));
+
+  (editable ? Swal2 : Swal1).fire({
+    title: '段落类型',
+    input: 'select',
+    inputOptions: tags,
+    inputValue: used[0],
+    inputPlaceholder: '选择一种段落类型',
+    inputLabel: `段落 “${ellipsisText($p.text(), 24)}”`,
+    draggable: true,
+    confirmButtonText: '设置',
+    didOpen: () => activatePara($p),
+    preConfirm: v => !v || used[0] === v ? false : postApi('/proj/match/tag',
+      {data: {info: getParaInfo($p, {tag: v}), sel: sel}}, reloadPage)
+  })
+}
+
 $.contextMenu({
   selector: '.cell-r [data-nid]',
   items: {
@@ -357,6 +378,10 @@ $.contextMenu({
       name: '合并到上段',
       callback: function(){ _mergeUp(this, false) },
       disabled: function(){ return !editable || !_mergeUp(this, true) },
+    },
+    tag: {
+      name: '段落类型...',
+      callback: function(){ _setTag(this) },
     },
     sep1: {name: '--'},
     mergeNote: {

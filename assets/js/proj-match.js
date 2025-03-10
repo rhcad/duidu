@@ -359,6 +359,7 @@ function _setTag($p) {
     inputOptions: tags,
     inputValue: used[0],
     inputPlaceholder: '选择一种段落类型',
+    inputLabel: `段落 “${ellipsisText($p.text(), 24)}”`,
     draggable: true,
     confirmButtonText: '设置',
     didOpen: () => activatePara($p),

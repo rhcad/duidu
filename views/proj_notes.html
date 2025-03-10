@@ -24,6 +24,7 @@
     p.has-sel.ellipsis-n, p.has-note.ellipsis-n { -webkit-line-clamp: unset; }
     p.active { color: var(--body-color) !important; }
     p.active:not(.has-sel) { border: 1px dotted var(--border-color); }
+    .swal2-shown p.active { border: 1px solid var(--hover-color); }
 
     .sec { margin: 0; padding: 5px; }
     .sec.gray { font-style: italic; font-size: .8em; }
@@ -122,6 +123,7 @@
   </div>
 </div>
 <script>
+  window.p_tags = {% raw P_TAGS %}
   window.nA = {% raw note_a %}
   window.notes = {% raw notes %}
   window.editable = {{int(editable)}}
