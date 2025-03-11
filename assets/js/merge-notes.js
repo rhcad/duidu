@@ -314,21 +314,23 @@ function _mergeUp($p, test) {
 }
 
 // 对当前单元格内选中的段落设置段落类型
-function _setTag($p) {
-  const $s = $p.closest('.cell').find('.selected')
-  const sel = $s.get().map(p => getParaInfo($(p)))
-  const tags = window.p_tags || {}, used = Object.keys(tags).filter(s => $p.hasClass(s));
+function _setTag($p_) {
+  const $s = $p_.closest('.cell').find('.selected'), $p = $p_.closest('p')
+  const sel = $s.get().map(p => getParaInfo($(p).closest('p')))
+  const pText = ellipsisText($p.text(), sel.length > 1 ? 20 : 24)
+  const ts = window.p_tags || {}, used = Object.keys(ts).filter(s => $p.hasClass(s))
+  const tags = Object.entries(ts).map(v => [v[0], v[1].replace('*', sel.length > 1 ? ' 批量' : '')]);
 
   (editable ? Swal2 : Swal1).fire({
     title: '段落类型',
     input: 'select',
-    inputOptions: tags,
+    inputOptions: Object.fromEntries(tags),
     inputValue: used[0],
     inputPlaceholder: '选择一种段落类型',
-    inputLabel: `段落 “${ellipsisText($p.text(), 24)}”`,
+    inputLabel: `段落 “${pText}”${sel.length > 1 ? '等' + sel.length + '个段落' : ''}`,
     draggable: true,
     confirmButtonText: '设置',
-    didOpen: () => activatePara($p),
+    didOpen: () => sel.length < 2 && activatePara($p),
     preConfirm: v => !v || used[0] === v ? false : postApi('/proj/match/tag',
       {data: {info: getParaInfo($p, {tag: v}), sel: sel}}, reloadPage)
   })

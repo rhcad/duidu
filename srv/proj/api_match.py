@@ -264,7 +264,7 @@ class TagApi(ProjBaseApi):
         d = self.data()
         tag = d['info'].pop('tag')
         proj, sec, rows, row = self.get_one_row(d['info'])
-        sel = d['sel'] if tag in ['verse', 'dharani', 'xu'] else [d['info']]
+        sel = d['sel'] if '*' in Section.TAGS[tag] else [d['info']]
         for r in sel:
             row = Section.get_row(rows, int(r['line']))
             if not row or r['s_i'] != d['info']['s_i']:

@@ -79,8 +79,8 @@ class Article(Model):
 
 class Section(Model):
     NUMS = '一二三四五六七八九十百零〇'
-    TAGS = dict(juan='章卷', juan_end='卷尾', byline='作译者', verse='偈颂', dharani='咒语',
-                pin='品', head='小节', toc_line='科判行', num='CB编号', _='--清除以上', xu='序跋', _xu='--清除序跋')
+    TAGS = dict(juan='章卷', juan_end='卷尾', byline='作译者', verse='偈颂 *', dharani='咒语 *',
+                pin='品', head='小节', toc_line='科判行', num='CB编号', _='--清除以上 *', xu='序跋 *', _xu='--清除序跋 *')
     fields = {
         'a_id': {'caption': '文章ID'},
         'name': {'caption': '名称'},
