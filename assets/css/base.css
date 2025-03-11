@@ -156,7 +156,8 @@ p.text { text-indent: 2em; }
 .text.juan { font-size: 1.05em; font-weight: bold; text-align: center; text-indent: 0; }
 .text.juan.xu { font-size: 1em; }
 .text.juan small { font-weight: normal; }
-.text.head, .text.toc_line, .text.pin { font-weight: 500; }
+.text.head, .text.toc_line, .text.pin { font-weight: 500;
+    font-family: STKaiti,"Kaiti SC","楷体","楷体_GB2312",KaiTi,KaiTi_GB2312,DFKai-SB; }
 .text.num { font-size: .8em; }
 .text.verse, .text.dharani { color: var(--verse-color); }
 @media (min-width:600px) {
