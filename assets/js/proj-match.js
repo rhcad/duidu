@@ -275,7 +275,7 @@ function _splitParagraph($p) {
 }
 
 function _insertToc($p) {
-  const tip = '每行一个条目，行首可指定级别，或+-相对缩进\n' +
+  const tip = '每行一个条目，行首可指定级别数字，或+-相对缩进\n' +
     '　例如 “2 二级”、“+ 子条目”、“-上级”、“条目 » 子条目”\n' +
     '“甲乙丙”等天干地支开头可不指定级别数字，例如“丙二回答分”'
   const t = getCurrentTocNode(), tocText = ellipsisText(t.text)
@@ -586,9 +586,9 @@ function importToc() {
   const a_id = $a[0] ? $a.closest('.cell').data('id') : ''
   const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
   const $p = $a[0] ? $a : $(`.cell[data-id="${a_id}"] p`).first()
-  const label = $c[0] && `<label for="t-title" class="swal2-input-label">为经典“${ $c.text()}”增加科判</label>`
-  const tip = `例如 “2 二级”、“  - 2 乙一抉择分”
-以“甲乙丙”等天干地支开头可不指定级别数字，例如“丙二回答分”`
+  const label = $c[0] && `<label for="t-title" class="swal2-input-label m-t-0 m-b-10">为经典“${ $c.text()}”增加科判</label>`
+  const tip = `例如 “2 二级”、“  - 次辨题名”
+以天干地支开头可不指定级别数字，例如“丙二回答分”`
 
   if (!a_id) {
     return showError('不能导入', '请在对应栏中点击段落，然后再试。')
@@ -598,7 +598,7 @@ function importToc() {
     width: 600,
     html: `${label || ''}
 <input id="t-title" class="swal2-input" maxlength="30" placeholder="科判名称" style="width: 100%; margin: 0;">
-<label for="t-text" class="swal2-input-label">每行一个科判条目，行首可指定级别，或+-相对缩进</label>
+<label for="t-text" class="swal2-input-label">每行一个科判条目，行首可指定级别数字，或+-相对缩进</label>
 <textarea id="t-text" rows="10" class="swal2-textarea" maxlength="2000"
  placeholder="${tip}" style="width: 100%; margin: .5em 0 5px;"></textarea>`,
     focusConfirm: false,
