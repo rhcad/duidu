@@ -112,7 +112,8 @@ function getApi(url, success, error) {
   return ajaxApi(url, 'GET', null, success, error)
 }
 function renderApi(success, url='') {
-  return ajaxApi(url || location.href, 'GET', {dataType: 'html'}, success, reloadPage)
+  return ajaxApi(url || location.pathname + location.href.replace(/^[^?]/, ''),
+    'GET', {dataType: 'html'}, success, reloadPage)
 }
 
 /**
