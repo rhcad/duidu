@@ -295,7 +295,8 @@ class ProjImportApi(ProjBaseApi):
         self.db.article.delete_many({'proj_id': proj['_id']})
         self.db.proj.delete_one({'_id': proj['_id']})
         for coll in ['proj', 'article', 'section']:
-            self.db[coll].insert_many(data[coll])
+            for r in data[coll]:
+                self.db[coll].update_one({'_id': r['_id']}, {'$set': r}, upsert=True)
         self.log(f"project {proj['code']} imported: {proj['name']}")
         return new_p
 

@@ -398,13 +398,12 @@ class TocImportApi(TocAddApi):
     def post(self):
         d, p = self.get_project_edit()
         a = self.get_article(d['a_id'])
-
+        assert d.get('name'), '需要科判名称'
+        assert not [1 for t in a.get('toc', []) if t['name'] == d['name']], '科判名称重复'
         content = re.split(r'\s*\n+\s*', d['text'].strip())
-        assert len(content) > 1 and not re.match(r'^\d+ ', content[0]), '需要科判名称和至少一个科判条目'
-        assert not [1 for t in a.get('toc', []) if t['name'] == content[0]], '科判名称重复'
-
-        d['text'] = '\n'.join(content[1:])
-        self.add_rows(d, p, a, {}, [], {}, name=content[0], add_toc=True)
+        assert content, '需要至少一个科判条目'
+        d['text'] = '\n'.join(content)
+        self.add_rows(d, p, a, {}, [], {}, name=d['name'], add_toc=True)
 
 
 class TocDelApi(TocBaseApi):

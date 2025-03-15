@@ -277,7 +277,7 @@ function _splitParagraph($p) {
 function _insertToc($p) {
   const tip = '每行一个条目，行首可指定级别，或+-相对缩进\n' +
     '　例如 “2 二级”、“+ 子条目”、“-上级”、“条目 » 子条目”\n' +
-    '“甲乙丙”等天干字开头可不指定级别，例如“丙二回答分”'
+    '“甲乙丙”等天干地支开头可不指定级别数字，例如“丙二回答分”'
   const t = getCurrentTocNode(), tocText = ellipsisText(t.text)
   const data = getParaInfo($p, {toc: tocText && Object.assign({text: t.text}, t.data)})
 
@@ -582,10 +582,13 @@ $.contextMenu({
 })
 
 function importToc() {
-  const $a = $('.cell p.active').first()
+  const $a = $('.cell p.active,.single-article p.text').first()
   const a_id = $a[0] ? $a.closest('.cell').data('id') : ''
   const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
   const $p = $a[0] ? $a : $(`.cell[data-id="${a_id}"] p`).first()
+  const label = $c[0] && `<label for="t-title" class="swal2-input-label">为经典“${ $c.text()}”增加科判</label>`
+  const tip = `例如 “2 二级”、“  - 2 乙一抉择分”
+以“甲乙丙”等天干地支开头可不指定级别数字，例如“丙二回答分”`
 
   if (!a_id) {
     return showError('不能导入', '请在对应栏中点击段落，然后再试。')
@@ -593,15 +596,19 @@ function importToc() {
   Swal2.fire({
     title: '导入科判',
     width: 600,
-    input: 'textarea',
-    inputAttributes: {rows: 10},
-    inputPlaceholder: `第一行输入科判名称
-其余每行一个科判条目，行首可指定级别，或+-相对缩进
-\u3000例如 “2 二级”、“  - 2 乙一抉择分”
-以“甲乙丙”等天干字开头可不指定级别数字，例如“丙二回答分”`,
-    inputLabel: `为经典“${ $c.text()}”增加科判`,
-    preConfirm: text => text && postApi('/proj/match/toc/import',
-      getParaInfo($p, {text: text}), reloadPage)
+    html: `${label || ''}
+<input id="t-title" class="swal2-input" maxlength="30" placeholder="科判名称" style="width: 100%; margin: 0;">
+<label for="t-text" class="swal2-input-label">每行一个科判条目，行首可指定级别，或+-相对缩进</label>
+<textarea id="t-text" rows="10" class="swal2-textarea" maxlength="2000"
+ placeholder="${tip}" style="width: 100%; margin: .5em 0 5px;"></textarea>`,
+    focusConfirm: false,
+    preConfirm: () => {
+      const name = $('#t-title').val().trim(), text = $('#t-text').val().trim();
+      if (!name) { $('#t-title').focus(); return false }
+      if (!text) { $('#t-text').focus(); return false }
+      return postApi('/proj/match/toc/import',
+        getParaInfo($p, {name: name, text: text}), reloadPage)
+    }
   })
 }
 
@@ -636,7 +643,7 @@ function _editTocName($s) {
 
   Swal2.fire({
     title: '修改科判名称',
-    inputLabel: `修改经典“${ $c.text()}”的科判名称`,
+    inputLabel: $c.text() ? `修改经典“${ $c.text()}”的科判名称` : '',
     input: 'text',
     inputValue: $s.text(),
     preConfirm: text => text && postApi('/proj/match/toc/edit',
