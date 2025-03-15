@@ -112,6 +112,7 @@ input[type="submit"] { border: none; }
 th { min-width: 3em; }
 th.created_by { min-width: 4em; }
 .table-p > table { border-collapse: separate; }
+.table-p > table.single-article { width: 100%; }
 .app .table > tbody > tr > td { max-width: 9em; }
 .app .table > tbody > tr > td.code,
 .app .table > tbody > tr > td.created_by { max-width: 5.5em; }

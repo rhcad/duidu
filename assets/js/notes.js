@@ -353,9 +353,7 @@ function addNote(note, $lf, $rt, $rp, ignoreErr=false) {
   }
 
   const $ins = $next.closest('.note-tag.inline')[0] ? $next : $pos
-  const insTag = $ins.closest('.note-tag')[0] || $ins[0] && $ins[0].previousSibling
   $tag.attr('title', title).insertAfter($ins)
-    .toggleClass('after', insTag ? insTag.tagName === 'SUP' : false)
   if ($rt.addClass) {
     $rt.addClass('used').removeClass('selected').attr('data-nid', note.id).removeAttr('data-id')
   }
@@ -378,6 +376,8 @@ function reloadNotes(notes, cellCls='.cell-l', fromReorder=false) {
   buildNotes(cellCls)
   if (!fromReorder) {
     reorderNoteTags(cellCls)
+  } else {
+    _checkNoteTags()
   }
 }
 
@@ -397,6 +397,14 @@ function buildNotes(cellCls='.cell-l') {
   })
 }
 
+function _checkNoteTags() {
+  $('.note-tag').each((i, tag) => {
+    if (tag.previousSibling.tagName === 'SUP') {
+      tag.classList.add('after')
+    }
+  })
+}
+
 function reorderNoteTags(cellCls='.cell-l') {
   let pn = 0, changes = 0, notes2 = []
   $('.note-tag').each((i, tag) => {
@@ -407,5 +415,7 @@ function reorderNoteTags(cellCls='.cell-l') {
   })
   if (changes) {
     reloadNotes(notes2, cellCls, true)
+  } else {
+    _checkNoteTags()
   }
 }

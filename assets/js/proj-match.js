@@ -73,6 +73,8 @@ $doc.on('keyup', e => {
       showSelectedTip($('.cell:first-child'))
     } else if (e.key.toUpperCase() === 'T') {
       _insertToc($('p.active').first())
+    } else if (e.key === '-' || e.key === '=') {
+      e.key === '-' ? reduceFont() : enlargeFont()
     } else {
       handled = false
     }
@@ -146,14 +148,14 @@ $.contextMenu({
       name: '合并为一组<span class="key" title="回车键">Enter</span>',
       isHtmlName: true,
       callback: function(){ mergeRow(false) },
-      disabled: function(){ return !editable || !mergeRow(true) },
+      disabled: function(){ return !editable || _status.oneCol || !mergeRow(true) },
     },
     sep2: {name: '--'},
     insertToc: {
       name: '插入科判条目...<span class="key">T</span>',
       isHtmlName: true,
       callback: function(){ _insertToc(this); },
-      disabled: function(){ return !editable },
+      disabled: function(){ return !editable || _status.oneCol },
     },
     sep3: {name: '--'},
     markDel: {
@@ -175,7 +177,7 @@ $.contextMenu({
       name: '插入科判条目...<span class="key">T</span>',
       isHtmlName: true,
       callback: function(){ _insertToc(this); },
-      disabled: function(){ return !editable },
+      disabled: function(){ return !editable || _status.oneCol },
     },
     sep1: {name: '--'},
     markDel: {
@@ -263,8 +265,7 @@ function _splitParagraph($p) {
     inputValue: t0,
     input: 'textarea',
     inputAttributes: {rows: 14},
-    width: 650,
-    draggable: true,
+    width: 800,
     confirmButtonText: '拆分',
     didOpen: () => activatePara($p),
     preConfirm: text => postApi('/proj/match/split',
@@ -358,7 +359,7 @@ function _setTag($p) {
   (editable ? Swal2 : Swal1).fire({
     title: '段落类型',
     input: 'select',
-    inputOptions: tags,
+    inputOptions: Object.fromEntries(tags),
     inputValue: used[0],
     inputPlaceholder: '选择一种段落类型',
     inputLabel: `段落 “${pText}”${sel.length > 1 ? '等' + sel.length + '个段落' : ''}`,
@@ -415,7 +416,7 @@ function mergeRow(test=false) {
   const $tr = $('.selected').closest('.columns').first()
   const $sel = $tr.find('.selected:not(.del)')
 
-  if ($tr.find('.cell').length < 2) { // 单栏不能合并对照
+  if (_status.oneCol || $tr.find('.cell').length < 2) { // 单栏不能合并对照
     return false
   }
   if ($tr.hasClass('merged') && $sel.length === $tr.find('.text:not(.del)').length) {

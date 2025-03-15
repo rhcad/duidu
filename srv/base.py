@@ -19,7 +19,7 @@ def on_exception(self, e):
         tb_info = traceback.extract_tb(tb)
         fn, line, f, text = tb_info[-1]
         if isinstance(e, AssertionError):
-            msg = '内部错误 ' + (str(e) if e.args else f"{path.basename(fn).split('.')[0]} L{line}")
+            msg = str(e) if e.args else f"内部错误 {path.basename(fn).split('.')[0]} L{line}"
         elif isinstance(e, PyMongoError):
             msg = '数据库错误 ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e))
         else:

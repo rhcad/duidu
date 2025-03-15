@@ -1626,7 +1626,7 @@
    */
   const move = event => {
     const popup = getPopup();
-    if (dragging) {
+    if (dragging && popup) {
       let {
         clientX,
         clientY

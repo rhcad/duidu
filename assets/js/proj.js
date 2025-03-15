@@ -1,5 +1,8 @@
 window.$doc = $(document)
-window._status = {autoSaveOpt: false, editMode: false, selId: 1}
+window._status = {
+  autoSaveOpt: false, editMode: false, selId: 1,
+  oneCol: $('.original.single-article').length > 0
+}
 
 const ellipsisText = (s, n=10) => {
   if (s && s.length > n) {

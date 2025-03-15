@@ -109,6 +109,8 @@ $doc.on('keyup', e => {
       clearAllSelected($c.hasClass('cell-l') ? '.cell-l' : $c.hasClass('cell-r') ? '.cell-r' : '')
       showSelectedTip($('.cell-r'))
       window.clearTimeout(_status.tmSel)
+    } else if (e.key === '-' || e.key === '=') {
+      e.key === '-' ? reduceFont() : enlargeFont()
     } else {
       handled = false
     }
@@ -293,8 +295,7 @@ function _splitParagraph($p) {
     inputValue: t0,
     input: 'textarea',
     inputAttributes: {rows: 14},
-    width: 650,
-    draggable: true,
+    width: 800,
     confirmButtonText: '拆分',
     preConfirm: text => postApi('/proj/match/split',
       getParaInfo($p, {old_text: t0, text: text.trim()}), reloadPage)

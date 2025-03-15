@@ -1,6 +1,6 @@
 function onPswChanged(el) {
   setTimeout(() => {
-    const chk = [el.value.length > 5, /[A-Z]/.test(el.value), /[a-z]/.test(el.value),
+    const chk = [el.value.length > 3, /[A-Z]/.test(el.value), /[a-z]/.test(el.value),
       /[0-9]/.test(el.value), /[~!@#$%_;,.]/.test(el.value)]
     const inv = /[^A-Za-z0-9~!@#$%_;,.]/.test(el.value)
     const n = chk.reduce((a, c) => a + c, 0), ok = !inv && chk[0] && n > 2

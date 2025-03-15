@@ -19,8 +19,8 @@ class ProjHandler(BaseHandler):
 
         editable = self.username == p['created_by'] or self.username in p['editors']
         view = not editable and not p.get('public')
-        if view and not editable and not p.get('published'):
-            self.send_raise_failed(f"项目 {p['code']} 还未发布，不能查看", 404)
+        if view and not editable and not p.get('published') and self.username != 'admin':
+            self.send_raise_failed(f"项目 {p['code']} 还未发布，可向创建者申请为协编。", 404)
         return p, editable
 
     @auto_try
@@ -38,7 +38,13 @@ class MatchHandler(ProjHandler, ProjBaseApi):
 
     @auto_try
     def get(self, mode, p_id, **kw):
+        if mode in ['notes', 'para']:
+            a = self.db.article.find_one({'_id': ObjectId(p_id)})
+            assert a, '经典不存在'
+            p_id = a['proj_id']
+            kw['note_a'] = a
         p, editable = self.check_proj(p_id)
+
         col_n, max_page, all_t = 0, 0, []
         pi_s = self.get_argument('page', '1').split('-')
         pi = max(1, int(pi_s[0])) if p['cols'] == 1 else 0
@@ -47,7 +53,7 @@ class MatchHandler(ProjHandler, ProjBaseApi):
         if cur_toc and mode == 'match':
             self.db.proj.update_one({'_id': p['_id']}, {'$unset': {'cur_toc': 1}})
 
-        n_a = mode == 'notes' and kw['note_a']
+        n_a = mode in ['notes', 'para'] and kw['note_a']
         if n_a:
             kw['note_a'] = Article.unpack_data(n_a, True)
             if n_a.get('note_for'):
@@ -57,6 +63,9 @@ class MatchHandler(ProjHandler, ProjBaseApi):
                 cn = [t for t in col0.get('notes', []) if t['a_id'] == n_a['_id']]  # 对应注解标签
                 p['columns'] = [col0, dict(a_id=n_a['_id'], code=n_a['code'],  # 右栏为释文
                                            name='[%s]%s' % (cn[0]['tag'], n_a['name']) if cn else n_a['name'])]
+                if mode == 'para':
+                    p.pop('rows', 0)
+                    p['columns'] = p['columns'][1:]
             else:
                 kw['notes'] = [s for s in p.get('notes', []) if s['left_aid'] == str(n_a['_id'])]
                 cn = p['columns'] = [c for c in p['columns'] if c['a_id'] == n_a['_id']][:1]
@@ -120,7 +129,7 @@ class MatchHandler(ProjHandler, ProjBaseApi):
 
 class MatchRenderApi(MatchHandler):
     """项目段落对照页面的局部渲染"""
-    URL = '/api/proj/(match)/@oid'
+    URL = '/api/proj/(match|para)/@oid'
 
     def finish(self, html=None):
         if b'<table>' not in (html or b''):
@@ -132,16 +141,10 @@ class MatchRenderApi(MatchHandler):
 
 class MergeNotesHandler(MatchHandler):
     """合并注解页面"""
-    URL = '/proj/notes/@oid'
-
-    @auto_try
-    def get(self, a_id):
-        a = self.db.article.find_one({'_id': ObjectId(a_id)})
-        assert a, '经典不存在'
-        return MatchHandler.get(self, 'notes', a['proj_id'], note_a=a)
+    URL = '/proj/(notes|para)/@oid'
 
     def render(self, template_name, **kwargs):
-        BaseHandler.render(self, 'proj_notes.html', **kwargs)
+        BaseHandler.render(self, f"proj_{'notes' if kwargs['mode'] == 'notes' else 'match'}.html", **kwargs)
 
 
 class DownloadHtmlApi(MatchHandler):

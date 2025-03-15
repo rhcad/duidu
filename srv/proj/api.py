@@ -79,13 +79,15 @@ class ProjBaseApi(BaseHandler):
         a = self.data()
         is_append = a.pop('append', 0)
         note_base, note_tag = a.pop('base', ''), a.pop('tag', '')
-        assert a['code'] and a['name'] and (is_append or a['type'])
+        if a.get('code2'):
+            a['code'] = a.pop('code2')
 
         if ' 第' in a['name']:
             a['name'] = re.sub(' 第.*$', '', a['name'])
         short_name = self.util.trim_bracket(a.pop('short_name', '') or a['name'])
         assert note_base or is_append or short_name, '请输入简称'
-        code = re.sub(r'_\d{3}$|:', '', a['code'])
+        code = re.sub(r'_\d{3}$|:', '', a.get('code', ''))
+        assert code, '请输入编码'
         colspan = int(a.pop('colspan', 0) or 0)
 
         proj = self.get_project(a['proj_id'])
@@ -96,6 +98,7 @@ class ProjBaseApi(BaseHandler):
 
         if not is_append or is_append == 'auto':
             if note_base:
+                assert len(exist_col) <= 1, '已存在相同编码的经典'
                 assert len(exist_col) == 1 and len(note_tag) == 1
                 exist_col = exist_col[0]
                 exist_col['notes'] = exist_col.get('notes', [])
@@ -115,7 +118,7 @@ class ProjBaseApi(BaseHandler):
                 if len(proj['columns']) > 11:
                     self.send_raise_failed('最多12栏对读')
 
-        assert not is_append or is_append == 'auto' or (exist_col and exist_a)
+        assert not is_append or is_append == 'auto' or exist_a
         if is_append and exist_a:
             exist_a.update(dict(name=a['name'], source=a.get('source'), content=a['content']))
             return proj, exist_a, is_append

@@ -18,7 +18,7 @@ class HomeHandler(BaseHandler):
                  created_by=1, editors=1, public=1, char_n=1, toc_n=1, note_n=1)
         rows = list(self.db.proj.find({'$or': cond, 'tmp': None}, projection=p,
                                       sort=[('published', -1), ('code', 1), ('name', 1)]))
-        rows = [r for r in rows if r['cols'] or self.username in (r['editors'] + [r['created_by']])]
+        rows = [r for r in rows if r['cols'] or self.username in (r['editors'] + [r['created_by'], 'admin'])]
         for r in rows:
             r['char_k'] = round(r['char_n'] / 1000)
         self.render('home.html', model=Proj, rows=Proj.format_rows(rows, time_format='%Y-%m-%d'))

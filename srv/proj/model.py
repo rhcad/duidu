@@ -134,5 +134,6 @@ class ProjNote(Model):
     }
     actions = [
         dict(id='edit', caption='合并注解', url='/proj/notes/@_id', default=True),
+        dict(id='view', caption='段落格式', url='/proj/para/@_id'),
         dict(id='view', caption='查看经典', url='/article/@_id')
     ]

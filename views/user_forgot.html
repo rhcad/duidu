@@ -34,9 +34,9 @@
           <div class="input-group">
             <span class="input-group-addon">新密码</span>
             <input type="password" id="password" class="form-control" required autocomplete="off" maxlength="20"
-                   pattern="[A-Za-z0-9~!@#$%_;,.]{6,}" onkeydown="onPswChanged(this)"
-                   placeholder="6~20个字母、数字或特殊符号，至少两种"
-                   oninvalid="setCustomValidity('6~20个大写字母、小写字母、数字或特殊符号\n至少两种，可含符号 ~!@#$%_;,.')">
+                   pattern="[A-Za-z0-9~!@#$%_;,.]{4,}" onkeydown="onPswChanged(this)"
+                   placeholder="4~20个字母、数字或特殊符号，至少两种"
+                   oninvalid="setCustomValidity('4~20个大写字母、小写字母、数字或特殊符号\n至少两种，可含符号 ~!@#$%_;,.')">
             <span class="input-group-btn">
               <button class="btn btn-default" type="button" onclick="togglePassword()">显</button>
             </span>
@@ -44,7 +44,7 @@
           <div class="input-group pwd-grade no-select">
             <span class="input-group-addon"></span>
             <span class="form-control">
-              <span id="p-ok"></span><span id="p-len" title="6~20个字符">0 字符</span><span
+              <span id="p-ok"></span><span id="p-len" title="4~20个字符">0 字符</span><span
                 id="p-upper">大写</span><span id="p-lower">小写</span><span
                 id="p-digit">数字</span><span id="p-sign" title="可含符号 ~!@#$%_;,.">符号</span>
             </span>
