@@ -65,7 +65,7 @@
             {% module Users(proj['editors'], '可邀请其他人共同编辑和检查内容') %}</span>
         {% elif current_user and '*' in proj['editors'] %}
         <span class="info-span gray">所有人可修改</span>
-        {% elif current_user and current_user['username'] %}
+        {% elif current_user and current_user['username'] in proj['editors'] %}
         <span class="info-span gray">我 是本项目的协编</span>
         {% end %}
         <span class="info-span">{% module Users([proj['created_by']]) %}
