@@ -25,7 +25,7 @@ html, body, .app, .columns-p, .sidebar, .toc-tree-p { height: 100%; }
     height: calc(100% - 1.6em); padding: 0 .1em;
     overflow: auto; scrollbar-width: thin; }
 
-@media (max-width:1023px) {
+@media (max-width:840px) {
   .show-sidebar .app-body { display: block; }
   .sidebar { position: fixed; left: 15px; right: 15px; overflow-y: auto; margin-left: unset; }
   .sidebar, .sidebar.wide { width: calc(100% - 30px); }
@@ -116,7 +116,7 @@ body.hide-navbar .app-body { height: 100%; margin-top: 10px; padding: 10px; }
 .single-article .sel-tip { display: none!important; }
 .app.has-sel-tip .columns-p { padding-top: 40px; }
 
-@media (max-width:1023px) {
+@media (max-width:840px) {
     body.show-sidebar .sel-tip { top: 225px; }
 }
 @media (min-width:800px) {
