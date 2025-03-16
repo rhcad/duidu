@@ -47,7 +47,12 @@ class Application(web.Application):
                     coll = path.basename(fn).split('.')[0]
                     with open(fn, encoding='utf-8') as f:
                         rs = json_util.loads(f.read())
-                    [self.db[coll].insert_one(r) for r in rs]
+                    for i, r in enumerate(rs):
+                        try:
+                            self.db[coll].insert_one(r)
+                        except PyMongoError as e:
+                            e = re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e))
+                            logging.warning(f"mock {coll}.{i} {e}")
 
     def stop(self):
         if self.conn:

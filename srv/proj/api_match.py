@@ -430,7 +430,8 @@ class TocDelApi(TocBaseApi):
                     if r.get('toc_ids'):
                         r['toc_ids'] = list(set(r['toc_ids']) & lines)
                         n += 1
-                self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(rows=sec['rows'])})
+                self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
+                    updated=self.now(), rows=sec['rows'])})
             sec = None
             self.log(f"toc_del n={n} name={toc['name']}")
         else:

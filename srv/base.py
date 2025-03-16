@@ -32,22 +32,22 @@ def on_exception(self, e):
 def auto_try(func):
     """Decorator for get or post function"""
 
-    def wrapper(self, *args, **kwargs):
+    def wrapper(slf, *args, **kwargs):
         try:
-            if self.request.method == 'GET' and self.URL.endswith('/@oid'):
-                short = self.get_argument('use_short', 0) or self.get_argument('add_short', 0)
-                if self.get_argument('use_short', 0):
-                    self._short = short
-                elif self.get_argument('add_short', 0):
-                    assert self.current_user.get('internal') and re.match('^[a-z0-9]+$', short)
-                    r = self.db.short.find_one({'id': short})
-                    assert r is None or r['url'] == self.request.path, 'used by ' + r['url']
-                    self.db.short.update_one({'id': short}, {'$set': dict(
-                        url=self.request.path, created=self.now())}, upsert=True)
-                    self._short = short
-            return func(self, *args, **kwargs)
+            if slf.request.method == 'GET' and slf.URL.endswith('/@oid'):
+                short = slf.get_argument('use_short', 0) or slf.get_argument('add_short', 0)
+                if slf.get_argument('use_short', 0):
+                    slf._short = short
+                elif slf.get_argument('add_short', 0):
+                    assert slf.current_user.get('internal') and re.match('^[a-z0-9]+$', short)
+                    r = slf.db.short.find_one({'id': short})
+                    assert r is None or r['url'] == slf.request.path, 'used by ' + r['url']
+                    slf.db.short.update_one({'id': short}, {'$set': dict(
+                        url=slf.request.path, created=slf.now(), updated=slf.now())}, upsert=True)
+                    slf._short = short
+            return func(slf, *args, **kwargs)
         except Exception as e:
-            on_exception(self, e)
+            on_exception(slf, e)
 
     return wrapper
 

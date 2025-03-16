@@ -227,9 +227,9 @@ class ProjCloneApi(ProjBaseApi):
 
         for a in articles:
             self.db.article.update_one({'_id': a['_id']}, {'$set': self.update_ids(
-                dict(sections=a['sections']), id_map)})
+                dict(sections=a['sections'], updated=self.now()), id_map)})
         self.db.proj.update_one({'_id': p_id}, {'$unset': {'tmp': 1}, '$set': self.update_ids(
-            dict(columns=p0['columns'], rows=p0['rows']), id_map)})
+            dict(columns=p0['columns'], rows=p0['rows'], updated=self.now()), id_map)})
         self.db.section.update_many(dict(proj_id=p_id), {'$unset': {'tmp': 1}})
         self.db.article.update_many(dict(proj_id=p_id), {'$unset': {'tmp': 1}})
 
@@ -296,6 +296,7 @@ class ProjImportApi(ProjBaseApi):
         self.db.proj.delete_one({'_id': proj['_id']})
         for coll in ['proj', 'article', 'section']:
             for r in data[coll]:
+                r['updated'] = self.now()
                 self.db[coll].update_one({'_id': r['_id']}, {'$set': r}, upsert=True)
         self.log(f"project {proj['code']} imported: {proj['name']}")
         return new_p
@@ -348,6 +349,7 @@ class ProjEditApi(ProjBaseApi):
                 self.send_raise_failed(f"项目编码重复 {upd['code']}")
         r = self.db.proj.update_one({'_id': proj['_id']}, {'$set': upd})
         if r.modified_count:
+            self.db.proj.update_one({'_id': proj['_id']}, {'$set': {'updated': self.now()}})
             self.log(f"proj {proj['code']} changed")
         return self.send_success({'modified': r.modified_count})
 
@@ -377,7 +379,8 @@ class SetEditorApi(ProjBaseApi):
 
         if editors == proj['editors']:
             self.send_raise_failed('协编没有改变')
-        self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(editors=editors)})
+        self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
+            editors=editors, updated=self.now())})
         self.log('editors changed: ' + ','.join(editors))
         return self.send_success(editors)
 
@@ -399,7 +402,7 @@ class ReorderColApi(ProjBaseApi):
             self.send_raise_failed('不能增减栏')
 
         self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
-            columns=[[c for c in proj['columns'] if c['code'] == s][0] for s in rows])})
+            updated=self.now(), columns=[[c for c in proj['columns'] if c['code'] == s][0] for s in rows])})
         return self.send_success()
 
 
@@ -430,7 +433,8 @@ class ArticleEditApi(ProjBaseApi):
             col[0]['colspan'] = int(colspan)
             col_changed += 1
         if col_changed:
-            r = self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(columns=p['columns'])})
+            r = self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(
+                updated=self.now(), columns=p['columns'])})
             changed += r.modified_count
 
         if changed:
@@ -466,7 +470,7 @@ class SectionDelApi(ProjBaseApi):
         if s['created_by'] != self.username and p.get('created_by') != self.username:
             self.send_raise_failed(f"需要由创建者 {s['created_by']} 删除")
         r = self.db.article.update_one({'_id': a['_id']}, {'$set': {
-            'char_n': a['char_n'] - s['char_n'],
+            'char_n': a['char_n'] - s['char_n'], 'updated': self.now(),
             'sections': [r for r in a['sections'] if r['_id'] != s['_id']]}})
         assert r.modified_count
         self.db.section.delete_one({'_id': s['_id']})
@@ -474,7 +478,7 @@ class SectionDelApi(ProjBaseApi):
 
         rows = self.update_ids(dict(char_n=p['char_n'] - (0 if is_note else s['char_n']),
                                     note_char_n=p.get('note_char_n', 0) - (s['char_n'] if is_note else 0),
-                                    rows=p.get('rows', [])), {str(s['_id']): ''})
+                                    rows=p.get('rows', []), updated=self.now()), {str(s['_id']): ''})
         self.db.proj.update_one({'_id': p['_id']}, {'$set': rows})
         self.send_success({'a_id': str(a['_id'])})
 
@@ -519,7 +523,7 @@ class ArticleDelApi(ProjBaseApi):
             self.db.proj.update_one({'_id': p['_id']}, {'$set': {
                 'char_n': p['char_n'] - (0 if is_note else a['char_n']),
                 'note_char_n': p.get('note_char_n', 0) - (a['char_n'] if is_note else 0),
-                'note_n': p['note_n'] - (1 if is_note else 0),
+                'note_n': p['note_n'] - (1 if is_note else 0), 'updated': self.now(),
                 'columns': columns, 'cols': len(columns), 'rows': rows}})
         self.db.article.delete_one({'_id': a['_id']})
         self.db.section.delete_many({'a_id': a['_id']})
@@ -587,8 +591,8 @@ class ImportTextApi(ProjBaseApi):
         else:
             p['char_n'] = p.get('char_n', 0) + char_n
         self.db.article.update_one({'_id': a['_id']}, {'$set': dict(
-            sections=a['sections'], char_n=a['char_n'])})
+            sections=a['sections'], char_n=a['char_n'], updated=self.now())})
         self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(
             note_char_n=p.get('note_char_n', 0), char_n=p['char_n'],
-            note_n=p.get('note_n', 0), columns=p['columns'],
+            note_n=p.get('note_n', 0), columns=p['columns'], updated=self.now()
         )})
