@@ -333,17 +333,18 @@ function _delTocRow($r) {
   const $p = r && r[1] || $r
   const info = r && r[0] ? r[0].data : getParaInfo($p, {level: $p.data('level'), text: $p.text()})
   const node = r && r[0] || getTocNode(info.toc_id, info)
+  const childN = node && node.children_d.length
 
   activatePara($p, !r || !r[0])
-  if (node && node.children.length) {
-    return showError('不能删除', '需要先删除子条目')
+  if (childN) {
+    info.children = node.children_d.map(s => parseInt(s.replace('toc-', '')))
   }
   Swal2.fire({
     title: '删除确认',
-    text: `确实要删除科判条目“${ info.text }”？`,
+    text: `确实要删除科判条目“${ellipsisText(info.text, 12)}”${childN ? '及' + childN + '个子条目' : ''}？`,
     draggable: true,
     preConfirm: () => postApi('/proj/match/toc/del',
-      Object.assign({proj_id: getProjId()}, info),
+      {data: Object.assign({proj_id: getProjId()}, info)},
       res => $p.remove() && tocEnsureVisible(res.data, true)),
   })
 }
@@ -567,6 +568,11 @@ $.contextMenu({
       callback: function(){ importToc(this) },
       disabled: function(){ return !editable },
     },
+    addHtml: {
+      name: '从CBeta网页导入科判...',
+      callback: function(){ importTocHtml(this) },
+      disabled: function(){ return !editable },
+    },
     sep1: {name: '--'},
     export: {
       name: '导出科判',
@@ -581,7 +587,7 @@ $.contextMenu({
   }
 })
 
-function importToc() {
+function importToc(title, toc_text) {
   const $a = $('.cell p.active,.single-article p.text').first()
   const a_id = $a[0] ? $a.closest('.cell').data('id') : ''
   const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
@@ -597,17 +603,45 @@ function importToc() {
     title: '导入科判',
     width: 600,
     html: `${label || ''}
-<input id="t-title" class="swal2-input" maxlength="30" placeholder="科判名称" style="width: 100%; margin: 0;">
+<input id="t-title" class="swal2-input" maxlength="30" placeholder="科判名称" value="${title || ''}"
+  style="width: 100%; margin: 0;">
 <label for="t-text" class="swal2-input-label">每行一个科判条目，行首可指定级别数字，或+-相对缩进</label>
 <textarea id="t-text" rows="10" class="swal2-textarea" maxlength="2000"
- placeholder="${tip}" style="width: 100%; margin: .5em 0 5px;"></textarea>`,
-    focusConfirm: false,
+ placeholder="${tip}" style="width: 100%; margin: .5em 0 5px;">${toc_text || ''}</textarea>`,
+    focusConfirm: !!title,
     preConfirm: () => {
       const name = $('#t-title').val().trim(), text = $('#t-text').val().trim();
       if (!name) { $('#t-title').focus(); return false }
       if (!text) { $('#t-text').focus(); return false }
       return postApi('/proj/match/toc/import',
         getParaInfo($p, {name: name, text: text}), reloadPage)
+    }
+  })
+}
+
+function importTocHtml() {
+  const $a = $('.cell p.active,.single-article p.text').first()
+  const a_id = $a[0] ? $a.closest('.cell').data('id') : ''
+  const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
+  const label = ($c[0] ? `为经典“${ $c.text()}”增加科判，` : '') + '请选择从CBeta科判页面下载的网页文件。'
+
+  if (!a_id) {
+    return showError('不能导入', '请在对应栏中点击段落，然后再试。')
+  }
+  Swal2.fire({
+    title: '导入科判',
+    input: 'file',
+    inputLabel: label,
+    inputAttributes: {'accept': 'text/html'},
+    preConfirm: file => {
+      if (!file) return false
+      const formData = new FormData()
+      formData.append('file', file)
+      return postApi('/proj/import/toc_cb', formData, res => {
+        if (Array.isArray(res.toc)) {
+          importToc(res.title, res.toc.map(t => `${'  '.repeat(t.level - 1)}- ${t.level} ${t.text}`).join('\n'))
+        }
+      })
     }
   })
 }

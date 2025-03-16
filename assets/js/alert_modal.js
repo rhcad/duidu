@@ -1,10 +1,15 @@
 function swalWillOpen(){
   const $w = $('.swal-autoscroll'), h = $w.height()
-  $w.first().css('height', h + 'px')
+  if (h) {
+    $w.first().css('height', h + 'px')
+    const $bar = $('.sidebar')
+    if ($bar[0] && $bar.height() > 300) {
+      $bar.css('height', h + 'px')
+    }
+  }
 }
 function swalWillClose(){
-  const $w = $('.swal-autoscroll'), h = $w.height()
-  setTimeout(() => $w.css('height', ''), 200)
+  setTimeout(() => $('.swal-autoscroll,.sidebar').css('height', ''), 200)
 }
 
 window.Swal = Swal.mixin({ willOpen: swalWillOpen, willClose: swalWillClose })
@@ -82,9 +87,8 @@ function ajaxApi(url, type, data, success_callback, error_callback) {
     }
   }
 
-  const file = data.file || data instanceof(FormData) && data.get('file')
+  const file = data instanceof(FormData) && data.get('file')
   const dataType = data.dataType, contentType = data.contentType
-  delete data.file
   delete data.dataType
   delete data.contentType
   if (file) {

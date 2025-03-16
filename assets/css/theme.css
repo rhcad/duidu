@@ -38,15 +38,16 @@
 .modal-footer { border-top-color: var(--border-color); }
 
 .swal2-textarea[rows="14"] { font-size: 150%; }
+
 div:where(.swal2-container) input:where(.swal2-input),
 div:where(.swal2-container) input:where(.swal2-file),
 div:where(.swal2-container) textarea:where(.swal2-textarea),
 div:where(.swal2-container) .swal2-select,
-.swal2-input:focus, .swal2-textarea:focus, .swal2-select:focus,
+.swal2-input:focus, .swal2-file:focus, .swal2-textarea:focus, .swal2-select:focus,
 .panel-default, .panel-default > .panel-heading,
 .original:not(.single-article) .row > div:not(.cell-0) {
-    border-color: var(--border-color);
-    outline: none;
+    border-color: var(--border-color) !important;
+    outline: none !important;
 }
 input::placeholder, textarea::placeholder,
 div:where(.swal2-container) input:where(.swal2-input)::placeholder,

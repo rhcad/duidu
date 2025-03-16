@@ -3,7 +3,7 @@ from tornado.escape import to_basestring
 from tornado.httpclient import AsyncHTTPClient, HTTPError
 from bs4 import BeautifulSoup as Soup
 from srv.base import on_exception
-from srv.proj.api import ImportTextApi, re
+from srv.proj.api import ImportTextApi, auto_try, re
 from srv.proj.model import Section, Toc
 
 
@@ -218,8 +218,11 @@ class ImportHtmlApi(ImportTextApi):
                 html = r.body.decode('gb18030')
 
             domain = re.search(r'https?://(w+\.)?([^/]+?)(\.[a-z]+)*/', url).group(2)
-            m = re.search('<title>(.+)</title>', html, re.I)
-            title = m and re.sub(' - .+$', '', m.group(1).strip()) or ''
+            m = re.search('<p class="juan"[^<>]*>(<[^<>]+>)?([^<>(（-]+)', html)
+            title = m and m.group(2).strip()
+            if not title:
+                m = re.search('<title>(.+)</title>', html, re.I)
+                title = m and re.sub(' - .+$', '', m.group(1).strip()) or ''
             if not title or re.search('error|404|not found|错误|不存在', title):
                 return '', '', ''
             self.db.cb.update_one({'name': code}, {'$set': dict(
@@ -280,3 +283,35 @@ class ArticleImportCBApi(ImportCBApi, ImportHtmlApi):
                 self.db.section.update_one({'_id': s['_id']}, {'$set': s_upd})
                 self.log(f"section {code} {s['_id']} updated: {n} rows")
                 changes.append(dict(code=code, s_id=str(s['_id'])))
+
+
+class ImportCbTocApi(ImportTextApi):
+    """从网页导入科判"""
+    URL = '/api/proj/import/toc_cb'
+
+    @auto_try
+    def post(self):
+        file = self.request.files.get('file')[0]
+        html = to_basestring(file['body'])
+        title, toc = self.parse_toc_html(html)
+        if not toc:
+            self.send_raise_failed('没有找到科判项')
+        self.send_success(dict(toc=toc, title=title))
+
+    def parse_toc_html(self, html):
+        m = re.search('<p class=[\'"]juan[\'"][^<>]*>(<[^<>]+>)?([^<>(（-]+)', html)
+        title = m and m.group(2).strip() or ''
+        html = re.sub('<(a|title)( [^>]+)?>[^<]+</(a|title)>', '', html, re.I)
+        soup = Soup(html, 'html.parser')
+        toc = []
+        for span in soup.select('ul>li'):
+            text = ''
+            for c in span.contents:
+                if not c.name or (not c.attrs and c.name != 'ul'):
+                    text += c.text
+            level, ul = -1, span
+            while ul:
+                ul = ul.find_parent('ul')
+                level += 1
+            toc.append(dict(level=level, text=re.sub('[◎○]', '', text)))
+        return title, toc

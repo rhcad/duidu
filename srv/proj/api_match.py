@@ -436,17 +436,32 @@ class TocDelApi(TocBaseApi):
             self.log(f"toc_del n={n} name={toc['name']}")
         else:
             assert t_r, '科判条目不存在'
+            fail_del, t_rows = [], toc['rows']
+            if not d.get('dis_link'):
+                d['children'] = [t_r['id']] + d.get('children', [])
+                for r in t_rows:
+                    if r['id'] in d['children']:
+                        if r.get('s_id') and (not row or str(r['s_id']) != row['s_id'] or r['line'] != row['line']):
+                            fail_del.append(r['id'])
+                        else:
+                            if row and r['id'] in row.get('toc_ids', []):
+                                row['toc_ids'].remove(r['id'])
+                                n += 1
+                            r = Toc.get_row(t_rows, r['id'])
+                            if r:
+                                i = t_rows.index(r)
+                                t_rows.remove(r)
+                                d['next_id'] = t_rows[i if i < len(t_rows) else i - 1]['id'] if t_rows else 0
+            if fail_del:
+                self.send_raise_failed(f'有{len(fail_del)}个子条目已关联到其他卷的段落')
+
             if row and t_r['id'] in row.get('toc_ids', []):
                 row['toc_ids'].remove(t_r['id'])
                 n += 1
             if d.get('dis_link'):
                 t_r.pop('s_id')
                 t_r.pop('line')
-            else:
-                i, t_rows = toc['rows'].index(t_r), toc['rows']
-                t_rows.remove(t_r)
-                d['next_id'] = t_rows[i if i < len(t_rows) else i - 1]['id'] if t_rows else 0
-                self.log(f"toc_del id={d['toc_id']} next_id={d['next_id']}")
+            self.log(f"toc_del n={n} id={d['toc_id']} next_id={d.get('next_id', '')}")
 
         if sec:
             self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(updated=self.now(), rows=rows)})
