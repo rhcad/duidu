@@ -18,9 +18,6 @@ class ProjHandler(BaseHandler):
             {'cloned': p['_id']}, projection={'name': 1}) and p['_id'])
 
         editable = self.username == p['created_by'] or self.username in p['editors']
-        view = not editable and not p.get('public')
-        if view and not editable and not p.get('published') and self.username != 'admin':
-            self.send_raise_failed(f"项目 {p['code']} 还未发布，可向创建者申请为协编。", 404)
         return p, editable
 
     @auto_try
