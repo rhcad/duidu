@@ -284,9 +284,6 @@
 </script>
 <script>
   function publish() {
-    {% if proj['cols'] < 2 and proj['toc_n'] < 1 and not proj.get('note_n') %}
-    showError('不能发布', '多栏对读、有科判或有注解的才能发布。')
-    {% else %}
     Swal2.fire({title: '确认发布', confirmButtonText: '发布',
       text: `将设置为公开，在首页优先显示（后发布的在前）。`,
       preConfirm: () => postApi('/proj/info', Object.assign(

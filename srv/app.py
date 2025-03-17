@@ -87,13 +87,13 @@ class Application(web.Application):
     def _connect_db(d, mock_path=''):
         if mock_path:
             from montydb import set_storage, MontyClient
-            conn = MontyClient(mock_path)
             set_storage(
                 repository=mock_path,  # dir path for database to live on disk
                 mongo_version='4.2',  # try matching behavior with this mongodb version
                 cache_modified='2',  # seconds, the only setting that flat-file have
                 use_bson=True,  # will import pymongo's bson
             )
+            conn = MontyClient(mock_path)
             return conn, conn[d['name']]
         usr = f"{d['user']}:{d['password']}@" if d.get('user') else ''
         uri = f"mongodb://{usr}{d['host']}:{d['port']}" + (f"/{d['name']}" if usr else '')
