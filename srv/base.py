@@ -7,11 +7,12 @@ from datetime import datetime
 from tornado.web import Finish
 from tornado.escape import to_basestring
 from pymongo.errors import PyMongoError
+from montydb.errors import MontyError
 from srv.cors import CorsMixin, RequestHandler
 from srv import util
 
 BASE_DIR = path.dirname(path.abspath(path.dirname(__file__)))
-
+DbError = PyMongoError, MontyError
 
 def on_exception(self, e):
     if not isinstance(e, Finish):
@@ -20,7 +21,7 @@ def on_exception(self, e):
         fn, line, f, text = tb_info[-1]
         if isinstance(e, AssertionError):
             msg = str(e) if e.args else f"内部错误 {path.basename(fn).split('.')[0]} L{line}"
-        elif isinstance(e, PyMongoError):
+        elif isinstance(e, DbError):
             msg = '数据库错误 ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e))
         else:
             msg = e.__class__.__name__ + ' ' + str(e)
@@ -60,6 +61,7 @@ class BaseHandler(CorsMixin):
     def __init__(self, app, req, **p):
         self.db, self.config, self.app = app.db, app.config, app
         self.is_api = '/api/' in req.path
+        self.mock = self.app.site.get('mock')
         self.util = util
         self.username, self._short, self._data = '', '', None
         RequestHandler.__init__(self, app, req, **p)

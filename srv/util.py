@@ -44,7 +44,7 @@ def get_date_time(fmt=None, time=None):
 
 
 def sub_prop(text, obj):
-    return re.sub('@([A-Za-z0-9_]+)', lambda m: obj[m.group(1)], text)
+    return re.sub('@([A-Za-z0-9_]+)', lambda m: obj[m.group(1)], str(text))
 
 
 def trim_bracket(text):

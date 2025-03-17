@@ -2,6 +2,6 @@ tornado==6.4.2
 pymongo==4.10.1
 PyYAML==6.0.2
 beautifulsoup4
-mongomock
+montydb
 zipfile37
 fire

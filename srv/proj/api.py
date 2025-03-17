@@ -283,6 +283,8 @@ class ProjImportApi(ProjBaseApi):
         for k in ['_id', 'code', 'editors', 'public', 'published']:
             if k in proj:
                 new_p[k] = proj[k]
+            else:
+                new_p.pop(k, 0)
 
         for coll in ['article', 'section']:
             for r in data[coll]:
@@ -296,7 +298,6 @@ class ProjImportApi(ProjBaseApi):
         self.db.proj.delete_one({'_id': proj['_id']})
         for coll in ['proj', 'article', 'section']:
             for r in data[coll]:
-                r['updated'] = self.now()
                 self.db[coll].update_one({'_id': r['_id']}, {'$set': r}, upsert=True)
         self.log(f"project {proj['code']} imported: {proj['name']}")
         return new_p

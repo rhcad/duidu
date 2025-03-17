@@ -75,6 +75,7 @@ class RegisterApi(BaseHandler):
 class LogoutApi(BaseHandler):
     """注销接口"""
     URL = '/api/user/logout'
+    ROLES = None
 
     @auto_try
     def get(self):

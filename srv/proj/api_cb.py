@@ -109,7 +109,7 @@ class ImportCBApi(ImportTextApi):
         """下载CBeta页面原文，已下载则从缓存文件读取"""
         if '_' not in name:
             name += '_' + vol
-        p = self.db.cb.find_one({'name': name})
+        p = not self.mock and self.db.cb.find_one({'name': name})
         if p:
             return p['html'], p['title'], name
 
@@ -125,16 +125,13 @@ class ImportCBApi(ImportTextApi):
                 return '', '', name
             m = re.search('<title>(.+)</title>', html, re.I)
             title = m and m.group(1).strip() or ''
-            self.db.cb.update_one({'name': name}, {'$set': dict(
-                html=html, title=title, size=len(html),
-                created_by=self.username, created=self.now())}, upsert=True)
+            if not self.mock:
+                self.db.cb.update_one({'name': name}, {'$set': dict(
+                    html=html, title=title, size=len(html),
+                    created_by=self.username, created=self.now())}, upsert=True)
             return html, title, name
         except HTTPError as e:
             self.send_raise_failed(f'获取{name}文本失败: {str(e)}')
-
-    def update_cb(self):
-        for p in self.db.cb.find({'size': None}):
-            self.db.cb.update_one({'_id': p['_id']}, {'$set': dict(size=len(p['html']))})
 
 
 class ImportHtmlApi(ImportTextApi):
@@ -202,7 +199,7 @@ class ImportHtmlApi(ImportTextApi):
     @gen.coroutine
     def fetch_html(self, code, url):
         """下载网页"""
-        p = self.db.cb.find_one({'name': code})
+        p = not self.mock and self.db.cb.find_one({'name': code})
         if p:
             assert not url or url == p['url']
             return p['html'], p['title'], p['domain']
@@ -225,9 +222,10 @@ class ImportHtmlApi(ImportTextApi):
                 title = m and re.sub(' - .+$', '', m.group(1).strip()) or ''
             if not title or re.search('error|404|not found|错误|不存在', title):
                 return '', '', ''
-            self.db.cb.update_one({'name': code}, {'$set': dict(
-                html=html, title=title, size=len(html), url=url, domain=domain,
-                created_by=self.username, created=self.now())}, upsert=True)
+            if not self.mock:
+                self.db.cb.update_one({'name': code}, {'$set': dict(
+                    html=html, title=title, size=len(html), url=url, domain=domain,
+                    created_by=self.username, created=self.now())}, upsert=True)
             return html, title, domain
         except HTTPError as e:
             self.send_raise_failed(f'获取{url}失败: {str(e)}')

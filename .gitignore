@@ -17,5 +17,7 @@ log/
 coverage/
 test.db
 app.yml
+doc/db/duidu/
+*monty.storag*
 
 !.keep
