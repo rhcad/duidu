@@ -155,7 +155,7 @@ $.contextMenu({
       name: '插入科判条目...<span class="key">T</span>',
       isHtmlName: true,
       callback: function(){ _insertToc(this); },
-      disabled: function(){ return !editable || _status.oneCol },
+      disabled: function(){ return !editable },
     },
     sep3: {name: '--'},
     markDel: {
@@ -177,7 +177,7 @@ $.contextMenu({
       name: '插入科判条目...<span class="key">T</span>',
       isHtmlName: true,
       callback: function(){ _insertToc(this); },
-      disabled: function(){ return !editable || _status.oneCol },
+      disabled: function(){ return !editable },
     },
     sep1: {name: '--'},
     markDel: {

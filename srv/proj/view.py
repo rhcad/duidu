@@ -150,9 +150,6 @@ class DownloadHtmlApi(MatchHandler):
 
     @auto_try
     def post(self, _id):
-        p = self.db.proj.find_one({'_id': ObjectId(_id)}, projection=dict(cols=1, toc_n=1))
-        if not p or (p['cols'] < 2 and p['toc_n'] < 1 and not p.get('note_n')):
-            self.send_raise_failed('多栏对读、有科判或有注解的才需要下载')
         return MatchHandler.get(self, 'download', _id)
 
     def get_max_page(self, p, a):

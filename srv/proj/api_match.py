@@ -441,7 +441,8 @@ class TocDelApi(TocBaseApi):
                 d['children'] = [t_r['id']] + d.get('children', [])
                 for r in t_rows:
                     if r['id'] in d['children']:
-                        if r.get('s_id') and (not row or str(r['s_id']) != row['s_id'] or r['line'] != row['line']):
+                        if r.get('s_id') and r['id'] != d['children'][0] and (
+                                not row or str(r['s_id']) != str(row['s_id']) or r['line'] != row['line']):
                             fail_del.append(r['id'])
                         else:
                             if row and r['id'] in row.get('toc_ids', []):
