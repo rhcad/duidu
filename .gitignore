@@ -13,11 +13,12 @@ node_modules/
 package-lock.json
 .idea/
 log/
+dist/
+build/
 
 coverage/
 test.db
 app.yml
-doc/db/duidu/
-*monty.storag*
+db/
 
 !.keep
