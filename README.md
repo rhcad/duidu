@@ -9,6 +9,12 @@
 - 运行脚本`python3 main.py`，或在 PyCharm 中选中 `main.py` 调试，然后打开控制台提示的页面
   - 用本地文件数据库时，用户 admin 和 demo 的初始密码为 d123
 
+## 打包
+```
+pip3 install pyinstaller
+pyinstaller main.spec -y
+```
+
 ## 欢迎改进
 
 本项目采用MIT开源许可，您可参与改进或改编使用，可提 issue 讨论或在微信群提问。

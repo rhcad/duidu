@@ -54,7 +54,7 @@ function _tocLoaded(d, ext, a_id, ti, ended) {
 function tocLoad(ext, a_id, ti, ended=null) {
   if (window.all_toc) {
     const r = all_toc.filter(a => a.a_id === a_id && parseInt(ti) === a.toc_i)[0]
-    return _tocLoaded(r, ext, a_id, ti, ended)
+    return r && _tocLoaded(r, ext, a_id, ti, ended)
   }
   getApi(`/proj/toc/${a_id}/${ti}`,
       r => _tocLoaded(r.data, ext, a_id, ti, ended), $.noop)
