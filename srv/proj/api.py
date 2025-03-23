@@ -168,19 +168,21 @@ class ProjAddApi(BaseHandler):
 
     @auto_try
     def post(self):
-        p = self.data()
-        assert p['code'] and p['name']
+        p = self.add_proj(self, self.data())
+        self.send_success(dict(redirect=f"/proj/edit/{str(p['_id'])}"))
 
-        if self.db.proj.find_one(dict(code=p['code'], created_by=self.username)):
-            self.send_raise_failed(f"项目编码重复 {p['code']}+{self.username}")
-        p = dict(code=p['code'], name=p['name'], comment=p['comment'], columns=[],
+    @staticmethod
+    def add_proj(self, d):
+        assert d['code'] and d['name']
+        if self.db.proj.find_one(dict(code=d['code'], created_by=self.username)):
+            self.send_raise_failed(f"项目编码重复 {d['code']}+{self.username}")
+        p = dict(code=d['code'], name=d['name'], comment=d['comment'], columns=[],
                  created_by=self.username, editors=[], cols=0, char_n=0, toc_n=0, note_n=0,
                  rows=[], created=self.now(), updated=self.now(), note_char_n=0)
         r = self.db.proj.insert_one(p)
-        _id = str(r.inserted_id)
-
+        p['_id'] = r.inserted_id
         self.log(f"project {p['code']} {p['name']} created")
-        self.send_success(dict(redirect=f"/proj/edit/{_id}"))
+        return p
 
 
 class ProjCloneApi(ProjBaseApi):
@@ -243,10 +245,10 @@ class ProjImportApi(ProjBaseApi):
 
     @auto_try
     def post(self, p_id):
-        proj = self.get_project(p_id, True)
+        proj = p_id != 'auto' and self.get_project(p_id, True)
 
         file = self.request.files.get('file')
-        z_fn = path.join(BASE_DIR, 'log', f'{p_id}.zip')
+        z_fn = path.join(BASE_DIR, 'log', f'{self.username if p_id == "auto" else p_id}.zip')
         makedirs(path.dirname(z_fn), exist_ok=True)
         with open(z_fn, 'wb') as f:
             f.write(file[0]['body'])
@@ -261,8 +263,14 @@ class ProjImportApi(ProjBaseApi):
                 if path.exists(j_fn):
                     with open(j_fn, encoding='utf-8') as f:
                         data[coll] = json_util.loads(f.read())
-            new_p = [p for p in data['proj'] if p['created_by'] == proj[
-                'created_by'] and p['code'] == proj['code']]
+            if not proj:
+                new_p = data['proj'][:1]
+                proj = self.db.proj.find_one({'code': new_p[0]['code'], 'created_by': self.username})
+                if proj is None:
+                    proj = ProjAddApi.add_proj(self, new_p[0])
+            else:
+                new_p = [p for p in data['proj'] if p['created_by'] == proj[
+                    'created_by'] and p['code'] == proj['code']]
             new_a = new_p and [a for a in data['article'] if a['proj_id'] == new_p[0]['_id']]
             new_s = new_a and [a for a in data['section'] if a['proj_id'] == new_p[0]['_id']]
             if not new_a:
@@ -280,7 +288,7 @@ class ProjImportApi(ProjBaseApi):
         p = self.db.proj.find_one({'_id': new_p['_id']}, projection=dict(name=1))
         if p and p['_id'] != proj['_id']:
             return self.send_raise_failed('项目不匹配')
-        for k in ['_id', 'code', 'editors', 'public', 'published']:
+        for k in ['_id', 'code', 'editors', 'public', 'published', 'created_by']:
             if k in proj:
                 new_p[k] = proj[k]
             else:
@@ -301,6 +309,11 @@ class ProjImportApi(ProjBaseApi):
                 self.db[coll].update_one({'_id': r['_id']}, {'$set': r}, upsert=True)
         self.log(f"project {proj['code']} imported: {proj['name']}")
         return new_p
+
+
+class ProjImportAutoApi(ProjImportApi):
+    """导入项目"""
+    URL = '/api/proj/import/(auto)'
 
 
 class ProjExportApi(ProjBaseApi):

@@ -1,6 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 a = Analysis(
     ['main.py',
      'srv/__init__.py', 'srv/app.py', 'srv/base.py', 'srv/cors.py', 'srv/model.py',
@@ -13,8 +12,8 @@ a = Analysis(
     binaries=[],
     datas=[('views', 'views'),
         ('doc', 'doc'),
-        ('assets','assets'),
-        ('app_.yml','app_.yml')],
+        ('assets', 'assets'),
+        ('app_.yml', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

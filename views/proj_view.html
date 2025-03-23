@@ -121,10 +121,10 @@
     reloadNotes(null, '-')
   })
   {% if mode == 'download' %}
-  window.all_toc = {% raw proj.get('all_toc', []) %}
+  window.all_toc = {% raw all_toc %}
   {% end %}
-  {% if all_toc %}tocLoad('1', `{{ all_toc[toc_i]['a_id'] }}`, `{{ all_toc[toc_i]['toc_i'] }}`){% end %}
-  {% if len(all_toc)>1 %}tocLoad('2', `{{ all_toc[toc_j]['a_id'] }}`, `{{ all_toc[toc_j]['toc_i'] }}`){% end %}
+  {% if all_toc %}tocLoad('1', `{{ all_toc[toc_i]['a_id'] }}`, {{int(all_toc[toc_i]['toc_i'])}}){% end %}
+  {% if len(all_toc)>1 %}tocLoad('2', `{{ all_toc[toc_j]['a_id'] }}`, {{int(all_toc[toc_j]['toc_i'])}}){% end %}
 </script>
 </body>
 </html>

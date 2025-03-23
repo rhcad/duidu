@@ -1,6 +1,6 @@
 from srv.base import auto_try, BaseHandler, re, to_basestring
 from bson.objectid import ObjectId
-from srv.proj.model import Proj, ProjNote, Article, Section
+from srv.proj.model import Proj, ProjNote, Article, Section, Toc
 from srv.proj.api import ProjBaseApi
 
 
@@ -84,6 +84,7 @@ class MatchHandler(ProjHandler, ProjBaseApi):
             if a.get('toc'):
                 all_t += [dict(a_id=str(a['_id']), toc_i=ti, name=t['name'], code=c['code'],
                                cur=int(ti == c.get('toc_i')),
+                               rows=Toc.format_rows([{'rows': t['rows']}])[0]['rows'] if mode == 'download' else None,
                                new=1 if u and u['a_id'] == str(a['_id']) and u['toc_i'] == ti else 0)
                           for ti, t in enumerate(a['toc']) if t['rows']]
 

@@ -46,33 +46,35 @@ class ImportCBApi(ImportTextApi):
         text, error, rows, tags = '', '', [], {}
         mu, xu, xu_n, xu_rows = '', '', 0, []
 
+        for br in soup.find_all('br'):
+            br.replace_with('\n')
         for p in soup.select('#body,p,.lg-cell,.div-xu,mulu'):
             s = self.fix_text(p.get_text())
             cls = p.get_attribute_list('class')
-
             if p.name == 'mulu':
                 mu = mu or (cls[0] if cls else '')
             elif 'div-xu' in cls:
                 xu, mu = xu or 'xu', ''  # 允许连续的 .div-xu 元素
             elif s:
-                r = self._parse_cb_html_p(text, rows, xu, xu_rows, tags, cls, s, p)
-                if not r:
-                    continue
-                r, text, xu = r
-                if mu:
-                    r['tag'] = r.get('tag', []) + [mu]
-                    mu = ''
-                if xu:
-                    if xu == 'xu':
-                        xu_n += 1
-                        flush_xu()
-                    xu = p.find_parent('div', class_='div-xu') is not None
+                for s in s.split('\n'):
+                    r = self._parse_cb_html_p(text, rows, xu, xu_rows, tags, cls, s, p)
+                    if not r:
+                        continue
+                    r, text, xu = r
+                    if mu:
+                        r['tag'] = r.get('tag', []) + [mu]
+                        mu = ''
                     if xu:
-                        r['tag'] = r.get('tag', []) + ['xu', f'xu{xu_n}']
-                        xu_rows.append(r)
-                if not xu and xu_rows:
-                    flush_xu()
-                rows.append(r)
+                        if xu == 'xu':
+                            xu_n += 1
+                            flush_xu()
+                        xu = p.find_parent('div', class_='div-xu') is not None
+                        if xu:
+                            r['tag'] = r.get('tag', []) + ['xu', f'xu{xu_n}']
+                            xu_rows.append(r)
+                    if not xu and xu_rows:
+                        flush_xu()
+                    rows.append(r)
         flush_xu()
         if text.startswith('{"'):
             m = re.search(r'"message":"(.+)"}}', text)
@@ -168,12 +170,15 @@ class ImportHtmlApi(ImportTextApi):
         text, error, rows, tags = '', '', [], {}
 
         root = cfg.get('body', '')
+        for br in soup.find_all('br'):
+            br.replace_with('\n')
         for p in soup.select('-p2,-p3,-p4,-p'.replace('-', root and root + ' ')):
             s = self.fix_text(p.get_text())
-            r = s and self._parse_html_p(text, rows, tags, s, p)
-            if r:
-                r, text = r
-                rows.append(r)
+            for s in (s.split('\n') if s else []):
+                r = self._parse_html_p(text, rows, tags, s, p)
+                if r:
+                    r, text = r
+                    rows.append(r)
         return dict(rows=rows, text=text.strip(), title=title, code=code), error
 
     @staticmethod
@@ -214,7 +219,7 @@ class ImportHtmlApi(ImportTextApi):
             except UnicodeDecodeError:
                 html = r.body.decode('gb18030')
 
-            domain = re.search(r'https?://(w+\.)?([^/]+?)(\.[a-z]+)*/', url).group(2)
+            domain = re.search(r'https?://(w+\.|read\.)?([^/]+?)(\.[a-z]+)*(\.cn)?/', url).group(2)
             m = re.search('<p class="juan"[^<>]*>(<[^<>]+>)?([^<>(（-]+)', html)
             title = m and m.group(2).strip()
             if not title:

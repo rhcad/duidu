@@ -17,6 +17,7 @@
   <div class="container">
     <div class="text-right">
       <a data-toggle="modal" data-target="#newProjModal" class="btn btn-default">创建项目</a>
+      <a data-toggle="modal" data-target="#importProjModal" class="btn btn-default">导入项目</a>
     </div>
     {% module Table(model, rows) %}
     <p class="gray text-right" style="opacity: .7"><small>v{{handler.app.version}} by <a href="https://github.com/rhcad/duidu" target="_blank">耀觉</a></small></p>
@@ -32,5 +33,20 @@
       window.location = res.redirect
     })
   }
+  function importProj($modal) {
+  const zipFile = $modal.find('input')[0].files[0]
+  const formData = new FormData()
+
+  if (!zipFile || !/\.z(ip|db)$/.test(zipFile.name)) {
+    return
+  }
+  if (zipFile.size > (1024 * 1024 * 10)) {
+    return showError('文件大小不能超过10MB')
+  }
+  formData.append('file', zipFile)
+  postApi(`/proj/import/auto`, formData, res => {
+    showSuccess('导入成功', `已导入 ${res.data.length} 个项目(${res.data[0].name})和相关经典。`, reloadPage)
+  })
+}
 </script>
 </html>
