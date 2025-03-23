@@ -17,7 +17,8 @@ class Page404Handler(BaseHandler):
             sec = '.'.join(self.get_ip().split('.')[:2])
             if sec != '127.0' and self.db.blocklist.find_one({'section': sec}):
                 self.send_raise_failed('page not found', code=404)
-            self.log(f'{self.request.path} not found', 'W')
+            if self.username:
+                self.log(f'{self.request.path} not found', 'W')
             if sec != '127.0' and re_err.search(self.request.path):
                 count = self.db.blocklist.count_documents({})
                 if count == 0:

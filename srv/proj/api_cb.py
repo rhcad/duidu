@@ -295,7 +295,10 @@ class ImportCbTocApi(ImportTextApi):
     @auto_try
     def post(self):
         file = self.request.files.get('file')[0]
-        html = to_basestring(file['body'])
+        try:
+            html = file['body'].decode('utf-8')
+        except UnicodeDecodeError:
+            html = file['body'].decode('gb18030')
         title, toc = self.parse_toc_html(html)
         if not toc:
             self.send_raise_failed('没有找到科判项')
