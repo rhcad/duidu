@@ -593,8 +593,9 @@ function importToc(title, toc_text) {
   const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
   const $p = $a[0] ? $a : $(`.cell[data-id="${a_id}"] p`).first()
   const label = $c[0] && `<label for="t-title" class="swal2-input-label m-t-0 m-b-10">为经典“${ $c.text()}”增加科判</label>`
-  const tip = `例如 “2 二级”、“  - 次辨题名”
-以天干地支开头可不指定级别数字，例如“丙二回答分”`
+  const tip = `每行一个科判条目，例如 “2 二级”、“  - 次辨题名”
+以天干地支开头可不指定级别数字，例如“丙二回答分”
+如需从CBeta科判网页导入，请用“导入科判网页”功能`
 
   if (!a_id) {
     return showError('不能导入', '请在对应栏中点击段落，然后再试。')
@@ -623,7 +624,7 @@ function importTocHtml() {
   const $a = $('.cell p.active,.single-article p.text').first()
   const a_id = $a[0] ? $a.closest('.cell').data('id') : ''
   const $c = $(`.cell[data-id="${a_id}"] .col-name`).first()
-  const label = ($c[0] ? `为经典“${ $c.text()}”增加科判，` : '') + '请选择从CBeta科判页面下载的网页文件。'
+  const label = ($c[0] ? `为经典“${ $c.text()}”增加科判，` : '') + '请选择从CBeta科判页面下载(汇出)的网页文件。'
 
   if (!a_id) {
     return showError('不能导入', '请在对应栏中点击段落，然后再试。')

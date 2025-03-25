@@ -1,4 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
+# Usage:
+#   pip3 install pyinstaller
+#   pyinstaller main.spec -y
 
 a = Analysis(
     ['main.py',
@@ -13,7 +16,7 @@ a = Analysis(
     datas=[('views', 'views'),
         ('doc', 'doc'),
         ('assets', 'assets'),
-        ('app_.yml', '.')],
+        ('app.yml', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

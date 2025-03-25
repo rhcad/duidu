@@ -1,19 +1,17 @@
-# duidu
+﻿# duidu
 
 经典对读制作：多版本对读网页制作工具，支持科判、注解
 
 ## 安装
 
-- 安装 Python 3.8+、可选的 MongoDB 5.0+(可不安装，用本地文件数据库)
+- 安装 Python 3.8 ~ 3.11
+  - Win7 用[Python 3.8.10](https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe)
+    - 勾选 Add Python 3.8 to PATH
+    - 勾选 py launcher，以便可直接运行 python 程序
+- 安装可选的 MongoDB 5.0+(个人使用可不安装，用本地文件数据库即可)
 - 安装依赖库 `pip3 install -r requirements.txt`
 - 运行脚本`python3 main.py`，或在 PyCharm 中选中 `main.py` 调试，然后打开控制台提示的页面
   - 用本地文件数据库时，用户 admin 和 demo 的初始密码为 d123
-
-## 打包
-```
-pip3 install pyinstaller
-pyinstaller main.spec -y
-```
 
 ## 欢迎改进
 
