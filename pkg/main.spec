@@ -1,7 +1,4 @@
 # -*- mode: python ; coding: utf-8 -*-
-# Usage:
-#   pip3 install pyinstaller
-#   pyinstaller main.spec -y
 
 a = Analysis(
     ['main.py',

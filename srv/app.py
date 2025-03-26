@@ -6,6 +6,7 @@ from tornado.log import access_log as log
 from srv.base import BASE_DIR, path, DbError
 from tornado.options import define, options
 from yaml import load as load_yml, SafeLoader
+from glob import glob
 
 define('port', default=8000, help='run port', type=int)
 define('debug', default=True, help='the debug mode', type=bool)
@@ -18,7 +19,7 @@ class Application(web.Application):
         with open(fn if path.exists(fn) else fn0, encoding='utf-8') as f:
             self.config = load_yml(f, Loader=SafeLoader)
         self.site = self.config['site']
-        self.version = '0.1.0323'
+        self.version = '0.1.0326'
 
         super(Application, self).__init__(
             handlers,
@@ -30,35 +31,21 @@ class Application(web.Application):
             static_path=path.join(BASE_DIR, 'assets'),
             template_path=path.join(BASE_DIR, 'views'), **p)
 
-        self.conn = self.db = None
+        self.conn = self.db = self.mock_path = None
         self._init_db(self.config['database'])
 
     def _init_db(self, db_cfg):
+        mock = db_cfg.get('mock')
         try:
-            self.conn, self.db = self._connect_db(db_cfg)
-            if options.test_db:
-                self.db.user.count_documents({})
+            if db_cfg.get('host'):
+                self.conn, self.db = self._connect_db(db_cfg)
+                return options.test_db and self.db.user.count_documents({})
         except DbError as e:
-            mock = db_cfg.get('mock')
             logging.error('database ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e)) + (
                 ', mocked data in %s used' % mock if mock else ''))
             self.stop()
-            if mock:
-                from glob import glob
-                mock_path = path.join(BASE_DIR, db_cfg['mock'])
-                self.conn, self.db = self._connect_db(db_cfg, mock_path)
-                self.site['mock'] = True
-                if self.db.user.find_one({}) is None:  # first run
-                    from montydb.types.bson import json_loads
-                    for fn in glob(path.join(BASE_DIR, 'doc/examples/db', '*.json')):
-                        coll = path.basename(fn).split('.')[0]
-                        with open(fn, encoding='utf-8') as f:
-                            rs = json_loads(f.read())
-                        for i, r in enumerate(rs):
-                            try:
-                                self.db[coll].insert_one(r)
-                            except DbError:
-                                pass
+        if mock:
+            self._init_mock(db_cfg)
 
     def stop(self):
         if self.conn:
@@ -82,6 +69,21 @@ class Application(web.Application):
         log_method("%s%s %s %d ms%s", '%03d ' % code if code else '',
                    summary, cls, request_time,
                    user and ' [%s]' % user.get('username') or '')
+
+    def _init_mock(self, db_cfg):
+        self.mock_path = path.join(BASE_DIR, db_cfg['mock'])
+        self.conn, self.db = self._connect_db(db_cfg, self.mock_path)
+        if self.db.user.find_one({}) is None:  # first run
+            from montydb.types.bson import json_loads
+            for fn in glob(path.join(BASE_DIR, 'doc/examples/db', '*.json')):
+                coll = path.basename(fn).split('.')[0]
+                with open(fn, encoding='utf-8') as f:
+                    rs = json_loads(f.read())
+                for i, r in enumerate(rs):
+                    try:
+                        self.db[coll].insert_one(r)
+                    except DbError:
+                        pass
 
     @staticmethod
     def _connect_db(d, mock_path=''):

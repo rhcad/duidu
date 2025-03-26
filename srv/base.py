@@ -61,7 +61,7 @@ class BaseHandler(CorsMixin):
     def __init__(self, app, req, **p):
         self.db, self.config, self.app = app.db, app.config, app
         self.is_api = '/api/' in req.path
-        self.mock = self.app.site.get('mock')
+        self.mock = self.app.mock_path
         self.util = util
         self.username, self._short, self._data = '', '', None
         RequestHandler.__init__(self, app, req, **p)

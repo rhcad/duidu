@@ -607,7 +607,7 @@ function importToc(title, toc_text) {
 <input id="t-title" class="swal2-input" maxlength="30" placeholder="科判名称" value="${title || ''}"
   style="width: 100%; margin: 0;">
 <label for="t-text" class="swal2-input-label">每行一个科判条目，行首可指定级别数字，或+-相对缩进</label>
-<textarea id="t-text" rows="10" class="swal2-textarea" maxlength="2000"
+<textarea id="t-text" rows="10" class="swal2-textarea" maxlength="6000"
  placeholder="${tip}" style="width: 100%; margin: .5em 0 5px;">${toc_text || ''}</textarea>`,
     focusConfirm: !!title,
     preConfirm: () => {

@@ -207,7 +207,7 @@ function _mergeNote(freeNode) {
       title: '添加注解',
       html: `
 <label for="note-text" class="swal2-input-label">为“${leftText}”添加注解。</label>
-<textarea id="note-text" rows="8" class="swal2-textarea" maxlength="2000" style="width: 100%; margin: .5em 0 5px;"></textarea>
+<textarea id="note-text" rows="8" class="swal2-textarea" maxlength="6000" style="width: 100%; margin: .5em 0 5px;"></textarea>
 <input id="note-source" class="swal2-input" maxlength="40" placeholder="来源" style="width: 100%; margin: 0;">`,
       focusConfirm: false,
       width: 500,

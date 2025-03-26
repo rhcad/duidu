@@ -4,14 +4,30 @@
 
 ## 安装
 
+## 简易免安装
+
+在64位 Windows 上可使用打包后的免安装包。运行时遇到360或杀毒软件警告时，选择允许运行或信任，是误报。
+
+### 开发和维护
+
 - 安装 Python 3.8 ~ 3.11
-  - Win7 用[Python 3.8.10](https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe)
-    - 勾选 Add Python 3.8 to PATH
-    - 勾选 py launcher，以便可直接运行 python 程序
+  - Win7 用 3.8.10，Win 10/11 最高选择 3.11
+    - 勾选 Add Python 3.x to PATH
+    - 勾选 py launcher，以便可直接运行 python 脚本文件
+  - Mac、Linux 用默认的或升级到3.8以上
 - 安装可选的 MongoDB 5.0+(个人使用可不安装，用本地文件数据库即可)
 - 安装依赖库 `pip3 install -r requirements.txt`
 - 运行脚本`python3 main.py`，或在 PyCharm 中选中 `main.py` 调试，然后打开控制台提示的页面
   - 用本地文件数据库时，用户 admin 和 demo 的初始密码为 d123
+
+### 打包
+
+如上安装了开发环境后，运行下列命令制作免安装包(退出360安全卫士等杀毒软件)
+```
+pip3 install pyinstaller
+pyinstaller pkg/main.spec -y
+```
+然后将 `pkg/montydb` 文件夹复制到 `dist/duidu/_internal` 下
 
 ## 欢迎改进
 

@@ -46,6 +46,7 @@
           <input type="file" class="form-control" name="zip" accept=".zdb" style="padding:4px 4px">
         </div>
         <div class="modal-footer no-border">
+          {% if not current_user %}<span class="gray" style="float: left">请先登录</span>{% end %}
           <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
           <button type="submit" class="btn btn-primary modal-confirm">确定</button>
         </div>
