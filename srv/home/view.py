@@ -14,7 +14,7 @@ class HomeHandler(BaseHandler):
         cond = [{'published': {'$ne': None}}, {'public': True},
                 {'created_by': {'$ne': None} if self.username == 'admin' else self.username or '-'},
                 {'editors': {'$elemMatch': {'$eq': self.username or '-'}}}]
-        p = dict(code=1, name=1, comment=1, published=1, updated=1, cols=1,
+        p = dict(code=1, name=1, comment=1, published=1, updated_at=1, cols=1,
                  created_by=1, editors=1, public=1, char_n=1, toc_n=1, note_n=1)
         rows = list(self.db.proj.find({'$or': cond, 'tmp': None}, projection=p,
                                       sort=[('published', -1), ('code', 1), ('name', 1)]))
@@ -36,10 +36,10 @@ class ClonedHandler(BaseHandler, Proj):
     @auto_try
     def get(self, p_id):
         p_id = ObjectId(p_id)
-        p = dict(code=1, name=1, comment=1, published=1, created=1, updated=1, cols=1,
+        p = dict(code=1, name=1, comment=1, published=1, created_at=1, updated_at=1, cols=1,
                  created_by=1, public=1, toc_n=1, note_n=1)
         rows = list(self.db.proj.find({'$or': [{'_id': p_id}, {'cloned': p_id}], 'tmp': None},
-                                      projection=p, sort=[('created', 1)]))
+                                      projection=p, sort=[('created_at', 1)]))
         rows = [r for r in rows if r['cols'] or self.username in (r['editors'] + [r['created_by']])]
         self.render('home_cloned.html', model=self, rows=Proj.format_rows(rows))
 
@@ -53,9 +53,9 @@ class UsersHandler(BaseHandler):
         if self.username != 'admin' and len(self.username) > 2:
             return self.send_error(403, reason='Forbidden')
         rows = list(self.db.user.find({}, projection=dict(
-            username=1, nickname=1, created=1, updated=1, ip=1)))
+            username=1, nickname=1, created_at=1, updated_at=1, ip=1)))
         blocked = [r['ip'] for r in self.db.blocklist.find(
-            {}, projection=dict(ip=1, _id=0), sort=[('created', -1)])]
+            {}, projection=dict(ip=1, _id=0), sort=[('created_at', -1)])]
 
         self.render('users.html', blocked=blocked, model=User,
                     rows=User.format_rows(rows, time_format='%Y-%m-%d'))

@@ -44,7 +44,7 @@ def auto_try(func):
                     r = slf.db.short.find_one({'id': short})
                     assert r is None or r['url'] == slf.request.path, 'used by ' + r['url']
                     slf.db.short.update_one({'id': short}, {'$set': dict(
-                        url=slf.request.path, created=slf.now(), updated=slf.now())}, upsert=True)
+                        url=slf.request.path, created_at=slf.now(), updated_at=slf.now())}, upsert=True)
                     slf._short = short
             return func(slf, *args, **kwargs)
         except Exception as e:
@@ -82,7 +82,7 @@ class BaseHandler(CorsMixin):
                 seconds = 1e5
             if self.ROLES and seconds > (30 if self.request.method[0] in 'PD' else 300):
                 u = self.db.user.find_one(dict(username=self.username))
-                if u and u['updated'] == self.current_user['updated']:
+                if u and u['updated_at'] == (self.current_user.get('updated') or self.current_user['updated_at']):
                     self.set_secure_cookie('user_time', self.now().strftime('%Y-%m-%d %H:%M:%S'))
                 else:
                     self.clear_cookie('user')

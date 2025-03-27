@@ -23,7 +23,7 @@ class ProjHandler(BaseHandler):
     @auto_try
     def get(self, oid):
         p, editable = self.check_proj(oid)
-        p.update(Proj.unpack_data(p, ['created', 'updated']))
+        p.update(Proj.unpack_data(p, ['created_at', 'updated_at']))
         self.render('proj_edit.html', proj=p, Article=Article, ProjNote=ProjNote, _id=str(p['_id']),
                     is_owner=p['created_by'] == self.username, editable=editable)
 
@@ -186,6 +186,6 @@ class ArticleHandler(BaseHandler):
             sec = [s for s in sections if s['_id'] == sec['_id']][0]
             a['sections'][i] = sec
 
-        a.update(Article.unpack_data(a, ['created', 'updated']))
+        a.update(Article.unpack_data(a, ['created_at', 'updated_at']))
         self.render('article.html', page=a, _id=a['_id'], Article=Article,
                     has_cb=[s['source'] for s in a['sections'] if 'import_cb' in s['source']])

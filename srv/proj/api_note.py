@@ -14,7 +14,7 @@ class AddNoteApi(ProjBaseApi):
         assert not [s for s in p['notes'] if s['id'] == note['id']], '重复保存'
         p['notes'].append(dict(left_aid=d['leftAid'], note_aid=d['noteAid'], **note))
 
-        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated=self.now(), notes=p['notes'])})
+        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated_at=self.now(), notes=p['notes'])})
         self.send_success({'id': note['id']})
 
 
@@ -33,7 +33,7 @@ class DelNoteApi(ProjBaseApi):
         if notes == p['notes']:
             self.send_raise_failed('没有改变')
 
-        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated=self.now(), notes=notes)})
+        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated_at=self.now(), notes=notes)})
         self.send_success({'notes': EditNoteApi.sub_notes(notes, d['note_a'])})
 
 
@@ -56,7 +56,7 @@ class EditNoteApi(ProjBaseApi):
         else:
             note.pop('type', 0)
 
-        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated=self.now(), notes=p['notes'])})
+        self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated_at=self.now(), notes=p['notes'])})
         self.send_success({'notes': self.sub_notes(p['notes'], d['note_a'])})
 
     @staticmethod

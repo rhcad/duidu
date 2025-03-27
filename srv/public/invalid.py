@@ -24,7 +24,7 @@ class Page404Handler(BaseHandler):
                 if count == 0:
                     self.db.blocklist.create_index('section', name='sec', unique=True)
                 self.db.blocklist.update_one({'section': sec}, {'$set': dict(
-                    ip=self.get_ip(), created=self.now(), path=self.request.path)}, upsert=True)
+                    ip=self.get_ip(), created_at=self.now(), path=self.request.path)}, upsert=True)
                 self.log(f'{self.get_ip()} and {count} sections blocked')
         except PyMongoError:
             pass

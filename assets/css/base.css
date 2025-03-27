@@ -120,7 +120,7 @@ li.name>a { max-width: 10em; }
 .ellipsis, td.code, td.created_by, li.name>a {
     overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .app td p:last-child { margin-bottom: 0; }
-td.created, td.updated { font-size: .9em; min-width: 5em; }
+td.created_at, td.updated_at { font-size: .9em; min-width: 5em; }
 .table .name, .table .base { min-width: 5em; }
 .table .actions { text-align: center; }
 .table .actions .btn { padding: 2px 5px; margin-bottom: 2px; }

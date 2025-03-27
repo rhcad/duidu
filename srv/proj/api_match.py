@@ -51,10 +51,10 @@ class SplitApi(ProjBaseApi):
         self.log(f"match split {sec['_id']} {row_i}: {len(new_rs)} rows")
         rows[row_i:row_i + 1] = new_rs
         self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
-            updated=self.now(), rows=rows)})
+            updated_at=self.now(), rows=rows)})
         if from_cell:
             self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
-                rows=proj['rows'], updated=self.now())})
+                rows=proj['rows'], updated_at=self.now())})
         self.send_success()
 
     @staticmethod
@@ -99,9 +99,9 @@ class MergeUpApi(ProjBaseApi):
         if from_i >= 0:
             del from_cell[from_i]
             self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
-                rows=proj['rows'], updated=self.now())})
+                rows=proj['rows'], updated_at=self.now())})
         self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
-            updated=self.now(), rows=rows)})
+            updated_at=self.now(), rows=rows)})
         self.send_success()
 
 
@@ -182,9 +182,9 @@ class MergeRowApi(ProjBaseApi):
         for sec in sections.values():
             if sec.get('_changed'):
                 self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
-                    rows=sec['rows'], updated=self.now())})
+                    rows=sec['rows'], updated_at=self.now())})
         self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
-            rows=proj['rows'], updated=self.now())})
+            rows=proj['rows'], updated_at=self.now())})
         self.send_success()
 
 
@@ -227,9 +227,9 @@ class MoveApi(ProjBaseApi):
 
         for sec in sections.values():
             self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
-                rows=sec['rows'], updated=self.now())})
+                rows=sec['rows'], updated_at=self.now())})
         self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
-            rows=proj['rows'], updated=self.now())})
+            rows=proj['rows'], updated_at=self.now())})
         self.send_success()
 
 
@@ -251,7 +251,7 @@ class MarkDelApi(ProjBaseApi):
 
         for sec in sections.values():
             self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
-                rows=sec['rows'], updated=self.now())})
+                rows=sec['rows'], updated_at=self.now())})
         self.send_success()
 
 
@@ -283,7 +283,7 @@ class TagApi(ProjBaseApi):
                 if tag[0] != '_':
                     tags.append(tag)
 
-        self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(updated=self.now(), rows=rows)})
+        self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(updated_at=self.now(), rows=rows)})
         self.send_success()
 
 
@@ -308,8 +308,8 @@ class TocBaseApi(ProjBaseApi):
         if old_n != now_n:
             p_upd = {'toc_n': p['toc_n'] + now_n - old_n, **(p_upd or {})}
         if p_upd:
-            self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated=self.now(), **p_upd)})
-        self.db.article.update_one({'_id': a['_id']}, {'$set': dict(updated=self.now(), toc=a['toc'])})
+            self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(updated_at=self.now(), **p_upd)})
+        self.db.article.update_one({'_id': a['_id']}, {'$set': dict(updated_at=self.now(), toc=a['toc'])})
 
 
 class TocAddApi(TocBaseApi):
@@ -384,7 +384,7 @@ class TocAddApi(TocBaseApi):
         assert ret_n, '没有改变'
         if s:
             self.db.section.update_one({'_id': s['_id']},
-                                       {'$set': dict(updated=self.now(), rows=rows)})
+                                       {'$set': dict(updated_at=self.now(), rows=rows)})
         self.update_article(a, p, p_upd)
         self.send_success(dict(a_id=str(a['_id']), toc_i=toc_i, toc_id=new_id - 1,
                                name=a['toc'][toc_i]['name'], add_toc=1 if add_toc else 0))
@@ -431,7 +431,7 @@ class TocDelApi(TocBaseApi):
                         r['toc_ids'] = list(set(r['toc_ids']) & lines)
                         n += 1
                 self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(
-                    updated=self.now(), rows=sec['rows'])})
+                    updated_at=self.now(), rows=sec['rows'])})
             sec = None
             self.log(f"toc_del n={n} name={toc['name']}")
         else:
@@ -465,7 +465,7 @@ class TocDelApi(TocBaseApi):
             self.log(f"toc_del n={n} id={d['toc_id']} next_id={d.get('next_id', '')}")
 
         if sec:
-            self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(updated=self.now(), rows=rows)})
+            self.db.section.update_one({'_id': sec['_id']}, {'$set': dict(updated_at=self.now(), rows=rows)})
         self.update_article(a, p)
         self.send_success(d)
 

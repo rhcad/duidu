@@ -72,7 +72,7 @@
           {% if proj['_cloned'] %}<a href="/cloned/{{proj['_cloned']}}" title="查看项目克隆列表">
             {{'克隆' if proj.get('cloned') else '创建'}}项目</a>
           {% else %} {{'克隆' if proj.get('cloned') else '创建'}}项目 {% end %}于
-          <small>{{proj['created']}}</small> <span class="gray">{{ '已发布' if proj.get('published') else  '已公开' if proj.get('public') else '未公开' }}</span></span>
+          <small>{{proj['created_at']}}</small> <span class="gray">{{ '已发布' if proj.get('published') else  '已公开' if proj.get('public') else '未公开' }}</span></span>
       </div>
     </div>
     <div class="panel panel-default">

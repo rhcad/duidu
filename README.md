@@ -25,7 +25,7 @@
 如上安装了开发环境后，运行下列命令制作免安装包(退出360安全卫士等杀毒软件)
 ```
 pip3 install pyinstaller
-pyinstaller pkg/main.spec -y
+pyinstaller main.spec -y
 ```
 然后将 `pkg/montydb` 文件夹复制到 `dist/duidu/_internal` 下
 

@@ -86,7 +86,8 @@ class ImportCBApi(ImportTextApi):
         r = dict(text=s, line=(len(rows) + 1) * 100)
         if p.get('id') == 'body':
             r['text'] = s = p.contents[0].string.strip()
-            if re.match(r'^[A-Za-z0-9 \[\](),.-]+$', s):
+            if re.match(r'^[A-Za-z0-9 \[\](),.-]+$', s) and 'num' not in tags:
+                tags['num'] = r
                 rows.append(dict(tag=['num'], **r))
             return
         text += s + '\n'
@@ -130,7 +131,7 @@ class ImportCBApi(ImportTextApi):
             if not self.mock:
                 self.db.cb.update_one({'name': name}, {'$set': dict(
                     html=html, title=title, size=len(html),
-                    created_by=self.username, created=self.now())}, upsert=True)
+                    created_by=self.username, created_at=self.now())}, upsert=True)
             return html, title, name
         except HTTPError as e:
             self.send_raise_failed(f'获取{name}文本失败: {str(e)}')
@@ -230,7 +231,7 @@ class ImportHtmlApi(ImportTextApi):
             if not self.mock:
                 self.db.cb.update_one({'name': code}, {'$set': dict(
                     html=html, title=title, size=len(html), url=url, domain=domain,
-                    created_by=self.username, created=self.now())}, upsert=True)
+                    created_by=self.username, created_at=self.now())}, upsert=True)
             return html, title, domain
         except HTTPError as e:
             self.send_raise_failed(f'获取{url}失败: {str(e)}')
@@ -268,7 +269,7 @@ class ArticleImportCBApi(ImportCBApi, ImportHtmlApi):
 
     def update_rows(self, r, s, code, changes):
         if r['rows'] and r['rows'] != s['org_rows']:
-            s_upd, n, checked = dict(org_rows=r['rows'], updated=self.now()), 0, []
+            s_upd, n, checked = dict(org_rows=r['rows'], updated_at=self.now()), 0, []
             if s.get('rows'):
                 s_upd['rows'] = s['rows']
                 for i, old_r in enumerate(s['rows']):
@@ -284,7 +285,7 @@ class ArticleImportCBApi(ImportCBApi, ImportHtmlApi):
 
             if n or not s.get('rows'):
                 self.db.section.update_one({'_id': s['_id']}, {'$set': s_upd})
-                self.log(f"section {code} {s['_id']} updated: {n} rows")
+                self.log(f"section {code} {s['_id']} updated_at: {n} rows")
                 changes.append(dict(code=code, s_id=str(s['_id'])))
 
 

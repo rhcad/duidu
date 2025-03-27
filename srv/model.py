@@ -4,10 +4,10 @@ from bson.objectid import ObjectId
 
 class Model(object):
     fields = {
-        'created': {'caption': '创建时间', 'type': 'time'},
-        'updated': {'caption': '更新时间', 'type': 'time'},
+        'created_at': {'caption': '创建时间', 'type': 'time'},
+        'updated_at': {'caption': '更新时间', 'type': 'time'},
     }
-    hidden_fields = ['created', 'updated']
+    hidden_fields = ['created_at', 'updated_at']
     actions = []
 
     @classmethod

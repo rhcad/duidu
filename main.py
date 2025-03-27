@@ -1,3 +1,4 @@
+import sys
 import logging
 from tornado import ioloop
 from tornado.options import options
@@ -14,12 +15,12 @@ if __name__ == '__main__':
                       ui_modules=ui_module.modules,
                       xsrf_cookies=True, xheaders=True)
     if app.db is None:
-        exit(1)
+        sys.exit(1)
     try:
         webbrowser.open('http://localhost:%d' % options.port)
         app.listen(options.port)
     except OSError:
-        exit(0)
+        sys.exit(0)
     logging.info('Start the maker v%s on http://localhost:%d' % (app.version, options.port))
     try:
         ioloop.IOLoop.current().start()

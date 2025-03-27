@@ -29,7 +29,7 @@ class LoginApi(BaseHandler):
     @staticmethod
     def send_user(self, user):
         ret = {'_id': str(user['_id'])}
-        for k in ['username', 'nickname', 'updated', 'internal']:
+        for k in ['username', 'nickname', 'updated_at', 'internal']:
             if k in user:
                 ret[k] = user[k]
         self.current_user = ret
@@ -55,7 +55,7 @@ class RegisterApi(BaseHandler):
         u = dict(username=u['username'], password=password,
                  nickname=u['nickname'], verification=u['verification'],
                  ip=self.get_ip(), ip0=self.get_ip(), internal=u['username'] == 'admin',
-                 created=self.now(), updated=self.now())
+                 created_at=self.now(), updated_at=self.now())
         r = self.db.user.insert_one(u)
         u['_id'] = r.inserted_id
 
@@ -105,7 +105,7 @@ class ProfileApi(BaseHandler):
                 upd[k] = u[k]
         if not upd:
             self.send_raise_failed('个人信息没有改变')
-        upd.update(dict(updated=self.now(), ip=self.get_ip()))
+        upd.update(dict(updated_at=self.now(), ip=self.get_ip()))
 
         self.db.user.update_one(dict(username=self.username), {'$set': upd})
         self.log(f"{self.username} profile changed: {','.join(list(upd.keys()))}")
@@ -123,7 +123,7 @@ class PasswordApi(BaseHandler):
             self.send_raise_failed('原密码不对')
         RegisterApi.check_password(self, u['password'])
 
-        upd = dict(updated=self.now(), ip=self.get_ip(), password=md5(u['password']))
+        upd = dict(updated_at=self.now(), ip=self.get_ip(), password=md5(u['password']))
         self.db.user.update_one(dict(username=self.username), {'$set': upd})
         self.log(f"{self.username} password changed")
         LoginApi.send_user(self, self.db.user.find_one(dict(username=self.username)))
@@ -145,7 +145,7 @@ class ForgotApi(BaseHandler):
         if u['verification'] != old['verification']:
             self.send_raise_failed('备忘不匹配')
 
-        upd = dict(ip=self.get_ip(), updated=self.now(), password=md5(u['password']))
+        upd = dict(ip=self.get_ip(), updated_at=self.now(), password=md5(u['password']))
         self.db.user.update_one(dict(username=u['username']), {'$set': upd})
         self.log(f"{u['username']} password reset")
         LoginApi.send_user(self, self.db.user.find_one(dict(username=self.username)))

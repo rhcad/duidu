@@ -46,7 +46,7 @@
           {% if page['short_name'] %}<span class="info-span"><span class="gray">对照简称：</span>{{page['short_name']}}</span>{% end %}
           <span class="info-span"><span class="gray">经典名称：</span>{{page['name']}}</span>
         </p>
-        <p>{% module Users([page['created_by']]) %} {{'克隆' if page.get('cloned') else '创建'}}于 <small>{{page['created']}}</small></p>
+        <p>{% module Users([page['created_by']]) %} {{'克隆' if page.get('cloned') else '创建'}}于 <small>{{page['created_at']}}</small></p>
       </div>
     </div>
     {% for i, sec in enumerate(page['sections']) %}

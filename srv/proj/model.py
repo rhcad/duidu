@@ -19,7 +19,7 @@ class Proj(Model):
         'columns': {'caption': '分栏'},  # {a_id,code,name}[]
         **Model.fields
     }
-    hidden_fields = ['editors', 'public', 'published', 'columns', 'created', 'char_n']
+    hidden_fields = ['editors', 'public', 'published', 'columns', 'created_at', 'char_n']
     actions = [
         dict(id='edit', caption='修改', url='/proj/edit/@_id'),
         dict(id='view', caption='预览', url='/proj/view/@_id', default=True)
@@ -39,7 +39,7 @@ class Article(Model):
         'sections': {'caption': '内容'},
         **Model.fields
     }
-    hidden_fields = ['proj_id', 'created_by', 'sections', 'created', 'updated']
+    hidden_fields = ['proj_id', 'created_by', 'sections', 'created_at', 'updated_at']
 
     @classmethod
     def get_column_rows(cls, handler, article, pi=0):
@@ -91,7 +91,7 @@ class Section(Model):
         'rows': {'caption': '段落'},  # {line,text,row_i,del,tag}[]
         **Model.fields
     }
-    hidden_fields = ['a_id', 'created_by', 'org_rows', 'rows', 'created', 'updated']
+    hidden_fields = ['a_id', 'created_by', 'org_rows', 'rows', 'created_at', 'updated_at']
 
     @staticmethod
     def get_rows(sec):
