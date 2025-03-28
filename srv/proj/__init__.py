@@ -7,4 +7,4 @@ handlers = [v.ProjHandler, v.MatchHandler, v.MatchRenderApi, v.MergeNotesHandler
             b.ImportCBApi, b.ImportHtmlApi, b.ArticleImportCBApi, b.ImportCbTocApi,
             m.SplitApi, m.MergeUpApi, m.MergeRowApi, m.MoveApi, m.MarkDelApi,
             m.TagApi, m.FixRowsApi, m.TocAddApi, m.TocDelApi, m.TocEditApi, m.TocGetApi,
-            m.TocImportApi, n.AddNoteApi, n.DelNoteApi, n.EditNoteApi]
+            m.TocImportApi, n.AddNoteApi, n.DelNoteApi, n.EditNoteApi, v.PreviewHtmlApi]

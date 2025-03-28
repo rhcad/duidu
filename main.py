@@ -17,7 +17,8 @@ if __name__ == '__main__':
     if app.db is None:
         sys.exit(1)
     try:
-        webbrowser.open('http://localhost:%d' % options.port)
+        if app.mock_path:
+            webbrowser.open('http://localhost:%d' % options.port)
         app.listen(options.port)
     except OSError:
         sys.exit(0)

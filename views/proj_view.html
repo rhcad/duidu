@@ -64,11 +64,7 @@
   </li>
 </ul>
 <div class="app">
-  {% if mode == 'download' %}
   {% module TopNav(proj['short_name'], themes=False, download=True) %}
-  {% else %}
-  {% module TopNav('预览', prev=dict(url='/proj/edit/' + _id, title=proj['short_name']), themes=False, download='preview') %}
-  {% end %}
   <div class="container-fluid m-t-n10">
     <div class="app-body">
       {% if all_toc %}
@@ -120,9 +116,7 @@
     $('.original:not(:has(.text))').hide()
     reloadNotes(null, '-')
   })
-  {% if mode == 'download' %}
   window.all_toc = {% raw all_toc %}
-  {% end %}
   {% if all_toc %}tocLoad('1', `{{ all_toc[toc_i]['a_id'] }}`, {{int(all_toc[toc_i]['toc_i'])}}){% end %}
   {% if len(all_toc)>1 %}tocLoad('2', `{{ all_toc[toc_j]['a_id'] }}`, {{int(all_toc[toc_j]['toc_i'])}}){% end %}
 </script>

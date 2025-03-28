@@ -27,8 +27,8 @@
       {% if model.actions %}
       <td class="actions">
         {% for c in model.actions %}
-        <a href="{{util.sub_prop(c['url'], r) if 'url' in c else '#'}}"
-           class="btn btn-default">{{c['caption']}}</a>
+        {% set href='url' in c and util.sub_prop(c['url'], r) or '#' %}
+        <a href="{{href}}" target="{{ '_blank' if 'proj/view/' in href else '_self' }}" class="btn btn-default">{{c['caption']}}</a>
         {% end %}
       </td>
       {% end %}

@@ -30,7 +30,7 @@ class ProjHandler(BaseHandler):
 
 class MatchHandler(ProjHandler, ProjBaseApi):
     """项目段落对照页面"""
-    URL = '/proj/(match|view)/@oid'
+    URL = '/proj/(match)/@oid'
     ROLES = None
 
     @auto_try
@@ -145,6 +145,23 @@ class MergeNotesHandler(MatchHandler):
         BaseHandler.render(self, f"proj_{'notes' if kwargs['mode'] == 'notes' else 'match'}.html", **kwargs)
 
 
+class PreviewHtmlApi(MatchHandler):
+    """预览对读网页"""
+    URL = '/proj/view/@oid'
+    ROLES = None
+
+    @auto_try
+    def get(self, _id):
+        return MatchHandler.get(self, 'download', _id)
+
+    def get_max_page(self, p, a):
+        if a.get('toc'):
+            p['all_toc'] = p.get('all_toc', []) + [
+                dict(a_id=str(a['_id']), toc_i=i, **Proj.unpack_data(t, True))
+                for i, t in enumerate(a['toc'])]
+        return 0
+
+
 class DownloadHtmlApi(MatchHandler):
     """下载对读网页"""
     URL = '/api/proj/download/@oid'
@@ -154,10 +171,6 @@ class DownloadHtmlApi(MatchHandler):
         return MatchHandler.get(self, 'download', _id)
 
     def get_max_page(self, p, a):
-        if p['cols'] < 2 and p['toc_n'] < 1:
-            self.send_raise_failed('多栏对读或有科判的才需要下载')
-        if len(a['sections']) > 5:
-            self.send_raise_failed('多页内容目前不能下载')
         if a.get('toc'):
             p['all_toc'] = p.get('all_toc', []) + [
                 dict(a_id=str(a['_id']), toc_i=i, **Proj.unpack_data(t, True))

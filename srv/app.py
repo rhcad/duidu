@@ -19,7 +19,7 @@ class Application(web.Application):
         with open(fn if path.exists(fn) else fn0, encoding='utf-8') as f:
             self.config = load_yml(f, Loader=SafeLoader)
         self.site = self.config['site']
-        self.version = '0.1.0326'
+        self.version = '0.1.0328'
 
         super(Application, self).__init__(
             handlers,
