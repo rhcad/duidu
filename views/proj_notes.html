@@ -104,7 +104,7 @@
         </div>
         {% if max_page %}{% module Pager(pi, max_page, 'm-t-0 m-r-10 m-b-0') %}{% end %}
         <div class="table-p">
-          <div class="cell cell-l no-ellipsis">
+          <div class="cell cell-l no-ellipsis autoscroll">
             {% set c = proj['columns'][0] %}
             {% for r in proj.get('rows', []) %}
             {% module SectionBlock(c, r['row_i']) %}
@@ -112,7 +112,7 @@
             {% module SectionBlock(c) %}
           </div>
           {% if len(proj['columns']) > 1 %}
-          <div class="cell cell-r">
+          <div class="cell cell-r autoscroll">
             <div class="sel-tip no-select"></div>
             {% module SectionBlock(proj['columns'][1]) %}
           </div>

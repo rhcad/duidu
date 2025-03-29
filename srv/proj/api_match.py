@@ -9,7 +9,7 @@ class SplitApi(ProjBaseApi):
 
     @auto_try
     def post(self):
-        re_cr, rc_sp = re.compile(r'@|\s*\n+\s*'), re.compile(r'[\s\u3000|]')
+        re_cr, rc_sp = re.compile(r'@|\s*\n+\s*'), re.compile(r'[\t \u3000|]')
         d = self.data()  # {old_text,text,line,a_i,a_id,s_i,s_id}
         d['old_text'] = rc_sp.sub('', d['old_text'])
         if d['old_text'] == rc_sp.sub('', d['text']):

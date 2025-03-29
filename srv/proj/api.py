@@ -229,9 +229,11 @@ class ProjCloneApi(ProjBaseApi):
 
         for a in articles:
             self.db.article.update_one({'_id': a['_id']}, {'$set': self.update_ids(
-                dict(sections=a['sections'], updated_at=self.now()), id_map)})
+                dict(sections=a['sections'], note_for=a.get('note_for'),
+                     updated_at=self.now()), id_map)})
         self.db.proj.update_one({'_id': p_id}, {'$unset': {'tmp': 1}, '$set': self.update_ids(
-            dict(columns=p0['columns'], rows=p0['rows'], updated_at=self.now()), id_map)})
+            dict(columns=p0['columns'], rows=p0['rows'], notes=p0.get('notes', []),
+                 updated_at=self.now()), id_map)})
         self.db.section.update_many(dict(proj_id=p_id), {'$unset': {'tmp': 1}})
         self.db.article.update_many(dict(proj_id=p_id), {'$unset': {'tmp': 1}})
 

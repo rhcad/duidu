@@ -2,6 +2,7 @@ from srv.base import auto_try, BaseHandler, re, to_basestring
 from bson.objectid import ObjectId
 from srv.proj.model import Proj, ProjNote, Article, Section, Toc
 from srv.proj.api import ProjBaseApi
+from bs4 import BeautifulSoup as Soup
 
 
 class ProjHandler(BaseHandler):
@@ -29,8 +30,8 @@ class ProjHandler(BaseHandler):
 
 
 class MatchHandler(ProjHandler, ProjBaseApi):
-    """项目段落对照页面"""
-    URL = '/proj/(match)/@oid'
+    """项目段落对照、合并注解页面"""
+    URL = '/proj/(match|notes|para)/@oid'
     ROLES = None
 
     @auto_try
@@ -89,7 +90,9 @@ class MatchHandler(ProjHandler, ProjBaseApi):
                           for ti, t in enumerate(a['toc']) if t['rows']]
 
         kw.update(mode=mode, proj=p, _id=str(p['_id']), pi=pi, max_page=max_page)
-        self.render(f"proj_{mode if mode == 'match' else 'view'}.html", P_TAGS=Section.TAGS,
+
+        template = dict(match='match', notes='notes', para='match')
+        self.render(f"proj_{template.get(mode, 'view')}.html", P_TAGS=Section.TAGS,
                     col_w=100 * 1000 // max(1, col_n) / 1000, all_toc=all_t, cur_toc=cur_toc,
                     is_owner=p['created_by'] == self.username, editable=editable, **kw)
 
@@ -127,22 +130,19 @@ class MatchHandler(ProjHandler, ProjBaseApi):
 
 class MatchRenderApi(MatchHandler):
     """项目段落对照页面的局部渲染"""
-    URL = '/api/proj/(match|para)/@oid'
+    URL = '/api/proj/(match|para|notes)/@oid'
 
     def finish(self, html=None):
-        if b'<table>' not in (html or b''):
+        if not re.search(b'<table|class="table-p"', html or b''):
             return BaseHandler.finish(self, html)
-        html = re.search(b'<table>((.|\n)+)</table>', html).group(1)
+        if b'<table' in html:
+            html = re.search(b'<table[^>]*>((.|\n)+)</table>', html).group(1)
+        else:
+            soup = Soup(html, 'html.parser')
+            html = soup.select('.table-p')[0].prettify()
+            html = re.search('^[^>]+>((.|\n)+)</[^>]+>$', html).group(1)
         self.set_header('Content-Type', 'text/html; charset=UTF-8')
         self.write(to_basestring(html).strip())
-
-
-class MergeNotesHandler(MatchHandler):
-    """合并注解页面"""
-    URL = '/proj/(notes|para)/@oid'
-
-    def render(self, template_name, **kwargs):
-        BaseHandler.render(self, f"proj_{'notes' if kwargs['mode'] == 'notes' else 'match'}.html", **kwargs)
 
 
 class PreviewHtmlApi(MatchHandler):

@@ -796,12 +796,12 @@
           // :hover on menu
           menuMouseenter: function () {
               var root = $(this).data().contextMenuRoot;
-              root.hovering = true;
+              if (root) root.hovering = true;
           },
           // :hover on menu
           menuMouseleave: function (e) {
               var root = $(this).data().contextMenuRoot;
-              if (root.$layer && root.$layer.is(e.relatedTarget)) {
+              if (root && root.$layer && root.$layer.is(e.relatedTarget)) {
                   root.hovering = false;
               }
           },

@@ -164,8 +164,10 @@ function tocEnsureVisible(p, reload=false) {
 }
 
 function scrollToVisible(scrollOwner, $prev, $next) {
-  const $s = $(scrollOwner), sr = $s.offset(), gap = $s.height() < 150 ? 20 : 50,
-      rPrev = $prev && $prev.offset(), rNext = $next && $next.offset()
+  const $s = $(scrollOwner), sr = $s.offset(),
+    gap = $s.height() < 150 ? 20 : 80,
+    rPrev = $prev && $prev.offset(),
+    rNext = $next && $next.offset()
 
   if (sr && rPrev && rPrev.top < sr.top + gap) {
     scrollOwner.scrollTop -= sr.top + gap - rPrev.top
@@ -189,7 +191,8 @@ function scrollTreeNodeToVisible(tree, node) {
 }
 
 function scrollParaToVisible($p) {
-  scrollToVisible(document.querySelector('.columns-p'), $p, $p)
+  const owner = $p.closest('.autoscroll')[0] || document.querySelector('.columns-p')
+  scrollToVisible(owner, $p, $p)
 }
 
 function _getTocExt(p) {
