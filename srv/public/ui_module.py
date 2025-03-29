@@ -93,10 +93,12 @@ class SectionBlock(UIModule):
     t['level']}}" data-line="{{t['line']}}" data-s-id="{{t['s_id']}}">{{t['text']}}</p>
     {% end %}{% end %}
     <span title="{{gen_line(r['line'])}}{{
+    ' 文字有改动' if r.get('changed') else ''}}{{
     ' 拆分的段落' if r['line']%100 else ''}}{{
     ' |后有合并段落' if '|' in r['text'] else ''}}" class="p-head{{
     ' split' if r['line']%100 else ''}}{{
     ' merge' if '|' in r['text'] else ''}}{{
+    ' changed' if r.get('changed') else ''}}{{
     ''.join(' '+s for s in tags if s in ['xu', 'xu_first', 'xu_end', 'dharani']) }}{{
     ' del' if r.get('del') else ''}}"{% if d_tag %} data-tag="{{d_tag[0]}}"{% end %}></span>
     <p class="text {{'del ellipsis' if r.get('del') else 'ellipsis-n'}}{{

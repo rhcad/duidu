@@ -131,7 +131,7 @@ $.contextMenu({
   selector: '.original p.text:not(.del)',
   items: {
     splitP: {
-      name: '拆分段落...',
+      name: '拆分或修改...',
       callback: function(){ _splitParagraph(this) },
     },
     mergeUp: {
@@ -192,7 +192,7 @@ $.contextMenu({
   selector: '.merged p.text',
   items: {
     splitP: {
-      name: '拆分段落...',
+      name: '拆分或修改...',
       callback: function(){ _splitParagraph(this) },
     },
     mergeUp: {
@@ -260,13 +260,12 @@ $.contextMenu({
 function _splitParagraph($p) {
   const t0 = $p.text().trim(), del = $p.hasClass('del');
   (del || !editable ? Swal1 : Swal2).fire({
-    title: `${del ? '段落内容' : '拆分段落'} <small>${$p.data('lineS')}</small>`,
-    inputLabel: del ? '' : '在要拆分处插入分隔符“@”或回车换行，不能改字。',
+    title: `${del ? '段落内容' : '拆分或修改'} <small>${$p.data('lineS')}</small>`,
+    inputLabel: del ? '' : '在要拆分处插入分隔符“@”或回车换行，可以修改内容。',
     inputValue: t0,
     input: 'textarea',
     inputAttributes: {rows: 14},
     width: 800,
-    confirmButtonText: '拆分',
     didOpen: () => activatePara($p),
     preConfirm: text => postApi('/proj/match/split',
       getParaInfo($p, {old_text: t0, text: text.trim()}),

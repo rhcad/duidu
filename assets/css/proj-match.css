@@ -72,6 +72,7 @@ body.hide-navbar .app-body { height: 100%; margin-top: 10px; padding: 10px; }
 .p-head.split::before { content: "拆"; }
 .p-head.merge::before { content: "合"; }
 .p-head.del { display: none; }
+.p-head.changed::before { border-color: red; }
 
 .col-name { font-size: .9em; margin: 0 auto .5em; }
 .cell.has-active { border-color: var(--hover-color); }

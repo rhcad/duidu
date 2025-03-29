@@ -4,20 +4,22 @@ from srv.proj.model import Section, Toc
 
 
 class SplitApi(ProjBaseApi):
-    """拆分段落"""
+    """拆分或修改"""
     URL = '/api/proj/match/split'
 
     @auto_try
     def post(self):
+        re_cr, rc_sp = re.compile(r'@|\s*\n+\s*'), re.compile(r'[\s\u3000|]')
         d = self.data()  # {old_text,text,line,a_i,a_id,s_i,s_id}
-        if d['old_text'] == d['text']:
+        d['old_text'] = rc_sp.sub('', d['old_text'])
+        if d['old_text'] == rc_sp.sub('', d['text']):
             self.send_raise_failed('没有改变')
-        re_cr, rc_sp = re.compile(r'@|\s*\n+\s*'), re.compile(r'[\s\u3000]')
-        if rc_sp.sub('', d['old_text']) != rc_sp.sub('', re_cr.sub('', d['text'])):
-            self.send_raise_failed('除了插入@或回车换行外，不能改动文本')
+        text_diff = re_cr.sub('', d['old_text']) != re_cr.sub('', rc_sp.sub('', d['text']))
+        if text_diff and re_cr.search(d['text']):
+            self.send_raise_failed('拆分和修改不能同时进行')
 
         proj, sec, rows, row = self.get_one_row(d)
-        if d['old_text'] != row['text']:
+        if d['old_text'] != rc_sp.sub('', row['text']):
             self.send_raise_failed('行内容不匹配，请刷新页面')
         self.verify_no_note(self, proj, d)
         assert not re_cr.search(row['text'])
@@ -33,7 +35,9 @@ class SplitApi(ProjBaseApi):
                 row['text'] = text
                 new_rs.append(row)
                 new_line = row['line'] // 100 * 100 + 1
-                for k in ['_id', 'line', 'text', 'toc_ids']:
+                if text_diff:
+                    row['changed'] = 1
+                for k in ['_id', 'line', 'text', 'toc_ids', 'changed']:
                     attr.pop(k, 0)
                 if from_cell:
                     from_cell[from_i]['text'] = text[:10]
