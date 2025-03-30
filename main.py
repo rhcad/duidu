@@ -17,14 +17,15 @@ if __name__ == '__main__':
     if app.db is None:
         sys.exit(1)
     try:
-        if app.mock_path:
-            webbrowser.open('http://localhost:%d' % options.port)
-        app.listen(options.port)
-    except OSError:
-        sys.exit(0)
-    logging.info('Start the maker v%s on http://localhost:%d' % (app.version, options.port))
-    try:
+        port = int(app.config.get('port', options.port))
+        if app.mock_path:  # app made by installer
+            webbrowser.open('http://localhost:%d' % port)
+        app.listen(port)
+        logging.info('Start the maker v%s on http://localhost:%d' % (app.version, port))
         ioloop.IOLoop.current().start()
+    except OSError:
+        logging.info('ignore same port')
+        sys.exit(0)
     except KeyboardInterrupt:
         logging.info('Stop the maker')
     finally:

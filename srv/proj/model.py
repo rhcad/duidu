@@ -11,12 +11,12 @@ class Proj(Model):
         'toc_n': {'caption': '科判'},
         'note_n': {'caption': '注解'},
         'char_n': {'caption': '字数'},
-        'char_k': {'caption': '千字', 'align': 'right'},
+        'char_k': {'caption': '千字', 'align': 'right'},  # 不存，动态显示
         'created_by': {'caption': '创建者', 'type': 'user'},
         'editors': {'caption': '协作人'},
         'public': {'caption': '公开', 'type': 'boolean'},
         'published': {'caption': '发布时间', 'type': 'time'},
-        'columns': {'caption': '分栏'},  # {a_id,code,name}[]
+        'columns': {'caption': '分栏'},  # {a_id,code,name,colspan,toc_i,notes}[]
         **Model.fields
     }
     hidden_fields = ['editors', 'public', 'published', 'columns', 'created_at', 'char_n']
@@ -33,10 +33,11 @@ class Article(Model):
         'code': {'caption': '编码'},
         'name': {'caption': '名称'},
         'type': {'caption': '类别', 'type': types},
-        'colspan': {'caption': '宽度', 'type': ['1:一栏', '2:两栏', '3:三栏']},
+        'colspan': {'caption': '宽度', 'type': ['1:一栏', '2:两栏', '3:三栏']},  # 对应于 Proj.columns[i].colspan
         'char_n': {'caption': '字数'},
         'created_by': {'caption': '创建者', 'type': 'user'},
-        'sections': {'caption': '内容'},
+        'sections': {'caption': '内容'},  # {_id,name}[]
+        'note_tag': {'caption': '注解标签'},  # note_for
         **Model.fields
     }
     hidden_fields = ['proj_id', 'created_by', 'sections', 'created_at', 'updated_at']
@@ -87,8 +88,8 @@ class Section(Model):
         'source': {'caption': '来源'},
         'char_n': {'caption': '字数'},
         'created_by': {'caption': '创建者', 'type': 'user'},
-        'org_rows': {'caption': '原文'},  # {line,text}[]
-        'rows': {'caption': '段落'},  # {line,text,row_i,del,tag}[]
+        'org_rows': {'caption': '原文'},  # {line,text,tag}[]
+        'rows': {'caption': '段落'},  # {line,text,row_i,del,tag,toc_ids,changed}[]
         **Model.fields
     }
     hidden_fields = ['a_id', 'created_by', 'org_rows', 'rows', 'created_at', 'updated_at']
@@ -126,6 +127,7 @@ class Toc(Model):
 
 
 class ProjNote(Model):
+    """对应于 Proj.columns[i].notes """
     fields = {
         'base': {'caption': '栏名'},
         'tag': {'caption': '标签'},

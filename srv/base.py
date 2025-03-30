@@ -14,6 +14,7 @@ from srv import util
 BASE_DIR = path.dirname(path.abspath(path.dirname(__file__)))
 DbError = PyMongoError, MontyError
 
+
 def on_exception(self, e):
     if not isinstance(e, Finish):
         _, _, tb = sys.exc_info()
@@ -61,7 +62,7 @@ class BaseHandler(CorsMixin):
     def __init__(self, app, req, **p):
         self.db, self.config, self.app = app.db, app.config, app
         self.is_api = '/api/' in req.path
-        self.mock = self.app.mock_path
+        self.mock = app.mock_path is not None
         self.util = util
         self.username, self._short, self._data = '', '', None
         RequestHandler.__init__(self, app, req, **p)
@@ -69,20 +70,21 @@ class BaseHandler(CorsMixin):
     def set_default_headers(self):
         CorsMixin.set_default_headers(self)
         self.set_header('Access-Control-Allow-Origin',
-                        not self.app.settings.get('debug') and self.app.site.get('domain') or '*')
+                        self.config['database'].get('user') and self.app.site.get('domain') or '*')
 
     def prepare(self):
         need_login = not self.current_user and self.ROLES
         if self.current_user:
             self.username = self.current_user['username']
             try:
-                time = datetime.strptime(to_basestring(self.get_secure_cookie('user_time')), '%Y-%m-%d %H:%M:%S')
+                time = to_basestring(self.get_secure_cookie('user_time'))
+                time = datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
                 seconds = (self.now() - time).seconds
             except (TypeError, ValueError, AttributeError):
-                seconds = 1e5
-            if self.ROLES and seconds > (30 if self.request.method[0] in 'PD' else 300):
+                seconds = 1e5  # expire
+            if self.ROLES and seconds > (60 if self.request.method[0] in 'PD' else 600):
                 u = self.db.user.find_one(dict(username=self.username))
-                if u and u['updated_at'] == (self.current_user.get('updated') or self.current_user['updated_at']):
+                if u and u['updated_at'] == self.current_user.get('updated_at'):
                     self.set_secure_cookie('user_time', self.now().strftime('%Y-%m-%d %H:%M:%S'))
                 else:
                     self.clear_cookie('user')

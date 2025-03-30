@@ -10,7 +10,6 @@ from glob import glob
 
 define('port', default=8000, help='run port', type=int)
 define('debug', default=True, help='the debug mode', type=bool)
-define('test_db', default=True, help='check database connection', type=bool)
 
 
 class Application(web.Application):
@@ -19,7 +18,7 @@ class Application(web.Application):
         with open(fn if path.exists(fn) else fn0, encoding='utf-8') as f:
             self.config = load_yml(f, Loader=SafeLoader)
         self.site = self.config['site']
-        self.version = '0.1.0328'
+        self.version = '0.1.330'
 
         super(Application, self).__init__(
             handlers,
@@ -33,19 +32,6 @@ class Application(web.Application):
 
         self.conn = self.db = self.mock_path = None
         self._init_db(self.config['database'])
-
-    def _init_db(self, db_cfg):
-        mock = db_cfg.get('mock')
-        try:
-            if db_cfg.get('host'):
-                self.conn, self.db = self._connect_db(db_cfg)
-                return options.test_db and self.db.user.count_documents({})
-        except DbError as e:
-            logging.error('database ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e)) + (
-                ', mocked data in %s used' % mock if mock else ''))
-            self.stop()
-        if mock:
-            self._init_mock(db_cfg)
 
     def stop(self):
         if self.conn:
@@ -70,11 +56,36 @@ class Application(web.Application):
                    summary, cls, request_time,
                    user and ' [%s]' % user.get('username') or '')
 
+    def _init_db(self, db_cfg):
+        mock = db_cfg.get('mock')
+        try:
+            if db_cfg.get('host'):
+                self.conn, self.db = self.connect_db(db_cfg)
+                return self.db.user.count_documents({})
+        except DbError as e:
+            logging.error('database ' + re.sub(r'\.?(, |[({]).+$|\. .+$', '', str(e)) + (
+                ', mocked data in %s used' % mock if mock else ''))
+            self.stop()
+        if mock:
+            self._init_mock(db_cfg)
+
     def _init_mock(self, db_cfg):
-        self.mock_path = path.join(BASE_DIR, db_cfg['mock'])
-        self.conn, self.db = self._connect_db(db_cfg, self.mock_path)
+        from montydb import set_storage, MontyClient
+        from montydb.types.bson import json_loads
+
+        if BASE_DIR[1] == ':':
+            self.mock_path = path.join(BASE_DIR[:2], db_cfg['mock'])
+        else:
+            self.mock_path = path.join(path.expanduser('~'), db_cfg['mock'])
+        set_storage(
+            repository=self.mock_path,  # dir path for database to live on disk
+            mongo_version='4.2',  # try matching behavior with this mongodb version
+            cache_modified='2',  # seconds, the only setting that flat-file have
+            use_bson=True,  # will import pymongo's bson
+        )
+        self.conn = MontyClient(self.mock_path)
+        self.db = self.conn[db_cfg['name']]
         if self.db.user.find_one({}) is None:  # first run
-            from montydb.types.bson import json_loads
             for fn in glob(path.join(BASE_DIR, 'doc/examples/db', '*.json')):
                 coll = path.basename(fn).split('.')[0]
                 with open(fn, encoding='utf-8') as f:
@@ -86,17 +97,7 @@ class Application(web.Application):
                         pass
 
     @staticmethod
-    def _connect_db(d, mock_path=''):
-        if mock_path:
-            from montydb import set_storage, MontyClient
-            set_storage(
-                repository=mock_path,  # dir path for database to live on disk
-                mongo_version='4.2',  # try matching behavior with this mongodb version
-                cache_modified='2',  # seconds, the only setting that flat-file have
-                use_bson=True,  # will import pymongo's bson
-            )
-            conn = MontyClient(mock_path)
-            return conn, conn[d['name']]
+    def connect_db(d):
         usr = f"{d['user']}:{d['password']}@" if d.get('user') else ''
         uri = f"mongodb://{usr}{d['host']}:{d['port']}" + (f"/{d['name']}" if usr else '')
         conn = pymongo.MongoClient(

@@ -7,6 +7,7 @@
 ## 简易免安装
 
 在64位 Windows 上可使用打包后的免安装包。运行时遇到360或杀毒软件警告时，选择允许运行或信任，是误报。
+本地文件数据库在 duidu_db 下，可直接用 admin 或 demo 登录(初始密码为 d123)。
 
 ### 开发和维护
 
@@ -27,7 +28,6 @@
 pip3 install pyinstaller
 pyinstaller main.spec -y
 ```
-然后将 `pkg/montydb` 文件夹复制到 `dist/duidu/_internal` 下
 
 ## 欢迎改进
 
