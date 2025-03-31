@@ -73,10 +73,8 @@ class Application(web.Application):
         from montydb import set_storage, MontyClient
         from montydb.types.bson import json_loads
 
-        if BASE_DIR[1] == ':':
-            self.mock_path = path.join(BASE_DIR[:2], db_cfg['mock'])
-        else:
-            self.mock_path = path.join(path.expanduser('~'), db_cfg['mock'])
+        mock_path = re.sub(r'([^/]+\.app|_internal)/.+$', '', BASE_DIR)
+        self.mock_path = path.join(mock_path, db_cfg['mock'])
         set_storage(
             repository=self.mock_path,  # dir path for database to live on disk
             mongo_version='4.2',  # try matching behavior with this mongodb version

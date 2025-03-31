@@ -1,0 +1,18 @@
+cookie_secret: 'vhYlUvXeTw6diFYZr7PWRw1HmKTZsEkVvaFkppAJCog='
+
+port: 8010
+site:
+  name: 经典对读制作
+  keywords: 经典页面,对读,多版本
+  description: 多版本对读网页制作工具
+  domain: duidu.ggbstudy.top
+
+database:
+  mock: db
+  name: duidu
+
+sites:
+  hrfjw:
+    body: .B1_text
+  goodweb:
+    body: td.style_txt
