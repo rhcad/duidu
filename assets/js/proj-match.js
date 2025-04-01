@@ -488,7 +488,7 @@ function onPageLoaded() {
   $('.merged:not([data-row-i="1"]) .col-name,.single-article .col-name,' +
     '.p-head.xu_first,.p-head[data-tag="卷"],.p-head[data-tag="节"]').remove()
   if (!editable) {
-    showError('只读提示', '需要登录，且是创建者或协编才能修改。')
+    showError('只读提示', '需要登录，且是创建者才能修改。')
   }
 }
 

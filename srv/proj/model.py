@@ -13,13 +13,12 @@ class Proj(Model):
         'char_n': {'caption': '字数'},
         'char_k': {'caption': '千字', 'align': 'right'},  # 不存，动态显示
         'created_by': {'caption': '创建者', 'type': 'user'},
-        'editors': {'caption': '协作人'},
         'public': {'caption': '公开', 'type': 'boolean'},
         'published': {'caption': '发布时间', 'type': 'time'},
         'columns': {'caption': '分栏'},  # {a_id,code,name,colspan,toc_i,notes}[]
         **Model.fields
     }
-    hidden_fields = ['editors', 'public', 'published', 'columns', 'created_at', 'char_n']
+    hidden_fields = ['public', 'published', 'columns', 'created_at', 'char_n']
     actions = [
         dict(id='edit', caption='修改', url='/proj/edit/@_id'),
         dict(id='view', caption='预览', url='/proj/view/@_id', default=True)

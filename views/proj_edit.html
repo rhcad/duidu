@@ -36,7 +36,6 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
               <li class="{{op_cls}}"><a data-toggle="modal" data-target="#editProjModal">修改</a></li>
-              <li class="{{op_cls}}"><a onclick="onChangeEditors()">设置协编</a></li>
               <li role="separator" class="divider"></li>
               <li class="{{op_cls}}"><a data-toggle="modal" data-target="#importProjModal">导入</a></li>
               <li class="{{'' if internal else op_cls}}"><a href="/api/proj/export/{{_id}}">导出</a></li>
@@ -60,14 +59,6 @@
           <span class="info-span"><span class="gray">备注：</span>{{proj['comment']}}</span>
           {% end %}
         </p>
-        {% if is_owner %}
-        <span class="info-span"><span class="gray">协编：</span>
-            {% module Users(proj['editors'], '可邀请其他人共同编辑和检查内容') %}</span>
-        {% elif current_user and '*' in proj['editors'] %}
-        <span class="info-span gray">所有人可修改</span>
-        {% elif current_user and current_user['username'] in proj['editors'] %}
-        <span class="info-span gray">我 是本项目的协编</span>
-        {% end %}
         <span class="info-span">{% module Users([proj['created_by']]) %}
           {% if proj['_cloned'] %}<a href="/cloned/{{proj['_cloned']}}" title="查看项目克隆列表">
             {{'克隆' if proj.get('cloned') else '创建'}}项目</a>
@@ -172,13 +163,6 @@
 {% include _/base_foot.html %}
 <script src="{{static_url('js/download.js')}}"></script>
 <script>
-  function onChangeEditors() {
-    Swal2.fire({title: '设置协编', input: 'text',
-      text: '输入要增加的协编人的用户名，减号开头则移除。',
-      preConfirm: (value) => value && postApi('/proj/editor',
-          {editor: value, proj_id: '{{_id}}'}, reloadPage),
-    })
-  }
   function reorderColumns() {
     Swal2.fire({ title: '调整栏序', input: 'textarea', inputAttributes: {rows: 6},
       inputValue: `{{ '\n'.join([ c['code'] + ' ' + c['name'] for c in proj['columns']]) }}`,

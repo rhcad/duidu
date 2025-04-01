@@ -25,9 +25,8 @@ class ProjBaseApi(BaseHandler):
         return d, p
 
     def verify_editable(self, proj):
-        es = proj['editors']
-        if self.username != proj['created_by'] and self.username not in es and '*' not in es:
-            self.send_raise_failed('本项目的创建者或协编才能修改内容，或克隆后修改')
+        if self.username != proj['created_by']:
+            self.send_raise_failed('本项目的创建者才能修改内容，或克隆后修改')
 
     @staticmethod
     def get_merged_row(proj, row_i):
@@ -177,7 +176,7 @@ class ProjAddApi(BaseHandler):
         if self.db.proj.find_one(dict(code=d['code'], created_by=self.username)):
             self.send_raise_failed(f"项目编码重复 {d['code']}+{self.username}")
         p = dict(code=d['code'], name=d['name'], comment=d['comment'], columns=[],
-                 created_by=self.username, editors=[], cols=0, char_n=0, toc_n=0, note_n=0,
+                 created_by=self.username, cols=0, char_n=0, toc_n=0, note_n=0,
                  rows=[], created_at=self.now(), updated_at=self.now(), note_char_n=0)
         r = self.db.proj.insert_one(p)
         p['_id'] = r.inserted_id
@@ -203,7 +202,7 @@ class ProjCloneApi(ProjBaseApi):
         self.db.proj.delete_many(dict(tmp=tmp))
 
         p = dict(code=d['code'], name=d['name'], comment=d['comment'], tmp=tmp,
-                 created_by=self.username, editors=[], cols=p0['cols'], char_n=p0['char_n'],
+                 created_by=self.username, cols=p0['cols'], char_n=p0['char_n'],
                  columns=[], rows=[], created_at=self.now(), updated_at=self.now(), toc_n=p0['toc_n'],
                  cloned=p0.get('cloned', p0['_id']),
                  note_n=p0['note_n'], note_char_n=p0.get('note_char_n', 0))
@@ -290,7 +289,7 @@ class ProjImportApi(ProjBaseApi):
         p = self.db.proj.find_one({'_id': new_p['_id']}, projection=dict(name=1))
         if p and p['_id'] != proj['_id']:
             return self.send_raise_failed('项目不匹配')
-        for k in ['_id', 'code', 'editors', 'public', 'published', 'created_by']:
+        for k in ['_id', 'code', 'public', 'published', 'created_by']:
             if k in proj:
                 new_p[k] = proj[k]
             else:
@@ -368,37 +367,6 @@ class ProjEditApi(ProjBaseApi):
             self.db.proj.update_one({'_id': proj['_id']}, {'$set': {'updated_at': self.now()}})
             self.log(f"proj {proj['code']} changed")
         return self.send_success({'modified': r.modified_count})
-
-
-class SetEditorApi(ProjBaseApi):
-    """设置项目协编"""
-    URL = '/api/proj/editor'
-
-    @auto_try
-    def post(self):
-        d = self.data()
-        if not re.match(r'^[\s\n-]?([A-Za-z0-9]+|\*)+$', d['editor'].strip()):
-            self.send_raise_failed('用户名格式不对')
-        proj = self.get_project(d['proj_id'], True)
-        editors, add = proj['editors'][:], []
-
-        for s in re.split(r'[\s\n]+', d['editor']):
-            if s.startswith('-'):
-                if s[1:] in editors:
-                    editors.remove(s[1:])
-            elif s and s not in editors and s not in add and s != self.username:
-                add.append(s)
-        added = [u['username'] for u in self.util.get_users(self.db, add)]
-        if set(added) != set(add):
-            self.send_raise_failed(f"用户名 {', '.join(list(set(add) - set(added)))} 不存在")
-        editors.extend(added)
-
-        if editors == proj['editors']:
-            self.send_raise_failed('协编没有改变')
-        self.db.proj.update_one({'_id': proj['_id']}, {'$set': dict(
-            editors=editors, updated_at=self.now())})
-        self.log('editors changed: ' + ','.join(editors))
-        return self.send_success(editors)
 
 
 class ReorderColApi(ProjBaseApi):

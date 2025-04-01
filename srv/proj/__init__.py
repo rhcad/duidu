@@ -1,7 +1,7 @@
 from . import view as v, api as a, api_match as m, api_cb as b, api_note as n
 
 handlers = [v.ProjHandler, v.MatchHandler, v.MatchRenderApi, v.ArticleHandler, v.PreviewHtmlApi,
-            a.ProjAddApi, a.ProjCloneApi, a.ProjEditApi, a.SetEditorApi, a.ImportTextApi,
+            a.ProjAddApi, a.ProjCloneApi, a.ProjEditApi, a.ImportTextApi,
             a.ArticleEditApi, a.ArticleDelApi, a.SectionDelApi, a.ProjDelApi, a.ReorderColApi,
             a.ProjImportApi, a.ProjExportApi, a.ProjImportAutoApi, v.DownloadHtmlApi,
             b.ImportCBApi, b.ImportHtmlApi, b.ArticleImportCBApi, b.ImportCbTocApi,

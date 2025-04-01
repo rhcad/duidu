@@ -5,7 +5,7 @@ from pymongo.errors import OperationFailure
 
 indexes = {
     'user': ['username:unique', 'nickname'],
-    'proj': ['code', 'name', 'created_by', 'editors', 'published', 'cols'],
+    'proj': ['code', 'name', 'created_by', 'published', 'cols'],
     'article': ['proj_id', 'code', 'name', 'type', 'created_by', 'sections'],
     'section': ['a_id', 'name'],
     'cb': ['name:unique']

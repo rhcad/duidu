@@ -18,7 +18,7 @@ class ProjHandler(BaseHandler):
         p['_cloned'] = p.get('cloned') or (self.db.proj.find_one(
             {'cloned': p['_id']}, projection={'name': 1}) and p['_id'])
 
-        editable = self.username == p['created_by'] or self.username in p['editors']
+        editable = self.username == p['created_by']
         return p, editable
 
     @auto_try
