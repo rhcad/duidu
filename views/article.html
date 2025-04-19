@@ -30,7 +30,7 @@
               <li><a href="/proj/edit/{{page['proj_id']}}">回到项目</a></li>
               <li role="separator" class="divider"></li>
               <li><a onclick="deleteAll()">全部删除</a></li>
-              {% if internal and [1 for s in page['sections'] if 'import_cb' in s['source'] or 'import_html' in s['source']] %}
+              {% if internal and [1 for s in page.get('sections', []) if 'import_cb' in s['source'] or 'import_html' in s['source']] %}
               <li role="separator" class="divider"></li>
               <li><a onclick="reimport()">重新导入</a></li>
               {% end %}
@@ -49,7 +49,7 @@
         <p>{% module Users([page['created_by']]) %} {{'克隆' if page.get('cloned') else '创建'}}于 <small>{{page['created_at']}}</small></p>
       </div>
     </div>
-    {% for i, sec in enumerate(page['sections']) %}
+    {% for i, sec in enumerate(page.get('sections', [])) %}
     <div class="panel panel-default" id="{{sec['_id']}}">
       <div class="panel-heading">
         <div class="panel-title">

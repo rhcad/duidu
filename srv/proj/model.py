@@ -43,7 +43,7 @@ class Article(Model):
 
     @classmethod
     def get_column_rows(cls, handler, article, pi=0):
-        rows, ids = [], [s['_id'] for s in article['sections']]
+        rows, ids = [], [s['_id'] for s in article.get('sections', [])]
         sec_coll = handler.db.section
         if pi > 0:
             res = [(pi + i, sec_coll.find_one({'_id': ids[pi + i]}))
@@ -58,7 +58,7 @@ class Article(Model):
                     rows.append(r)
         else:
             sections = list(handler.db.section.find({'_id': {'$in': ids}}))
-            for i, sec in enumerate(article['sections']):
+            for i, sec in enumerate(article.get('sections', [])):
                 sec = [s for s in sections if s['_id'] == sec['_id']][0]
                 rows.append(dict(s_i=i, s_id=sec['_id'], name=sec['name']))
                 for r in Section.get_rows(sec):

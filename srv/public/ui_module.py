@@ -80,7 +80,7 @@ class SectionBlock(UIModule):
 
     def render(self, cell, row_i=None):
         t = Template('''<p class="col-name gray ellipsis">{{c['code']}} {{c['name']}}</p>
-{% for r in c['rows'] %}{% set tags = r.get('tag',[]) %}
+{% for r in c.get('rows', []) %}{% set tags = r.get('tag',[]) %}
 {% if r.get('name') %}
     {% if row_i is None and r['s_i'] %}
     <p class="sec gray ellipsis" data-s-i="{{r['s_i']}}" data-id="{{

@@ -74,6 +74,8 @@ class MatchHandler(ProjHandler, ProjBaseApi):
 
         for i, c in enumerate(p['columns']):
             a = self.db.article.find_one({'_id': c['a_id']})
+            if not a:
+                continue
             if i == 0:
                 max_page = pi and self.get_max_page(p, a) or 0
                 pi_ = pi = min(pi, max_page) if max_page else 0
@@ -97,7 +99,8 @@ class MatchHandler(ProjHandler, ProjBaseApi):
                     is_owner=p['created_by'] == self.username, editable=editable, **kw)
 
     def get_max_page(self, p, a):
-        return len(a['sections']) if self and len(a['sections']) > 3 else 0
+        return 0 if not a.get('sections') else len(
+            a['sections']) if self and len(a['sections']) > 3 else 0
 
     def finish(self, html=None):
         if html and b'width: 1%' in html:
@@ -194,11 +197,12 @@ class ArticleHandler(BaseHandler):
         a['colspan'] = cell[0].get('colspan', 1) if cell else None
         a['proj_name'] = proj['name'] if proj else ''
 
-        sections = list(self.db.section.find({'_id': {'$in': [s['_id'] for s in a['sections']]}}))
-        for i, sec in enumerate(a['sections']):
+        sections = list(self.db.section.find({'_id': {'$in': [s['_id'] for s in a.get('sections', [])]}}))
+        for i, sec in enumerate(a.get('sections', [])):
             sec = [s for s in sections if s['_id'] == sec['_id']][0]
             a['sections'][i] = sec
 
         a.update(Article.unpack_data(a, ['created_at', 'updated_at']))
         self.render('article.html', page=a, _id=a['_id'], Article=Article,
-                    has_cb=[s['source'] for s in a['sections'] if 'import_cb' in s['source']])
+                    has_cb=[s['source'] for s in a.get('sections', [])
+                            if 'import_cb' in s['source']])

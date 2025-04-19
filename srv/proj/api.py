@@ -228,7 +228,7 @@ class ProjCloneApi(ProjBaseApi):
 
         for a in articles:
             self.db.article.update_one({'_id': a['_id']}, {'$set': self.update_ids(
-                dict(sections=a['sections'], note_for=a.get('note_for'),
+                dict(sections=a.get('sections', []), note_for=a.get('note_for'),
                      updated_at=self.now()), id_map)})
         self.db.proj.update_one({'_id': p_id}, {'$unset': {'tmp': 1}, '$set': self.update_ids(
             dict(columns=p0['columns'], rows=p0['rows'], notes=p0.get('notes', []),
@@ -455,7 +455,7 @@ class SectionDelApi(ProjBaseApi):
             self.send_raise_failed(f"需要由创建者 {s['created_by']} 删除")
         r = self.db.article.update_one({'_id': a['_id']}, {'$set': {
             'char_n': a['char_n'] - s['char_n'], 'updated_at': self.now(),
-            'sections': [r for r in a['sections'] if r['_id'] != s['_id']]}})
+            'sections': [r for r in a.get('sections', []) if r['_id'] != s['_id']]}})
         assert r.modified_count
         self.db.section.delete_one({'_id': s['_id']})
         self.log(f"section {s['_id']} removed: {s['name']}")
@@ -575,7 +575,7 @@ class ImportTextApi(ProjBaseApi):
         else:
             p['char_n'] = p.get('char_n', 0) + char_n
         self.db.article.update_one({'_id': a['_id']}, {'$set': dict(
-            sections=a['sections'], char_n=a['char_n'], updated_at=self.now())})
+            sections=a.get('sections', []), char_n=a['char_n'], updated_at=self.now())})
         self.db.proj.update_one({'_id': p['_id']}, {'$set': dict(
             note_char_n=p.get('note_char_n', 0), char_n=p['char_n'],
             note_n=p.get('note_n', 0), columns=p['columns'], updated_at=self.now()
